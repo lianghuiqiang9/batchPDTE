@@ -26,14 +26,36 @@ int main(){
     uint64_t poly_modulus_degree = 1 << log_poly_mod_degree;
     EncryptionParameters parms = EncryptionParameters(scheme_type::bfv);
     parms.set_poly_modulus_degree(poly_modulus_degree);
-    parms.set_plain_modulus(PlainModulus::Batching(poly_modulus_degree, prime_bitlength));
+
+    auto plain_modulus = PlainModulus::Batching(poly_modulus_degree, prime_bitlength);
+
+    parms.set_plain_modulus(plain_modulus);
     
-    parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
+    //auto coeff_modulus = CoeffModulus::BFVDefault(poly_modulus_degree);
+    //auto coeff_modulus = CoeffModulus::Create(poly_modulus_degree, { 48, 48, 48, 48, 48, 48, 48 });
+    //auto coeff_modulus = CoeffModulus::Create(poly_modulus_degree, { 60, 60, 60, 60, 60, 60, 60 });
+    auto coeff_modulus = CoeffModulus::Create(poly_modulus_degree, { 48, 48, 48, 49, 49, 49, 49, 49, 49});
+    //auto coeff_modulus = CoeffModulus::Create(poly_modulus_degree, { 48, 48, 48, 48, 48, 48, 48 });
+    //auto coeff_modulus = CoeffModulus::BFVDefault(poly_modulus_degree);
+    //auto coeff_modulus = CoeffModulus::Create(poly_modulus_degree, { 48, 48, 48, 48, 48, 48, 48 });
+    parms.set_coeff_modulus(coeff_modulus);
+
+    //parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
     //parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, { 60, 60, 60, 60, 60, 60, 60 }));
+    //parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, { 48, 48, 48, 49, 49, 49, 49, 49, 49}));
     //parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, { 48, 48, 48, 48, 48, 48, 48 }));
     //parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
     //parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, { 48, 48, 48, 48, 48, 48, 48 }));
-    
+    cout << "N                                     : " << poly_modulus_degree <<endl;
+    cout << "PlainModulus (decimal)                : " << plain_modulus.value() << endl;
+    cout << "CoeffModulus size                     : " << coeff_modulus.size() << endl;
+    cout << "CoeffModulus values (in decimal)      : " << endl;
+    for (size_t i = 0; i < coeff_modulus.size(); ++i)
+    {
+        cout << "Modulus " << i << "                             : " << coeff_modulus[i].value() << endl;
+    }
+    cout<<endl;
+
     SEALContext* context = new SEALContext(parms);
 
     KeyGenerator keygen(*context);
@@ -49,7 +71,7 @@ int main(){
     
     GaloisKeys* gal_keys_server = new GaloisKeys();
     keygen.create_galois_keys(*gal_keys_server);    
-    uint64_t plain_modulus = parms.plain_modulus().value();
+    uint64_t plain_modulus_value = parms.plain_modulus().value();
     uint64_t slot_count = batch_encoder->slot_count();
     uint64_t row_count = slot_count / 2;
     //cout << "Plaintext matrix row size: " << row_count << endl;
@@ -61,7 +83,6 @@ int main(){
     //out << "Plaintext matrix num_slots_per_element: " << num_slots_per_element << endl;
     uint64_t num_cmps_per_row = row_count/num_slots_per_element;
     uint64_t num_cmps = 2 * num_cmps_per_row;
-
 
 
     vector<uint64_t> x(slot_count, 1);
@@ -87,7 +108,7 @@ int main(){
         evaluator->relinearize_inplace(ct, *rlk_server);
 
         for(int j=0;j<slot_count;j++){
-            x[j] = x[j]*y[j] % plain_modulus;
+            x[j] = x[j]*y[j] % plain_modulus_value;
         }
         decryptor->decrypt(ct,ans);
         batch_encoder->decode(ans, res);
@@ -99,8 +120,9 @@ int main(){
         }
 
     }
+    cout<<endl;
 
-   {
+    {
     srand(time(NULL));
     vector<uint64_t> encrypted_op(slot_count, 0); 
     for(int i = 0; i<num_cmps ;i++){

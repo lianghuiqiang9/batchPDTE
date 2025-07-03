@@ -9,7 +9,7 @@ EncryptionParameters fhe_init(int depth_need_min)
 
     if(depth_need_min<=4){
         log_poly_mod_degree = 13; prime_bitlength = 17;
-        coeff_modulus = CoeffModulus::BFVDefault(1 << log_poly_mod_degree);
+        coeff_modulus = CoeffModulus::BFVDefault(1 << log_poly_mod_degree);//{43, 43, 44, 44, 44}
     }else if(depth_need_min<=8){
         log_poly_mod_degree = 14; prime_bitlength = 17;
         coeff_modulus = CoeffModulus::Create(1 << log_poly_mod_degree, { 48, 48, 48, 48, 48, 48, 48 });
@@ -18,7 +18,7 @@ EncryptionParameters fhe_init(int depth_need_min)
         coeff_modulus = CoeffModulus::Create(1 << log_poly_mod_degree, { 60, 60, 60, 60, 60, 60, 60 });
     }else if (depth_need_min<=12){
         log_poly_mod_degree = 14; prime_bitlength = 17;
-        coeff_modulus = CoeffModulus::BFVDefault(1 << log_poly_mod_degree);
+        coeff_modulus = CoeffModulus::BFVDefault(1 << log_poly_mod_degree); //{48,48,48,49,49,49,49,49,49}
     }else{
         cout<<"params depth_need_min is too large, please choose the params again"<<endl;
         exit(0);

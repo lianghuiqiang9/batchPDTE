@@ -70,7 +70,11 @@
         "bitset": "cpp",
         "cfenv": "cpp",
         "optional": "cpp",
-        "span_ext": "cpp"
+        "span_ext": "cpp",
+        "coroutine": "cpp",
+        "list": "cpp",
+        "source_location": "cpp",
+        "variant": "cpp"
     },
     "C_Cpp.errorSquiggles": "enabled"
 }

@@ -48,6 +48,7 @@ bool CipherNode::is_leaf() const {
     return this->left == nullptr && this->right == nullptr;
 }
 
+//change it to iter when necessary
 void decrypt_the_cipher_tree_rec(seal::Decryptor *decryptor, std::shared_ptr<CipherNode> cipher_node, int max_index_add_one, seal::BatchEncoder *batch_encoder) {
     if (cipher_node->is_leaf()){
         Plaintext class_leaf_pt;

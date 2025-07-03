@@ -176,22 +176,61 @@ void cdcmp_pdte_init_rec(Node& a, seal::BatchEncoder *batch_encoder,int num_cmps
     }
 }
 
+void cdcmp_pdte_init_iter(
+    Node& root,
+    seal::BatchEncoder* batch_encoder,
+    int num_cmps,
+    int num_slots_per_element,
+    uint64_t slot_count,
+    uint64_t row_count,
+    uint64_t num_cmps_per_row
+) {
+    stack<StackFrame> stk;
+    stk.push({ &root });
+
+    while (!stk.empty()) {
+        StackFrame frame = stk.top();
+        stk.pop();
+
+        Node* node = frame.node;
+
+        if (!node->is_leaf()) {
+            vector<uint64_t> plain_op(num_cmps, node->threshold);
+
+            if (node->threshold == 0 && num_cmps > 0) {
+                plain_op[num_cmps - 1] = 4097;
+            }
+
+            vector<uint64_t> plain_op_encode = cdcmp_encode_a(
+                plain_op,
+                num_slots_per_element,
+                slot_count,
+                row_count,
+                num_cmps_per_row
+            );
+
+            Plaintext server_input;
+            batch_encoder->encode(plain_op_encode, server_input);
+            node->threshold_bitv_plain.push_back(server_input);
+
+
+            if (node->right) stk.push({ node->right.get() });
+            if (node->left)  stk.push({ node->left.get() });
+        }
+    }
+}
+
+
 
 void Node::cdcmp_pdte_init(seal::BatchEncoder *batch_encoder,int num_cmps, int num_slots_per_element, uint64_t slot_count,uint64_t row_count, uint64_t num_cmps_per_row) {
-    cdcmp_pdte_init_rec(*this, batch_encoder, num_cmps, num_slots_per_element, slot_count,row_count, num_cmps_per_row);
+    cdcmp_pdte_init_iter(*this, batch_encoder, num_cmps, num_slots_per_element, slot_count,row_count, num_cmps_per_row);
 }
 
 void tecmp_pdte_init_rec(Node& a, int l,int m){
     if (a.is_leaf()){
 
     }else{
-        /*
-        vector<uint64_t> plain_op(l, 0ULL);
-        for(int i = 0 ; i < l; i++){
-            plain_op[ i ] = (a.threshold >> (i * m) ) & ((1 << m) - 1);
-        }
-        a.threshold_bitv = plain_op;
-        */
+
         uint64_t m_degree = (1 << m);
         a.threshold_bitv = tecmp_encode_a(a.threshold,l,m,m_degree);
         
@@ -200,8 +239,29 @@ void tecmp_pdte_init_rec(Node& a, int l,int m){
     }
 }
 
+void tecmp_pdte_init_iter(Node& root, int l, int m) {
+    stack<StackFrame> stk;
+    stk.push({ &root });
+
+    uint64_t m_degree = (1ULL << m);
+
+    while (!stk.empty()) {
+        StackFrame frame = stk.top();
+        stk.pop();
+
+        Node* node = frame.node;
+
+        if (!node->is_leaf()) {
+            node->threshold_bitv = tecmp_encode_a(node->threshold, l, m, m_degree);
+
+            if (node->right) stk.push({ node->right.get() }); 
+            if (node->left)  stk.push({ node->left.get() });
+        }
+    }
+}
+
 void Node::tecmp_pdte_init(int l,int m) {
-    tecmp_pdte_init_rec(*this, l, m);
+    tecmp_pdte_init_iter(*this, l, m);
 }
 
 void rdcmp_pdte_init_rec(Node& a, seal::BatchEncoder *batch_encoder,int n, int num_cmps, uint64_t slot_count, uint64_t row_count){
@@ -222,8 +282,45 @@ void rdcmp_pdte_init_rec(Node& a, seal::BatchEncoder *batch_encoder,int n, int n
     }
 }
 
+void rdcmp_pdte_init_iter(
+    Node& root,
+    seal::BatchEncoder* batch_encoder,
+    int n,
+    int num_cmps,
+    uint64_t slot_count,
+    uint64_t row_count
+) {
+    stack<StackFrame> stk;
+    stk.push({ &root });
+
+    while (!stk.empty()) {
+        StackFrame frame = stk.top();
+        stk.pop();
+
+        Node* node = frame.node;
+
+        if (!node->is_leaf()) {
+            vector<uint64_t> plain_op(num_cmps, node->threshold);
+
+            vector<vector<uint64_t>> plain_op_encode = rdcmp_encode_a(plain_op, n, slot_count, row_count);
+
+            vector<Plaintext> server_input(n);
+            for (int i = 0; i < n; ++i) {
+                batch_encoder->encode(plain_op_encode[i], server_input[i]);
+            }
+
+            node->threshold_bitv_plain = std::move(server_input);
+
+
+            if (node->right) stk.push({ node->right.get() });  
+            if (node->left)  stk.push({ node->left.get() });
+        }
+    }
+}
+
+
 void Node::rdcmp_pdte_init(seal::BatchEncoder *batch_encoder,int n, int num_cmps, uint64_t slot_count,uint64_t row_count ) {
-    rdcmp_pdte_init_rec(*this, batch_encoder, n, num_cmps,slot_count,row_count);
+    rdcmp_pdte_init_iter(*this, batch_encoder, n, num_cmps,slot_count,row_count);
 }
 
 /**/
@@ -260,11 +357,6 @@ int Node::max_index() {
     max_index_rec(*this, max_index);
     return max_index;
 }
-
-
-
-
-
 
 void build_json_from_tree(Node& node, json::reference ref){
     if(node.is_leaf()){
@@ -333,5 +425,26 @@ void leaf_extract_rec(vector<uint64_t>& out,Node& node ){
     }else{
         leaf_extract_rec(out, *(node.left));
         leaf_extract_rec(out, *(node.right));
+    }
+}
+
+
+void leaf_extract_iter(vector<uint64_t>& out, Node& root) {
+    stack<StackFrame> stk;
+    stk.push({&root});
+
+    while (!stk.empty()) {
+        StackFrame frame = stk.top();
+        stk.pop();
+
+        Node* node = frame.node;
+
+        if (node->is_leaf()) {
+            out.push_back(node->class_leaf);
+        } else {
+  
+            if (node->right) stk.push({node->right.get()}); 
+            if (node->left) stk.push({node->left.get()});
+        }
     }
 }

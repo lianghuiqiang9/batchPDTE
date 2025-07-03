@@ -7,6 +7,7 @@
 #include "cmp.h"
 #include "pdte.h"
 #include<seal/seal.h>
+#include <stack>
 
 using namespace std;
 using namespace seal;
@@ -30,6 +31,59 @@ void pdte_cdcmp_rec(vector<Ciphertext>& out,Node& node, Evaluator *evaluator,Gal
     }
 }
 
+void pdte_cdcmp_iter(
+    vector<Ciphertext>& out,
+    Node& root,
+    Evaluator* evaluator,
+    GaloisKeys* gal_keys_server,
+    RelinKeys* rlk_server,
+    const vector<Ciphertext>& client_input,
+    const Plaintext& one,
+    BatchEncoder* batch_encoder,
+    int num_cmps,
+    int num_slots_per_element,
+    uint64_t slot_count,
+    uint64_t row_count,
+    uint64_t num_cmps_per_row
+) {
+    stack<StackFrame> stk;
+    stk.push({ &root, false });
+
+    while (!stk.empty()) {
+        StackFrame frame = stk.top();
+        stk.pop();
+
+        Node* node = frame.node;
+
+        if (node->is_leaf()) {
+            out.push_back(node->value);
+            continue;
+        }
+
+        if (!frame.visited) {
+            node->right->value = cdcmp(
+                evaluator,
+                gal_keys_server,
+                rlk_server,
+                num_slots_per_element,
+                node->threshold_bitv_plain[0],
+                client_input[node->feature_index]
+            );
+
+            evaluator->negate(node->right->value, node->left->value);
+            evaluator->add_plain_inplace(node->left->value, one);
+            evaluator->add_inplace(node->left->value, node->value);
+            evaluator->add_inplace(node->right->value, node->value);
+
+
+            stk.push({ node, true });
+
+            stk.push({ node->right.get(), false });  
+            stk.push({ node->left.get(), false });
+        }
+
+    }
+}
 
 //g++ -o cdcmp_pdte -O3 cdcmp_pdte.cpp src/utils.cpp src/cmp.cpp src/node.cpp src/pdte.cpp -I./include -I /usr/local/include/SEAL-4.1 -lseal-4.1
 
@@ -142,7 +196,7 @@ int main(int argc, char* argv[]){
 
     vector<Ciphertext> pdte_out;
     start = clock();
-    pdte_cdcmp_rec(pdte_out, root, evaluator, gal_keys_server, rlk_server, client_input, one, batch_encoder,num_cmps, num_slots_per_element, slot_count, row_count, num_cmps_per_row);
+    pdte_cdcmp_iter(pdte_out, root, evaluator, gal_keys_server, rlk_server, client_input, one, batch_encoder,num_cmps, num_slots_per_element, slot_count, row_count, num_cmps_per_row);
 
 
     uint64_t tree_depth = root.get_depth();
@@ -159,7 +213,7 @@ int main(int argc, char* argv[]){
     }
     
     vector<uint64_t> leaf_vec;
-    leaf_extract_rec(leaf_vec, root);
+    leaf_extract_iter(leaf_vec, root);
     vector<Plaintext> leaf_vec_plain;//leaf_vec_plain
     for(int i = 0; i<leaf_vec.size(); i++){
         Plaintext pt = init_b_zero_zero(batch_encoder,leaf_vec[i],slot_count,data_m,num_cmps_per_row,num_slots_per_element,row_count); 

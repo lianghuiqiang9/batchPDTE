@@ -7,6 +7,7 @@
 #include "cmp.h"
 #include "pdte.h"
 #include<seal/seal.h>
+#include <stack>
 
 using namespace std;
 using namespace seal;
@@ -29,6 +30,59 @@ void pdte_rdcmp_rec(vector<Ciphertext>& out,Node& node, Evaluator *evaluator,Gal
         pdte_rdcmp_rec(out, *(node.right), evaluator,gal_keys_server, rlk_server, client_input,one,n, batch_encoder,slot_count, row_count, num_cmps);
     }
 }
+
+void pdte_rdcmp_iter(
+    vector<Ciphertext>& out,
+    Node& root,
+    Evaluator* evaluator,
+    GaloisKeys* gal_keys_server,
+    RelinKeys* rlk_server,
+    const vector<vector<Ciphertext>>& client_input,
+    const Plaintext& one,
+    int n,
+    BatchEncoder* batch_encoder,
+    int slot_count,
+    int row_count,
+    int num_cmps
+) {
+    stack<StackFrame> stk;
+    stk.push({ &root, false });
+
+    while (!stk.empty()) {
+        StackFrame frame = stk.top();
+        stk.pop();
+
+        Node* node = frame.node;
+
+        if (node->is_leaf()) {
+            out.push_back(node->value);
+            continue;
+        }
+
+        if (!frame.visited) {
+            node->right->value = rdcmp(
+                evaluator,
+                rlk_server,
+                n,
+                node->threshold_bitv_plain,
+                client_input[node->feature_index]
+            );
+
+            evaluator->negate(node->right->value, node->left->value);
+            evaluator->add_plain_inplace(node->left->value, one);
+            evaluator->add_inplace(node->left->value, node->value);
+            evaluator->add_inplace(node->right->value, node->value);
+
+
+            stk.push({ node, true });
+
+            stk.push({ node->right.get(), false }); 
+            stk.push({ node->left.get(), false });
+        }
+
+    }
+}
+
 
 //g++ -o rdcmp_pdte -O3 rdcmp_pdte.cpp src/utils.cpp src/cmp.cpp src/node.cpp src/pdte.cpp -I./include -I /usr/local/include/SEAL-4.1 -lseal-4.1
 
@@ -145,10 +199,10 @@ int main(int argc, char* argv[]){
 
     vector<Ciphertext> pdte_out;
     start = clock();
-    pdte_rdcmp_rec(pdte_out, root, evaluator, gal_keys_server, rlk_server, client_input, one_one_one, n, batch_encoder, slot_count, row_count,num_cmps);
+    pdte_rdcmp_iter(pdte_out, root, evaluator, gal_keys_server, rlk_server, client_input, one_one_one, n, batch_encoder, slot_count, row_count,num_cmps);
     
     vector<uint64_t> leaf_vec;
-    leaf_extract_rec(leaf_vec, root);
+    leaf_extract_iter(leaf_vec, root);
     int leaf_num = leaf_vec.size();
     //for (auto e:leaf_vec){cout<<e;}cout<<endl;
 
@@ -225,9 +279,6 @@ int main(int argc, char* argv[]){
     if(expect_result.size()<data_m){cout<<"depth_need_min is too small, please the params again by add the extra value."<<endl;exit(0);}
     
     cout<<"decrypt the result ,                 run time is "<<(clock()-start)/1000 <<"ms"<<endl;start = clock();
-
-    cout<<"result compare"<<endl;
-
 
     for(int j = 0; j < data_m ; j++){
         uint64_t actural_result = root.eval(client_data[j]);

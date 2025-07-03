@@ -5,6 +5,7 @@
 #include "utils.h"
 #include "cmp.h"
 #include<seal/seal.h>
+#include <stack>
 using namespace seal;
 
 using json = nlohmann::json;
@@ -44,6 +45,12 @@ public:
     void cdcmp_pdte_init(seal::BatchEncoder *batch_encoder,int num_cmps, int num_slots_per_element, uint64_t slot_count,uint64_t row_count, uint64_t num_cmps_per_row);
     void rdcmp_pdte_init(seal::BatchEncoder *batch_encoder,int n, int num_cmps, uint64_t slot_count,uint64_t row_count);
 };
+
+struct StackFrame {
+    Node* node;
+    bool visited; 
+};
+void leaf_extract_iter(vector<uint64_t>& out, Node& root);
 
 void print_node(Node& a, std::string tabs = "");
 

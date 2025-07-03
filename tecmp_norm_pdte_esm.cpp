@@ -7,6 +7,7 @@
 #include "cmp.h"
 #include "pdte.h"
 #include<seal/seal.h>
+#include <stack>
 
 using namespace std;
 using namespace seal;
@@ -30,7 +31,64 @@ void pdte_tecmp_norm_rec(vector<Ciphertext>& out,Node& node, Evaluator *evaluato
     }
 }
 
+void pdte_tecmp_norm_iter(
+    vector<Ciphertext>& out,
+    Node& root,
+    Evaluator* evaluator,
+    GaloisKeys* gal_keys_server,
+    RelinKeys* rlk_server,
+    const vector<vector<Ciphertext>>& client_input,
+    const Plaintext& one,
+    int l,
+    int m,
+    uint64_t m_degree,
+    BatchEncoder* batch_encoder,
+    int slot_count,
+    int plain_modulus,
+    const seal::Ciphertext& one_zero_init_cipher
+) {
+    stack<StackFrame> stk;
+    stk.push(StackFrame{ &root, false });
+
+    while (!stk.empty()) {
+        StackFrame frame = stk.top();
+        stk.pop();
+
+        Node* node = frame.node;
+
+        if (node->is_leaf()) {
+
+            out.push_back(node->value);
+            continue;
+        }
+
+        if (!frame.visited) {
+
+            node->right->value = tecmp_norm(
+                evaluator, gal_keys_server, rlk_server,
+                node->threshold_bitv,
+                client_input[node->feature_index],
+                l, m, m_degree,
+                one_zero_init_cipher
+            );
+            evaluator->negate(node->right->value, node->left->value);
+            evaluator->add_plain_inplace(node->left->value, one);
+            evaluator->add_inplace(node->left->value, node->value);
+            evaluator->add_inplace(node->right->value, node->value);
+
+
+            stk.push(StackFrame{ node, true });
+
+    
+            stk.push(StackFrame{ node->right.get(), false }); 
+            stk.push(StackFrame{ node->left.get(), false });
+        }
+
+    }
+}
+
 //g++ -o tecmp_norm_pdte -O3 tecmp_norm_pdte.cpp src/utils.cpp src/cmp.cpp src/node.cpp src/pdte.cpp -I./include -I /usr/local/include/SEAL-4.1 -lseal-4.1
+//./tecmp_norm_pdte_esm -t ../data/heart_11bits/model.json -v ../data/heart_11bits/x_test.csv -r 2048 -l 4 -m 3 -c 1 -e 8
 
 int main(int argc, char* argv[]){
     if (argc < 3) {
@@ -151,10 +209,10 @@ int main(int argc, char* argv[]){
 
     vector<Ciphertext> pdte_out;
     start = clock();
-    pdte_tecmp_norm_rec( pdte_out, root, evaluator, gal_keys_server, rlk_server, client_input, one, l, m,m_degree, batch_encoder, slot_count, plain_modulus, one_zero_zero_cipher);
+    pdte_tecmp_norm_iter( pdte_out, root, evaluator, gal_keys_server, rlk_server, client_input, one, l, m,m_degree, batch_encoder, slot_count, plain_modulus, one_zero_zero_cipher);
 
     vector<uint64_t> leaf_vec;
-    leaf_extract_rec(leaf_vec, root);
+    leaf_extract_iter(leaf_vec, root);
     int leaf_num = leaf_vec.size();
 
 
@@ -231,8 +289,6 @@ int main(int argc, char* argv[]){
     if(expect_result.size()<data_m){cout<<"depth_need_min is too small, please the params again by add the extra value."<<endl;exit(0);}
 
     cout<<"decrypt the result ,                 run time is "<<(clock()-start) <<"\\mus"<<endl;start = clock();
-
-    cout<<"result compare"<<endl;
 
     for(int j = 0; j < data_m ; j++){
         //cout<<"j = "<<j<<" ";
