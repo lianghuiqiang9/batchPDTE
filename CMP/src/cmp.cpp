@@ -392,7 +392,7 @@ EncryptionParameters tecmp_norm_init(int n,int l,int m,int d,int extra){
 }
 
 
-EncryptionParameters tecmp_init(int n,int l,int m,int d, int extra){
+EncryptionParameters tecmp_init(int n, int l,int m, int d, int extra){
     
     int cmp_depth_need_min = log(l)/log(2);
     if(1<<cmp_depth_need_min !=l){
