@@ -18,18 +18,41 @@ void print(const std::vector<T> &vec, size_t k, std::string name = "Result") {
     if (vec.size()==0){
         return;
     }
-    size_t limit = std::min(k, vec.size());
-    
-    cout << "[ ";
-    for (size_t i = 0; i < limit; i++) {
-        cout << vec[i] << (i == limit - 1 ? "" : ", ");
 
-        if ((i + 1) % k == 0) {
+    k = std::min(k, vec.size());
+    
+    cout << name << " [ ";
+    for (size_t i = 0; i < k; i++) {
+        cout << vec[i] << (i == k - 1 ? "" : ", ");
+
+        if ((i + 1) % k == 0 ) {
             cout << " ] (first " << k << " slots):" << endl;
         }
+
+
+
     }
 }
 
+template <typename T>
+void print(const std::vector<std::vector<T>> &matrix, size_t k, std::string name = "Result") {
+    if (matrix.size()==0){
+        return;
+    }
+    cout << name;
+    for (int i = 0;i<matrix.size();i++){
+        print(matrix[i], k, "");
+    }
+
+}
+/*
+template <typename T>
+void print(const T &a, size_t k = 1, std::string name = "Result") {
+    
+    cout << "[ "<< a << " ] (first " << k << " slots):" << endl;
+
+}
+*/
 vector<uint64_t> add(const vector<uint64_t> &a, const vector<uint64_t> &b, uint64_t mod) {
     if (a.size() != b.size()) throw invalid_argument("Vector sizes must match.");
     

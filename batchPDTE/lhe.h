@@ -28,7 +28,7 @@ public:
     uint64_t slot_count;
     
 
-    LHE(string scheme, int depth = 3, vector<int> steps = vector<int>{1}) : parms((scheme == "bfv") ? scheme_type::bfv : scheme_type::bgv) {
+    LHE(string scheme, int depth = 3, vector<int> steps = vector<int>{}) : parms((scheme == "bfv") ? scheme_type::bfv : scheme_type::bgv) {
         this->scheme = scheme;
         this->scheme_id = (scheme == "bfv") ? 0x1 : 0x3;
         this->depth = depth;
@@ -90,7 +90,7 @@ public:
         keygen.create_relin_keys(rlk);
         
         // vector<uint32_t> elts = { 3, 9, 27 }; // for steps: 1, 2, 3
-        keygen.create_galois_keys(steps, gal_keys);
+        steps.size() == 0 ? keygen.create_galois_keys(gal_keys) : keygen.create_galois_keys(steps, gal_keys);
         
         encryptor = new Encryptor(*context, pk);
         decryptor = new Decryptor(*context, keygen.secret_key());
@@ -187,6 +187,11 @@ public:
         return out;
     }
 
+    void multiply_plain_inplace(Ciphertext& ct, Plaintext& pt){
+        mod_switch(ct, pt);
+        evaluator->multiply_plain_inplace(ct, pt);
+    }
+
     Ciphertext multiply_plain(const Ciphertext& ct, const std::vector<uint64_t>& a){
         auto pt = encode(a);
         mod_switch(ct, pt);
@@ -201,6 +206,11 @@ public:
         return out;
     }
 
+    void multiply_inplace(Ciphertext& ct1, Ciphertext& ct2){
+        mod_switch(ct1, ct2);
+        evaluator->multiply_inplace(ct1, ct2);
+    }
+
     Ciphertext rotate_rows(const Ciphertext& ct, int step){
         Ciphertext out;
         evaluator->rotate_rows(ct, step, gal_keys, out);
@@ -211,6 +221,12 @@ public:
         mod_switch(ct1, ct2);
         evaluator->add_inplace(ct1, ct2);
     }
+
+    void sub_inplace(Ciphertext& ct1, Ciphertext& ct2){
+        mod_switch(ct1, ct2);
+        evaluator->sub_inplace(ct1, ct2);
+    }
+    
 
     Ciphertext add(Ciphertext& ct1, Ciphertext& ct2){
         mod_switch(ct1, ct2);
@@ -245,6 +261,10 @@ public:
 
     void relinearize_inplace(Ciphertext& ct){
         evaluator->relinearize_inplace(ct, rlk);
+    }
+
+    void negate_inplace(Ciphertext& ct){
+        evaluator->negate_inplace(ct);
     }
 
 private:

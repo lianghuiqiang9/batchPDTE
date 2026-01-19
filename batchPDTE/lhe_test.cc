@@ -1,11 +1,7 @@
 
-#include <iostream>
-#include <vector>
-#include <chrono>
+
 #include "lhe.h"
 #include "utils.h"
-
-using namespace std;
 
 // g++ -o lhe_test -O3 lhe_test.cc -I /usr/local/include/SEAL-4.1 -lseal-4.1
 // ./lhe_test
