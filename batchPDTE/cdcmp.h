@@ -76,7 +76,7 @@ public:
         return lhe->encode(one_zero_zero);
     }
 
-    Ciphertext gt(const vector<uint64_t>& a, Ciphertext& b){
+    Ciphertext great_than(const vector<uint64_t>& a, Ciphertext& b){
 
         auto pt_a = lhe->encode(a);
         auto gt = lhe->multiply_plain(b, pt_a);
@@ -169,7 +169,6 @@ public:
     }
 
 
-
     // input= [ b0,  b1,  b2 ]
     // out  = [ b00, b01, b02, ..., b10, b11, b12, ..., b20, b21, b22, ... ]
     // b0 = b00 + 2 * b01 + 2^2 * b02 + ...;
@@ -214,13 +213,13 @@ public:
 
     long communication_cost(const Ciphertext& ct1, const Ciphertext& ct2){
         stringstream send;
-        long comm;
+        long comm = 0;
         comm+=ct1.save(send);
         comm+=ct2.save(send);
         return comm;
     }
     void print(){
-        cout << " Name                                      : " << name
+        cout << " name                                      : " << name
              << "\n bit precision                             : "<< n 
              << "\n compare number                            : "<< num_cmps
              << "\n";

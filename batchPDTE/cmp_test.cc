@@ -1,11 +1,13 @@
 #include"cdcmp.h"
 #include"tecmp.h"
+#include"rdcmp.h"
 #include"utils.h"
 #include<unistd.h>
 
 // g++ -o cmp_test -O3 cmp_test.cc -I /usr/local/include/SEAL-4.1 -lseal-4.1
 // ./cmp_test -n 16 
 // ./cmp_test -m 8 -l 2
+// ./cmp_test -n 16
 
 int main(int argc, char* argv[]) {
     int l,m,n; 
@@ -17,7 +19,7 @@ int main(int argc, char* argv[]) {
         case 'n': n = atoi(optarg);break;
         }
     }
-    Tecmp cmp(l,m); //Cdcmp cmp(n); //Tecmp cmp(l,m);
+    Rdcmp cmp(n); //Cdcmp cmp(n); //Tecmp cmp(l,m); 
     auto num_cmps = cmp.num_cmps;
     auto raw_encode_a = cmp.random_raw_encode_a();
     auto raw_encode_b = cmp.random_raw_encode_b();
@@ -30,13 +32,13 @@ int main(int argc, char* argv[]) {
     
     //cmp
     Ciphertext result;
-    auto finish = profile("Cmp", [&]() { result = cmp.gt(cmp_encode_a, cmp_encode_b_cipher);});
+    auto finish = profile("Cmp", [&]() { result = cmp.great_than(cmp_encode_a, cmp_encode_b_cipher);});
     
     cmp.clear_up(result);
     auto expect_result = cmp.decode(result);
     auto actural_result = cmp.verify(raw_encode_a, raw_encode_b);
 
-    print(expect_result, 10, "expect_result");
+    print(expect_result, 10, "expect_result ");
     print(actural_result, 10, "actural_result");
     auto is_correct = cmp.verify(actural_result, expect_result);
 

@@ -191,6 +191,11 @@ public:
         mod_switch(ct, pt);
         evaluator->multiply_plain_inplace(ct, pt);
     }
+    void multiply_plain_inplace(Ciphertext& ct, vector<uint64_t>& a){
+        auto pt = encode(a);
+        mod_switch(ct, pt);
+        evaluator->multiply_plain_inplace(ct, pt);
+    }
 
     Ciphertext multiply_plain(const Ciphertext& ct, const std::vector<uint64_t>& a){
         auto pt = encode(a);

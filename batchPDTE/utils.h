@@ -43,8 +43,8 @@ void print(const std::vector<std::vector<T>> &matrix, size_t k, std::string name
     for (int i = 0;i<matrix.size();i++){
         print(matrix[i], k, "");
     }
-
 }
+
 /*
 template <typename T>
 void print(const T &a, size_t k = 1, std::string name = "Result") {

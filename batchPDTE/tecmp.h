@@ -116,7 +116,7 @@ public:
         return lhe->encode(one_zero_zero);
     }
 
-    Ciphertext gt(const vector<uint64_t>& a, const vector<Ciphertext>& b){
+    Ciphertext great_than(const vector<uint64_t>& a, const vector<Ciphertext>& b){
 
         vector<Ciphertext> eq(l);
         vector<Ciphertext> gt(l);
@@ -289,6 +289,9 @@ public:
         return out;
     }
 
+    // input = a
+    // out = [a01, a02, a03, ...]
+    // a = a00 + 2^m * a01 + (2^m)^2 * a02 ;
     vector<uint64_t> raw_encode(uint64_t a){
         vector<uint64_t> out(l, 0ULL);
         auto range = num_slots_per_element - 1;
@@ -325,7 +328,7 @@ public:
 
     long communication_cost(const vector<Ciphertext>& ct1, const Ciphertext& ct2){
         stringstream send;
-        long comm;
+        long comm = 0;
         for(auto e:ct1){
             comm+=e.save(send);
         }
@@ -333,7 +336,7 @@ public:
         return comm;
     }
     void print(){
-        cout << " Name                                      : " << name
+        cout << " name                                      : " << name
              << " \n l                                         : "<< l 
              << " \n m                                         : "<< m
              << " \n bit precision                             : "<< n 
