@@ -17,9 +17,9 @@ public:
     EncryptionParameters parms;
     shared_ptr<SEALContext> context; 
     
-    Encryptor *encryptor = nullptr;
-    Evaluator *evaluator = nullptr;
-    BatchEncoder *batch_encoder = nullptr;
+    unique_ptr<Encryptor> encryptor;
+    unique_ptr<Evaluator> evaluator;
+    unique_ptr<BatchEncoder> batch_encoder;
     RelinKeys rlk;
     GaloisKeys gal_keys;
     
@@ -92,22 +92,17 @@ public:
         // vector<uint32_t> elts = { 3, 9, 27 }; // for steps: 1, 2, 3
         steps.size() == 0 ? keygen.create_galois_keys(gal_keys) : keygen.create_galois_keys(steps, gal_keys);
         
-        encryptor = new Encryptor(*context, pk);
-        decryptor = new Decryptor(*context, keygen.secret_key());
-        evaluator = new Evaluator(*context);
-        batch_encoder = new BatchEncoder(*context);
+        encryptor = make_unique<Encryptor>(*context, pk);
+        decryptor = make_unique<Decryptor>(*context, keygen.secret_key());
+        evaluator = make_unique<Evaluator>(*context);
+        batch_encoder = make_unique<BatchEncoder>(*context);
 
         plain_modulus = parms.plain_modulus().value();
         slot_count = batch_encoder->slot_count();
 
     }
 
-    ~LHE() {
-        delete encryptor;
-        delete decryptor;
-        delete evaluator;
-        delete batch_encoder;
-    }
+    ~LHE() = default;
 
     Plaintext encode(const std::vector<uint64_t>& a){
         Plaintext pt;
@@ -137,6 +132,10 @@ public:
         Plaintext pt;
         decryptor->decrypt(ct, pt);
         return pt;
+    }
+
+    int get_noise_budget(const Ciphertext& ct) {
+        return decryptor->invariant_noise_budget(ct);
     }
 
     void mod_switch(Ciphertext& ct1, Ciphertext& ct2) {
@@ -231,7 +230,10 @@ public:
         mod_switch(ct1, ct2);
         evaluator->sub_inplace(ct1, ct2);
     }
-    
+    void sub_plain_inplace(Ciphertext& ct, Plaintext& pt){
+        mod_switch(ct, pt);
+        evaluator->sub_plain_inplace(ct, pt);
+    }
 
     Ciphertext add(Ciphertext& ct1, Ciphertext& ct2){
         mod_switch(ct1, ct2);
@@ -273,6 +275,6 @@ public:
     }
 
 private:
-    Decryptor *decryptor = nullptr;
+    unique_ptr<Decryptor> decryptor;
 
 };
