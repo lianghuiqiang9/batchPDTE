@@ -4,14 +4,14 @@
 #include"utils.h"
 #include<unistd.h>
 
-// g++ -o cmp_test -O3 cmp_test.cc -I /usr/local/include/SEAL-4.1 -lseal-4.1
+// g++ -o cmp_test -O3 cmp_test.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1
 
 // ./cmp_test -m 8 -l 2 -n 16 -t 0
 
 int main(int argc, char* argv[]) {
     int l,m,n; 
     int opt;
-    int cmp_name = 0;
+    int cmp_type = 0;
     unique_ptr<CMP> cmp;
 
     while ((opt = getopt(argc, argv, "fl:m:n:t:")) != -1) {
@@ -19,25 +19,26 @@ int main(int argc, char* argv[]) {
         case 'l': l = atoi(optarg); break;
         case 'm': m = atoi(optarg); break;
         case 'n': n = atoi(optarg);break;
-        case 't': cmp_name = atoi(optarg);break;
+        case 't': cmp_type = atoi(optarg);break;
         }
     }
-    
-    switch (cmp_name) {
-        case 0: cmp = make_unique<Tecmp>(l, m); break;
-        case 1: cmp = make_unique<Cdcmp>(n); break;
-        case 2: cmp = make_unique<Rdcmp>(n);break;
+
+    switch (cmp_type) {
+        case 0: cmp = make_unique<Tecmp>(l, m, n); break;
+        case 1: cmp = make_unique<Cdcmp>(l, m, n); break;
+        case 2: cmp = make_unique<Rdcmp>(l, m, n);break;
     }
-
-    //unique_ptr<CMP> cmp = make_unique<Rdcmp>(n);
-    //unique_ptr<CMP> cmp = make_unique<Cdcmp>(n);
-    //unique_ptr<CMP> cmp = make_unique<Tecmp>(l, m);
-
     auto num_cmps = cmp->num_cmps;
-    auto raw_encode_a = cmp->random_raw_encode_a();
-    auto raw_encode_b = cmp->random_raw_encode_b();
-    print(raw_encode_a, 10, "a: ");
-    print(raw_encode_b, 10, "b: ");
+    //auto raw_encode_a = cmp->random_raw_encode_a();
+    //auto raw_encode_b = cmp->random_raw_encode_b();
+
+    auto a = random_k_bit(l*m, num_cmps);
+    auto b = random_k_bit(l*m, num_cmps);
+    print(a, 10, "a: ");
+    print(b, 10, "b: ");
+
+    auto raw_encode_a = cmp->raw_encode_a(a);
+    auto raw_encode_b = cmp->raw_encode_b(b);
 
     auto cmp_encode_a = cmp->encode_a(raw_encode_a);
     auto cmp_encode_b = cmp->encode_b(raw_encode_b);

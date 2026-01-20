@@ -3,7 +3,7 @@
 #include "utils.h"
 
 
-// g++ -o lhe_depth_test -O3 lhe_depth_test.cc -I /usr/local/include/SEAL-4.1 -lseal-4.1
+// g++ -o lhe_depth_test -O3 lhe_depth_test.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1
 
 // ./lhe_depth_test
 

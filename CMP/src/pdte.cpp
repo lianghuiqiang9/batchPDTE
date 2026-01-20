@@ -162,7 +162,6 @@ Ciphertext private_info_retrieval_with_b_b_b(Evaluator *evaluator, vector<Cipher
         }
     }
     evaluator->add_many(in_first, out);
-
     return out;
 }
 
