@@ -181,17 +181,10 @@ class PDTE {
         auto leaf_vec_pt = leaf_flatten.leaf_vec_pt;
         auto leaf_num = leaf_vec_pt.size();
         for(int i = 0; i < leaf_num; i++){
-            //evaluator->multiply_plain_inplace(out[0][i],salts[0][i]);
-            //evaluator->multiply_plain_inplace(out[1][i],salts[1][i]);
-            //evaluator->add_plain_inplace(out[1][i], leaf_flatten.leaf_vec_pt[i]);
-
             lhe->multiply_plain_inplace(out[0][i], salts[0][i]);
             lhe->multiply_plain_inplace(out[1][i], salts[1][i]);
             lhe->add_plain_inplace(out[1][i], leaf_vec_pt[i]);
         }
-
-        //this->clear_up(out);    // ?
-
         return shuffle_result(out, leaf_num);
     }
 
@@ -390,38 +383,38 @@ class PDTE {
 
     vector<uint64_t> recover(vector<vector<Ciphertext>>& a){
         if (shuffle !=0){
-
-            vector<vector<uint64_t>> ans0;
-            vector<vector<uint64_t>> ans1;
-            for(int j=0;j<a[0].size();j++){
-                ans0.push_back(cmp->recover(a[0][j]));
-                ans1.push_back(cmp->recover(a[1][j]));
-            }
-
-            vector<uint64_t> out;
-            for(int j = 0; j < data_rows ; j++){
-                for(int i = 0; i < ans0.size(); i++){
-                    if(ans0[i][j]==0){
-                        out.push_back(ans1[i][j]);
-                        break;      
-                    }
-                }
-            }
-            
-            print_vec(ans0, 255, "ans0: ");
-            print_vec(ans1, 255, "ans1: ");
-            print_vec(out, out.size(), "out: ");
-
-            if(out.size()<data_rows){
-                cout<<"depth_need_min is too small, please the params again by add the extra value."<<endl;
-                //exit(0);
-            }
-
-            return out;
-
+            return recover_shuffle_result(a);
         }
 
         return cmp->recover(a[0][0]);
+    }
+
+    vector<uint64_t> recover_shuffle_result(vector<vector<Ciphertext>>& a){
+        size_t leaf_num = a[0].size();
+        vector<vector<uint64_t>> ans0(leaf_num);
+        vector<vector<uint64_t>> ans1(leaf_num);
+        for(int j=0;j<a[0].size();j++){
+            ans0[j] = cmp->recover(a[0][j]);
+            ans1[j] = cmp->recover(a[1][j]);
+        }
+
+        vector<uint64_t> out;
+        out.reserve(data_rows);
+
+        for(int j = 0; j < data_rows ; j++){
+            for(int i = 0; i < ans0.size(); i++){
+                if(ans0[i][j]==0){
+                    out.push_back(ans1[i][j]);
+                    break;      
+                }
+            }
+        }
+
+        if(out.size()<data_rows){
+            cout<<"depth_need_min is too small, please the params again by add the extra value."<<endl;
+            //exit(0);
+        }
+        return out;
     }
 
     bool verify(const vector<uint64_t>& result, shared_ptr<Node> root, const vector<vector<uint64_t>>& data){
