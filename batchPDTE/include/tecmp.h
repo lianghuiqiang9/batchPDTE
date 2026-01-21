@@ -119,6 +119,16 @@ public:
         return lhe->encode(one_zero_zero);
     }
 
+    Plaintext init_x_zero_zero(const vector<uint64_t>& salt) override {
+        vector<uint64_t> salt_zero_zero(slot_count, 0ULL);
+        auto salt_size = salt.size();
+        auto limit = num_cmps > salt_size ? salt_size : num_cmps;
+        for(int i = 0; i < limit ; i++){
+            salt_zero_zero[index_map[i]] = salt[i];
+        }
+        return lhe->encode(salt_zero_zero);
+    }
+
     Ciphertext great_than(vector<Plaintext>& pt_a, vector<Ciphertext>& b) override {
         auto a = lhe->decode(pt_a[0]);
 

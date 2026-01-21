@@ -43,7 +43,7 @@ Plaintext init_one_one_one(BatchEncoder *batch_encoder,uint64_t slot_count);
 Plaintext init_b_b_b(uint64_t b, BatchEncoder *batch_encoder,uint64_t slot_count);
 Ciphertext init_zero_zero_zero_cipher(BatchEncoder *batch_encoder, Encryptor *encryptor,uint64_t slot_count);
 Ciphertext init_one_one_one_cipher(BatchEncoder *batch_encoder, Encryptor *encryptor,uint64_t slot_count);
-Plaintext init_salt_zero_zero(BatchEncoder *batch_encoder, int slot_count,uint64_t num_cmps,uint64_t num_cmps_per_row,uint64_t num_slots_per_element,uint64_t row_count, std::uniform_int_distribution<>& distrib,std::mt19937& gen);
+Plaintext init_x_zero_zero(BatchEncoder *batch_encoder, int slot_count,uint64_t num_cmps,uint64_t num_cmps_per_row,uint64_t num_slots_per_element,uint64_t row_count, std::uniform_int_distribution<>& distrib,std::mt19937& gen);
 Plaintext init_salt_salt_salt(BatchEncoder *batch_encoder, int slot_count, int num_cmps, std::uniform_int_distribution<>& distrib,std::mt19937& gen);
 Ciphertext init_only_index_is_one_cipher(BatchEncoder *batch_encoder,Encryptor *encryptor,uint64_t index, int slot_count,uint64_t num_cmps,uint64_t num_cmps_per_row,uint64_t num_slots_per_element,uint64_t row_count);
 

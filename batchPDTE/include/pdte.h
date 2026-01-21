@@ -27,8 +27,15 @@ class PDTE {
     Plaintext tree_depth_factorial_inv_pt;
     vector<Plaintext> tree_depth_vec_pt;
 
+    // shuffle
+    uint8_t shuffle = 0;
+    vector<vector<Plaintext>> salts;
+
 
     PDTE() = default;
+    PDTE(uint8_t shuffle){
+        this->shuffle = shuffle;
+    };
 
     //server
     shared_ptr<Node> load_tree(string filename){
@@ -60,13 +67,13 @@ class PDTE {
 
 
     // client
-    vector<vector<uint64_t>> load_data(string filename, int data_size){
-        this->data_rows = data_size;
-        auto data = load_matrix(filename, data_size);
+    vector<vector<uint64_t>> load_data(string filename, int data_rows){
+        this->data_rows = data_rows;
+        auto data = load_matrix(filename, data_rows);
         
         //data_m < num_cmps 
-        if(batch_size < data_size){
-            cout<<"data_size : "<<data_size<<" >= batch_size : "<<batch_size<<endl;
+        if(batch_size < data_rows){
+            cout<<"data_rows : "<<data_rows<<" >= batch_size : "<<batch_size<<endl;
             cout<<"data_size is too large, please divide different page until the size is small than batch_size"<<endl;
             exit(0);
         }
@@ -121,12 +128,215 @@ class PDTE {
             leaf_vec_pt[i] = lhe->encode(leaf);
         }
 
+        // shuffle
+        if (shuffle != 0){
+            this->salts = init_salts(2, leaf_vec.size());
+        }
+        
         return LeafFlatten{leaf_vec, leaf_vec_pt};
 
     }
 
+    vector<vector<Plaintext>> init_salts(int row, int cols){
+        std::random_device rd;  
+        std::mt19937 gen(rd()); 
+        std::uniform_int_distribution<> distrib(1, lhe->plain_modulus - 1);
+        
+        vector<vector<Plaintext>> salts(row, vector<Plaintext>(cols));
+        vector<uint64_t> salt_buffer(batch_size);
+        for(int i = 0; i <  row ; ++i){
+            for(int j = 0; j < cols; ++j){
+                for (size_t k = 0; k < batch_size; ++k) {
+                    salt_buffer[k] =  distrib(gen);
+                }
+                salts[i][j] = cmp->init_x_zero_zero(salt_buffer);
+            }
+        }
+
+        return salts;
+    }
+
     // server
-    Ciphertext evaluate(shared_ptr<Node> root, vector<vector<Ciphertext>>& data_cipher, LeafFlatten& leaf_flatten, vector<vector<uint64_t>>& data){
+
+    vector<vector<Ciphertext>> evaluate(shared_ptr<Node> root, vector<vector<Ciphertext>>& data_cipher, LeafFlatten& leaf_flatten){
+        
+        auto sum_path_result = sum_path(root, data_cipher, leaf_flatten);
+        
+        if (shuffle != 0){
+            return extended_sum_path(sum_path_result, leaf_flatten);
+        }
+
+        return adapted_sum_path(sum_path_result, leaf_flatten);
+        
+
+    }
+
+
+    vector<vector<Ciphertext>> extended_sum_path(vector<Ciphertext>& sum_path_result, LeafFlatten& leaf_flatten){
+
+        // record the zero position
+        vector<vector<Ciphertext>> out(2, vector<Ciphertext>(0));
+        out[0] = sum_path_result;
+        out[1] = sum_path_result;
+        auto leaf_vec_pt = leaf_flatten.leaf_vec_pt;
+        auto leaf_num = leaf_vec_pt.size();
+        for(int i = 0; i < leaf_num; i++){
+            //evaluator->multiply_plain_inplace(out[0][i],salts[0][i]);
+            //evaluator->multiply_plain_inplace(out[1][i],salts[1][i]);
+            //evaluator->add_plain_inplace(out[1][i], leaf_flatten.leaf_vec_pt[i]);
+
+            lhe->multiply_plain_inplace(out[0][i], salts[0][i]);
+            lhe->multiply_plain_inplace(out[1][i], salts[1][i]);
+            lhe->add_plain_inplace(out[1][i], leaf_vec_pt[i]);
+        }
+
+        //this->clear_up(out);    // ?
+
+        return shuffle_result(out, leaf_num);
+    }
+
+    vector<vector<Ciphertext>> shuffle_result(vector<vector<Ciphertext>> out, int leaf_num){
+        auto leaf_num_perm = random_permutation(leaf_num);
+        vector<Ciphertext> x(leaf_num);
+        vector<Ciphertext> y(leaf_num);
+        
+        // shuffle the leaf position
+        for(int i = 0; i < leaf_num; i++){
+            x[i] = std::move(out[0][leaf_num_perm[i]]);
+            y[i] = std::move(out[1][leaf_num_perm[i]]);
+        }
+
+        // shuffle the leaf in different row.
+        int log_data_rows = log2(data_rows + 1);
+        int half_data_rows = (data_rows + 1) / 2;
+        vector<uint64_t> W0(lhe->slot_count);
+        vector<uint64_t> W1(lhe->slot_count); 
+    
+        cout<<"log_data_rows " <<log_data_rows<<endl;
+        for(int i = 0; i < log_data_rows ; ++i){
+            auto data_rows_perm = random_permutation(data_rows); //+ 1
+
+            std::fill(W0.begin(), W0.end(), 0);
+            std::fill(W1.begin(), W1.end(), 0);
+
+            for(int j = 0; j < half_data_rows; ++j){
+                W0[data_rows_perm[j]] = 1;
+                if (half_data_rows + j < data_rows) {
+                    W1[data_rows_perm[half_data_rows + j]] = 1;
+                }
+            }
+
+
+            Plaintext W0_pt = cmp->init_x_zero_zero(W0);
+            Plaintext W1_pt = cmp->init_x_zero_zero(W1);
+
+            auto L = random_permutation(leaf_num);
+
+            vector<Ciphertext> x_temp0(leaf_num);
+            vector<Ciphertext> y_temp0(leaf_num);
+            vector<Ciphertext> x_temp1(leaf_num);
+            vector<Ciphertext> y_temp1(leaf_num);
+            for(int j = 0; j < leaf_num; ++j){
+                
+                x_temp0[j] = x[j];
+                y_temp0[j] = y[j];
+                x_temp1[j] = x[j];
+                y_temp1[j] = y[j];
+
+                lhe->multiply_plain_inplace(x_temp0[j], W0_pt);
+                lhe->multiply_plain_inplace(x_temp1[j], W1_pt);
+                lhe->multiply_plain_inplace(y_temp0[j], W0_pt);
+                lhe->multiply_plain_inplace(y_temp1[j], W1_pt);
+                
+            }
+            for(int j = 0; j < leaf_num; ++j){
+                x[j] = lhe->add(x_temp0[L[j]], x_temp1[j]);
+                y[j] = lhe->add(y_temp0[L[j]], y_temp1[j]);
+            }
+        }
+        return {std::move(x), std::move(y)};
+        
+    }
+
+    vector<vector<Ciphertext>> shuffle_result2(vector<vector<Ciphertext>> out, int leaf_num) {
+        auto leaf_num_perm = random_permutation(leaf_num);
+        vector<Ciphertext> x(leaf_num);
+        vector<Ciphertext> y(leaf_num);
+        
+        // 1. 初始位置洗牌：利用 std::move 实现“指针级”交换，避免昂贵的深拷贝
+        for(int i = 0; i < leaf_num; i++){
+            x[i] = std::move(out[0][leaf_num_perm[i]]);
+            y[i] = std::move(out[1][leaf_num_perm[i]]);
+        }
+
+        int log_rows = log2(data_rows + 1);
+        int half_rows = (data_rows + 1) / 2;
+
+        // 2. 预分配缓冲区：将向量内存分配移出循环
+        vector<uint64_t> W0(lhe->slot_count, 0);
+        vector<uint64_t> W1(lhe->slot_count, 0);
+
+        for(int i = 0; i < log_rows; ++i) {
+            auto data_rows_perm = random_permutation(data_rows);
+            
+            // 重置掩码向量
+            std::fill(W0.begin(), W0.end(), 0);
+            std::fill(W1.begin(), W1.end(), 0);
+
+            for(int j = 0; j < half_rows; ++j) {
+                W0[data_rows_perm[j]] = 1;
+                // 修复 251 等奇数样本时的越界 Bug
+                if (half_rows + j < data_rows) {
+                    W1[data_rows_perm[half_rows + j]] = 1;
+                }
+            }
+
+            // 将掩码编码为平文
+            Plaintext W0_pt = cmp->init_x_zero_zero(W0);
+            Plaintext W1_pt = cmp->init_x_zero_zero(W1);
+            auto L = random_permutation(leaf_num);
+
+            // 3. 核心运算优化：inplace（原地）操作
+            // 目标：每一轮循环中，每个叶子节点只产生 1 次必要的密文拷贝
+            for(int j = 0; j < leaf_num; ++j) {
+                // --- 处理 X 密文 ---
+                // 创建一个临时变量来存储左侧项
+                Ciphertext x_temp = x[L[j]];           // 必须的拷贝
+                lhe->multiply_plain_inplace(x_temp, W0_pt); // x[L[j]] * W0
+                
+                // 直接修改原密文存储空间
+                lhe->multiply_plain_inplace(x[j], W1_pt);    // x[j] * W1
+                lhe->add_inplace(x[j], x_temp);             // x[j] = (x[j]*W1) + (x[L[j]]*W0)
+
+                // --- 处理 Y 密文 ---
+                Ciphertext y_temp = y[L[j]];           // 必须的拷贝
+                lhe->multiply_plain_inplace(y_temp, W0_pt);
+                
+                lhe->multiply_plain_inplace(y[j], W1_pt);
+                lhe->add_inplace(y[j], y_temp);
+            }
+        }
+
+        return {std::move(x), std::move(y)};
+    }
+
+    vector<vector<Ciphertext>> adapted_sum_path(vector<Ciphertext>& sum_path_result, LeafFlatten& leaf_flatten){
+
+        // [0, ..., d-1] --> [0,1]
+        auto out_temp = map_to_boolean(sum_path_result);
+
+        // auto zero_temp_pt = lhe->decrypt(zero_zero_zero);
+        // auto zero_temp = lhe->decode(zero_temp_pt);
+        // print(zero_temp, 100, "zero_zero_zero: ");
+
+        // pir
+        auto out_temp1 = private_info_retrieval(out_temp, leaf_flatten.leaf_vec_pt, leaf_flatten.leaf_vec);
+        
+        return vector<vector<Ciphertext>>{vector<Ciphertext>{out_temp1}};
+
+    }
+
+    vector<Ciphertext> sum_path(shared_ptr<Node> root, vector<vector<Ciphertext>>& data_cipher, LeafFlatten& leaf_flatten){
         vector<Ciphertext> out;
         root->value = zero_zero_zero;
         stack<StackFrame> stk;
@@ -148,8 +358,6 @@ class PDTE {
                 //  r      1-r
                 //  r+c    1-r+c
                 node->right->value = cmp->great_than(node->cmp_encode_threshold, data_cipher[node->index]);
-                
-
 
                 lhe->negate(node->right->value, node->left->value);
                 lhe->add_plain_inplace(node->left->value, one_one_one);
@@ -163,33 +371,29 @@ class PDTE {
                 stk.push(StackFrame{ node->left.get(), false });
             }
         }
-
-        // [0, ..., d-1] --> [0,1]
-        out = map_to_boolean(out);
-
-        // auto zero_temp_pt = lhe->decrypt(zero_zero_zero);
-        // auto zero_temp = lhe->decode(zero_temp_pt);
-        // print(zero_temp, 100, "zero_zero_zero: ");
-
-        // pir
-        auto output = private_info_retrieval(out, leaf_flatten.leaf_vec_pt, leaf_flatten.leaf_vec);
-
-        return output;
-
+        return out;
     }
 
-    void clear_up(Ciphertext& result) {
-        cmp->clear_up(result);
+    void clear_up(vector<vector<Ciphertext>>& result) {
+        for(int i = 0; i < result.size(); ++i){
+            for(int j = 0; j < result[0].size(); ++j){
+                cmp->clear_up(result[i][j]);
+            }
+        } 
     }
     
-    long communication_cost(const vector<vector<Ciphertext>>& ct1, const Ciphertext& ct2) {
+    long communication_cost(const vector<vector<Ciphertext>>& ct1, const vector<vector<Ciphertext>>& ct2) {
         long comm = 0;
         for(const auto& cte : ct1){
             for(const auto& e : cte){
                 comm += e.save_size();
             }
         } 
-        comm += ct2.save_size();
+        for(const auto& cte : ct2){
+            for(const auto& e : cte){
+                comm += e.save_size();
+            }
+        } 
         return comm;
     }
 
@@ -239,8 +443,40 @@ class PDTE {
         return lhe->add_many(a);
     }
 
-    vector<uint64_t> recover(Ciphertext& a){
-        return cmp->recover(a);
+    vector<uint64_t> recover(vector<vector<Ciphertext>>& a){
+        if (shuffle !=0){
+
+            vector<vector<uint64_t>> ans0;
+            vector<vector<uint64_t>> ans1;
+            for(int j=0;j<a[0].size();j++){
+                ans0.push_back(cmp->recover(a[0][j]));
+                ans1.push_back(cmp->recover(a[1][j]));
+            }
+
+            vector<uint64_t> out;
+            for(int j = 0; j < data_rows ; j++){
+                for(int i = 0; i < ans0.size(); i++){
+                    if(ans0[i][j]==0){
+                        out.push_back(ans1[i][j]);
+                        break;      
+                    }
+                }
+            }
+            
+            print_vec(ans0, 255, "ans0: ");
+            print_vec(ans1, 255, "ans1: ");
+            print_vec(out, out.size(), "out: ");
+
+            if(out.size()<data_rows){
+                cout<<"depth_need_min is too small, please the params again by add the extra value."<<endl;
+                //exit(0);
+            }
+
+            return out;
+
+        }
+
+        return cmp->recover(a[0][0]);
     }
 
     bool verify(const vector<uint64_t>& result, shared_ptr<Node> root, const vector<vector<uint64_t>>& data){
@@ -254,11 +490,11 @@ class PDTE {
         return true;
     }
 
-    bool verify(const vector<uint64_t>& result, const vector<uint64_t>& actural_result){
-        //print(result, actural_result.size(),         "pdte_result   : ");
-        //print(actural_result, actural_result.size(), "actural_result: ");
+    bool verify(const vector<uint64_t>& expect_result, const vector<uint64_t>& actural_result){
+        print_vec(expect_result, expect_result.size(),         "pdte_result   : ");
+        print_vec(actural_result, actural_result.size(), "actural_result: ");
         for(int i = 0; i < actural_result.size(); ++i){
-            if (actural_result[i]!=result[i]){
+            if (actural_result[i]!=expect_result[i]){
                 return false;
             }
         }

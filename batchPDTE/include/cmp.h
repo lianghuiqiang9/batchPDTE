@@ -27,6 +27,8 @@ public:
 
     virtual vector<Plaintext> encode_a(const vector<vector<uint64_t>>& a) = 0;
 
+    virtual Plaintext init_x_zero_zero(const vector<uint64_t>& salt) = 0;
+
     virtual Ciphertext great_than(vector<Plaintext>& a, vector<Ciphertext>& b) = 0;
 
     virtual void clear_up(Ciphertext& result) = 0;

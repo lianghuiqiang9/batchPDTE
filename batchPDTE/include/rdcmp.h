@@ -9,7 +9,7 @@
 
 class Rdcmp : public CMP {
 public:
-    Plaintext zero_zero_one;
+    Plaintext one_one_zero;
     //Ciphertext one_zero_zero_cipher;
     // inline static std::mt19937 gen{ std::random_device{}() };
 
@@ -30,7 +30,7 @@ public:
         num_cmps = slot_count - 1;//Reserve a padding bit to prevent the plaintext from being 0
 
         // for cmp
-        zero_zero_one = init_zero_zero_one();
+        one_one_zero = init_one_one_zero();
         //one_zero_zero_cipher = lhe->encrypt(one_zero_zero);
     }
     ~Rdcmp() override = default;
@@ -81,10 +81,14 @@ public:
     
     // [ 1,0,0,...,1,0,0,...
     //   1,0,0,...,1,0,0,... ]
-    Plaintext init_zero_zero_one(){
-        vector<uint64_t> zero_zero_one(slot_count,1);
-        zero_zero_one[num_cmps] = 0;
-        return lhe->encode(zero_zero_one);
+    Plaintext init_one_one_zero(){
+        vector<uint64_t> one_one_zero(slot_count,1);
+        one_one_zero[num_cmps] = 0;
+        return lhe->encode(one_one_zero);
+    }
+    
+    Plaintext init_x_zero_zero(const vector<uint64_t>& salt) override {
+        return lhe->encode(salt);
     }
     
     Ciphertext great_than(vector<Plaintext>& a, vector<Ciphertext>& b) override {
@@ -118,7 +122,7 @@ public:
     }
 
     void clear_up(Ciphertext& result) override {
-        lhe->multiply_plain_inplace(result, zero_zero_one);
+        lhe->multiply_plain_inplace(result, one_one_zero);
     }
 
     vector<uint64_t> decrypt(const Ciphertext& ct) override {

@@ -228,7 +228,7 @@ int main(int argc, char* argv[]){
     for(int i = 0; i <  2 ; i++){
         vector<Plaintext> temp;
         for(int j = 0;j < leaf_num; j++){
-            temp.push_back(init_salt_zero_zero(batch_encoder,slot_count,num_cmps,num_cmps_per_row,num_slots_per_element,row_count,distrib,gen));
+            temp.push_back(init_x_zero_zero(batch_encoder,slot_count,num_cmps,num_cmps_per_row,num_slots_per_element,row_count,distrib,gen));
         }
         salt.push_back(temp);
     }

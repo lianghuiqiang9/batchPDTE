@@ -2,6 +2,7 @@
 #include<iostream>
 #include<vector>
 #include<random>
+#include <algorithm>
 using namespace std;
 
 template <typename Func>
@@ -15,7 +16,7 @@ auto profile(string name, Func&& func) {
 }
 
 template <typename T>
-void print(const std::vector<T> &vec, size_t k, std::string name = "Result") {
+void print_vec(const std::vector<T> &vec, size_t k, std::string name = "Result") {
     if (vec.size()==0){
         return;
     }
@@ -33,13 +34,13 @@ void print(const std::vector<T> &vec, size_t k, std::string name = "Result") {
 }
 
 template <typename T>
-void print(const std::vector<std::vector<T>> &matrix, size_t k, std::string name = "Result") {
+void print_vec(const std::vector<std::vector<T>> &matrix, size_t k, std::string name = "Result") {
     if (matrix.size()==0){
         return;
     }
     cout << name;
     for (int i = 0;i<matrix.size();i++){
-        print(matrix[i], k, "");
+        print_vec(matrix[i], k, "");
     }
 }
 
@@ -140,6 +141,22 @@ std::vector<uint64_t> random_k_bit(int k, size_t count) {
         results[i] = dis(gen);
     }
     return results;
+}
+
+std::vector<uint64_t> random_permutation(int n) {
+    if (n <= 0) {
+        throw std::invalid_argument("n must be positive");
+    }
+
+    std::vector<uint64_t> a(n);
+    std::iota(a.begin(), a.end(), 0);
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    std::shuffle(a.begin(), a.end(), gen);
+
+    return a;
 }
 
 uint64_t factorial(uint64_t n) {

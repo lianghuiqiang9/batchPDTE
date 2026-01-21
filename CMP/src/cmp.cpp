@@ -504,7 +504,7 @@ Ciphertext init_one_one_one_cipher(BatchEncoder *batch_encoder, Encryptor *encry
 }
 
 
-Plaintext init_salt_zero_zero(BatchEncoder *batch_encoder, int slot_count,uint64_t num_cmps,uint64_t num_cmps_per_row,uint64_t num_slots_per_element,uint64_t row_count, std::uniform_int_distribution<>& distrib,std::mt19937& gen){
+Plaintext init_x_zero_zero(BatchEncoder *batch_encoder, int slot_count,uint64_t num_cmps,uint64_t num_cmps_per_row,uint64_t num_slots_per_element,uint64_t row_count, std::uniform_int_distribution<>& distrib,std::mt19937& gen){
 
     vector<uint64_t> salt(slot_count, 0ULL);
     for(int j = 0; j < num_cmps ; j++){
