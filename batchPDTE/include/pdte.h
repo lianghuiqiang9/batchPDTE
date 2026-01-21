@@ -212,6 +212,11 @@ class PDTE {
         vector<uint64_t> W0(lhe->slot_count);
         vector<uint64_t> W1(lhe->slot_count); 
     
+        vector<Ciphertext> x_temp0(leaf_num);
+        vector<Ciphertext> y_temp0(leaf_num);
+        vector<Ciphertext> x_temp1(leaf_num);
+        vector<Ciphertext> y_temp1(leaf_num);
+
         cout<<"log_data_rows " <<log_data_rows<<endl;
         for(int i = 0; i < log_data_rows ; ++i){
             auto data_rows_perm = random_permutation(data_rows); //+ 1
@@ -232,92 +237,32 @@ class PDTE {
 
             auto L = random_permutation(leaf_num);
 
-            vector<Ciphertext> x_temp0(leaf_num);
-            vector<Ciphertext> y_temp0(leaf_num);
-            vector<Ciphertext> x_temp1(leaf_num);
-            vector<Ciphertext> y_temp1(leaf_num);
+            
             for(int j = 0; j < leaf_num; ++j){
                 
                 x_temp0[j] = x[j];
                 y_temp0[j] = y[j];
-                x_temp1[j] = x[j];
-                y_temp1[j] = y[j];
+                x_temp1[j] = std::move(x[j]);
+                y_temp1[j] = std::move(y[j]);
 
                 lhe->multiply_plain_inplace(x_temp0[j], W0_pt);
                 lhe->multiply_plain_inplace(x_temp1[j], W1_pt);
                 lhe->multiply_plain_inplace(y_temp0[j], W0_pt);
                 lhe->multiply_plain_inplace(y_temp1[j], W1_pt);
-                
+
             }
+
             for(int j = 0; j < leaf_num; ++j){
-                x[j] = lhe->add(x_temp0[L[j]], x_temp1[j]);
-                y[j] = lhe->add(y_temp0[L[j]], y_temp1[j]);
+                lhe->add_inplace(x_temp1[j], x_temp0[L[j]]);
+                lhe->add_inplace(y_temp1[j], y_temp0[L[j]]);
+                x[j] = std::move(x_temp1[j]);
+                y[j] = std::move(y_temp1[j]);
             }
-        }
-        return {std::move(x), std::move(y)};
-        
-    }
 
-    vector<vector<Ciphertext>> shuffle_result2(vector<vector<Ciphertext>> out, int leaf_num) {
-        auto leaf_num_perm = random_permutation(leaf_num);
-        vector<Ciphertext> x(leaf_num);
-        vector<Ciphertext> y(leaf_num);
-        
-        // 1. 初始位置洗牌：利用 std::move 实现“指针级”交换，避免昂贵的深拷贝
-        for(int i = 0; i < leaf_num; i++){
-            x[i] = std::move(out[0][leaf_num_perm[i]]);
-            y[i] = std::move(out[1][leaf_num_perm[i]]);
-        }
-
-        int log_rows = log2(data_rows + 1);
-        int half_rows = (data_rows + 1) / 2;
-
-        // 2. 预分配缓冲区：将向量内存分配移出循环
-        vector<uint64_t> W0(lhe->slot_count, 0);
-        vector<uint64_t> W1(lhe->slot_count, 0);
-
-        for(int i = 0; i < log_rows; ++i) {
-            auto data_rows_perm = random_permutation(data_rows);
             
-            // 重置掩码向量
-            std::fill(W0.begin(), W0.end(), 0);
-            std::fill(W1.begin(), W1.end(), 0);
-
-            for(int j = 0; j < half_rows; ++j) {
-                W0[data_rows_perm[j]] = 1;
-                // 修复 251 等奇数样本时的越界 Bug
-                if (half_rows + j < data_rows) {
-                    W1[data_rows_perm[half_rows + j]] = 1;
-                }
-            }
-
-            // 将掩码编码为平文
-            Plaintext W0_pt = cmp->init_x_zero_zero(W0);
-            Plaintext W1_pt = cmp->init_x_zero_zero(W1);
-            auto L = random_permutation(leaf_num);
-
-            // 3. 核心运算优化：inplace（原地）操作
-            // 目标：每一轮循环中，每个叶子节点只产生 1 次必要的密文拷贝
-            for(int j = 0; j < leaf_num; ++j) {
-                // --- 处理 X 密文 ---
-                // 创建一个临时变量来存储左侧项
-                Ciphertext x_temp = x[L[j]];           // 必须的拷贝
-                lhe->multiply_plain_inplace(x_temp, W0_pt); // x[L[j]] * W0
-                
-                // 直接修改原密文存储空间
-                lhe->multiply_plain_inplace(x[j], W1_pt);    // x[j] * W1
-                lhe->add_inplace(x[j], x_temp);             // x[j] = (x[j]*W1) + (x[L[j]]*W0)
-
-                // --- 处理 Y 密文 ---
-                Ciphertext y_temp = y[L[j]];           // 必须的拷贝
-                lhe->multiply_plain_inplace(y_temp, W0_pt);
-                
-                lhe->multiply_plain_inplace(y[j], W1_pt);
-                lhe->add_inplace(y[j], y_temp);
-            }
         }
-
         return {std::move(x), std::move(y)};
+        
     }
 
     vector<vector<Ciphertext>> adapted_sum_path(vector<Ciphertext>& sum_path_result, LeafFlatten& leaf_flatten){
