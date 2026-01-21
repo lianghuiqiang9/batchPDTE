@@ -3,12 +3,12 @@
 #include<vector>
 #include<random>
 #include"pdte.h"
-#include"utils.h"
 using namespace std;
 
 // g++ -o pdte_test -O3 pdte_test.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1
 
-// ./pdte_test -i ./data/heart_11bits -s 10 
+// ./pdte_test -i ./data/heart_11bits -s 2048 -t 0 -l 8 -m 2 -n 16 -e 0
+
 
 int main(int argc, char* argv[]){
     if (argc < 2) {
@@ -32,7 +32,6 @@ int main(int argc, char* argv[]){
         case 'm': m = atoi(optarg); break;
         case 'n': n = atoi(optarg);break;
         case 'e':extra = atoi(optarg);break;       
-        //case 'd':d = atoi(optarg);break;
         }
     }
     // pdte setup
@@ -49,17 +48,27 @@ int main(int argc, char* argv[]){
 
 
     // evaluate
-    auto result_cipher = pdte.evaluate(root, data_cipher, leaf_flatten, data);
+    Ciphertext result;
+    auto finish = profile("PDTE", [&]() { result = pdte.evaluate(root, data_cipher, leaf_flatten, data);});
+    pdte.clear_up(result);
 
-
-    // decrypt
-    auto result = pdte.recovery(result_cipher);
+    // recover
+    auto expect_result = pdte.recover(result);
 
     // verify
     auto actural_result = root->eval(data);
-    auto is_correct = pdte.verify(result, actural_result);
+    auto is_correct = pdte.verify(expect_result, actural_result);
 
+    long comm = pdte.communication_cost(data_cipher, result);
 
-cout<< " pdte result a > b                      : "<< is_correct 
-    <<endl;
+    pdte.print();
+    cout<< " pdte result is correct                   : "<< is_correct 
+        << " \n input_address                            : "<<input_address
+        << " \n data_size                                : "<< data_size
+        << " \n overall time cost                        : "<< finish/1000     
+        << " ms\n overall comm. cost                       : "<< comm/1024 
+        << " kB\n amortized time cost                      : "<< finish/1024/data_size 
+        << " ms\n amortized comm. cost                     : "<< comm/1024 /data_size <<" kB"
+        << endl;
+
 }

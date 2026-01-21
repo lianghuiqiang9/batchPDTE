@@ -52,20 +52,15 @@ int main(int argc, char* argv[]){
         }
     }
 
-    string input_data_address= input_address + "/x_test.csv";
-    vector<vector<uint64_t>> data = load_matrix(input_data_address, data_size);
+    auto data = load_matrix(input_address + "/x_test.csv", data_size);
     print(data, 10, "data");
-    string output_data_address = output_address + "/x_test.csv";
-    save_data(data, output_data_address);
+    save_data(data, output_address + "/x_test.csv");
 
-    string input_tree_address = input_address + "/model.json";
-    Node root = Node(input_tree_address);
+    Node root = Node(input_address + "/model.json");
     root.print_tree();
-    string output_tree_address = output_address + "/model.json";
-    cout<<output_tree_address<<endl;
-    root.save_tree(output_tree_address);
+    root.save_tree(output_address + "/model.json");
 
-    Node root_temp = Node(output_tree_address);
+    Node root_temp = Node(output_address + "/model.json");
     root_temp.print_tree();
 
 }

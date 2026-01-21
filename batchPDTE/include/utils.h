@@ -11,7 +11,7 @@ auto profile(string name, Func&& func) {
     auto end = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
     cout << name << ": " << duration.count() << " us" << endl;
-    return duration.count();
+    return (float)duration.count();
 }
 
 template <typename T>

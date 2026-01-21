@@ -46,10 +46,10 @@ int main(int argc, char* argv[]) {
     
     //cmp
     Ciphertext result;
-    auto finish = profile("Cmp", [&]() { result = cmp->great_than(cmp_encode_a, cmp_encode_b_cipher);});
+    auto finish = profile("CMP", [&]() { result = cmp->great_than(cmp_encode_a, cmp_encode_b_cipher);});
     
     cmp->clear_up(result);
-    auto expect_result = cmp->decode(result);
+    auto expect_result = cmp->recover(result);
     auto actural_result = cmp->verify(raw_encode_a, raw_encode_b);
 
     print(expect_result, 10, "expect_result ");
@@ -59,11 +59,11 @@ int main(int argc, char* argv[]) {
     long comm = cmp->communication_cost(cmp_encode_b_cipher, result);
 
     cmp->print();
-cout<< " decrypt result a > b                      : "<< is_correct 
-    << " \n overall time cost                         : "<< finish/1000     
-    << " ms\n overall comm. cost                        : "<< comm/1024 // /8 or not?
-    << " KB\n amortized time cost                       : "<< (float)finish/1024/num_cmps 
-    << " ms\n amortized comm. cost                      : "<< (float)comm/1024 /num_cmps <<" KB"
-    << endl;
+    cout<< " decrypt result a > b                      : "<< is_correct 
+        << " \n overall time cost                         : "<< finish/1000     
+        << " ms\n overall comm. cost                        : "<< comm/1024 // /8 or not?
+        << " kB\n amortized time cost                       : "<< (float)finish/1024/num_cmps 
+        << " ms\n amortized comm. cost                      : "<< (float)comm/1024 /num_cmps 
+        << " kB" << endl;
 
 }

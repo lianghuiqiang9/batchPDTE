@@ -145,7 +145,7 @@ public:
         return ans;
     }
 
-    vector<uint64_t> recovery(const Ciphertext& ct) override {
+    vector<uint64_t> recover(const Ciphertext& ct) override {
         auto res = this->decrypt(ct);
         return this->decode(res);
     }
@@ -214,10 +214,11 @@ public:
     }
 
     void print() override {
-        cout << " name                                      : " << name
-             << "\n bit precision (n)                         : "<< n 
-             << "\n compare number                            : "<< num_cmps
-             << "\n";
+        cout << " name                                     : " << name
+             << " \n max depth                                : "<< depth
+             << " \n bit precision (n)                        : "<< n 
+             << " \n compare number                           : "<< num_cmps
+             << " \n";
     }
 
 };

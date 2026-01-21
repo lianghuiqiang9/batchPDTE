@@ -31,9 +31,10 @@ public:
             exit(0);
         }
         int tree_depth_need = (tree_depth == 0) ? 0 : static_cast<int>(std::ceil(std::log2(tree_depth)) + 1);
-        int total_depth = cmp_depth_need + tree_depth_need + extra;
-
-        this->lhe = make_unique<LHE>("bfv", total_depth);
+        depth = cmp_depth_need + tree_depth_need + extra;
+        //cout<<"depth: "<<depth<<endl;
+        
+        this->lhe = make_unique<LHE>("bfv", depth);
 
         if (m >= this->lhe->log_poly_mod_degree - 1) {
             cout<< m <<" " << this->lhe->log_poly_mod_degree<<endl;
@@ -187,7 +188,7 @@ public:
         return ans;
     }
 
-    vector<uint64_t> recovery(const Ciphertext& ct) override {
+    vector<uint64_t> recover(const Ciphertext& ct) override {
         auto res = this->decrypt(ct);
         return this->decode(res);
     }
@@ -276,11 +277,12 @@ public:
     }
 
     void print() override {
-        cout << " name                                      : " << name
-             << " \n l                                         : "<< l 
-             << " \n m                                         : "<< m
-             << " \n bit precision (n)                         : "<< n 
-             << " \n compare number                            : "<< num_cmps
+        cout << " name                                     : " << name
+             << " \n max depth                                : "<< depth    
+             << " \n l                                        : "<< l 
+             << " \n m                                        : "<< m
+             << " \n bit precision (n)                        : "<< n 
+             << " \n compare number                           : "<< num_cmps
              <<endl ;
     }
 

@@ -15,7 +15,8 @@ public:
     uint64_t num_cmps;
     uint64_t slot_count;
     uint64_t row_count;
-    unique_ptr<LHE> lhe;
+    uint64_t depth;
+    shared_ptr<LHE> lhe;
     inline static std::mt19937 gen{ std::random_device{}() };
 
     virtual ~CMP() = default;
@@ -32,7 +33,7 @@ public:
 
     virtual vector<uint64_t> decrypt(const Ciphertext& ct) = 0;
 
-    virtual vector<uint64_t> recovery(const Ciphertext& ct) = 0;
+    virtual vector<uint64_t> recover(const Ciphertext& ct) = 0;
 
     virtual vector<vector<uint64_t>> raw_encode_b(const vector<uint64_t>& b) = 0;
     
