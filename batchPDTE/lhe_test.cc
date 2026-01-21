@@ -1,9 +1,8 @@
-
-
 #include "lhe.h"
 #include "utils.h"
 
 // g++ -o lhe_test -O3 lhe_test.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1
+
 // ./lhe_test
 
 int main() {
@@ -49,7 +48,7 @@ int main() {
     vector<uint64_t> result;
     profile("Decrypt             ", [&]() { pt_res = lhe.decrypt(ct_res); });
     profile("Decode              ", [&]() { result = lhe.decode(pt_res); });
-    print(result, 10);
+    print_vec(result, 10);
 
     auto actural_result = mul(
                             rotate(
@@ -60,7 +59,7 @@ int main() {
                                  step), 
                             b, mod);
 
-    print(actural_result, 10);
+    print_vec(actural_result, 10);
 
     cout << endl << "--- Multiply Performance ---" << endl;
     {

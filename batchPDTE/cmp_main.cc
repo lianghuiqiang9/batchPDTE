@@ -4,12 +4,12 @@
 #include"utils.h"
 #include<unistd.h>
 
-// g++ -o cmp_test -O3 cmp_test.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1
+// g++ -o cmp_main -O3 cmp_main.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1 -L ./lib -lpdte -Wl,-rpath,./lib
 
-// ./cmp_test -m 8 -l 2 -n 16 -t 0
+// ./cmp_main -m 8 -l 2 -n 16 -t 0
 
 int main(int argc, char* argv[]) {
-    int l,m,n; 
+    int l =8, m = 2, n = 16;
     int opt;
     int cmp_type = 0;
     unique_ptr<CMP> cmp;
@@ -34,8 +34,8 @@ int main(int argc, char* argv[]) {
 
     auto a = random_k_bit(l*m, num_cmps);
     auto b = random_k_bit(l*m, num_cmps);
-    print(a, 10, "a: ");
-    print(b, 10, "b: ");
+    print_vec(a, 10, "a: ");
+    print_vec(b, 10, "b: ");
 
     auto raw_encode_a = cmp->raw_encode_a(a);
     auto raw_encode_b = cmp->raw_encode_b(b);
@@ -52,8 +52,8 @@ int main(int argc, char* argv[]) {
     auto expect_result = cmp->recover(result);
     auto actural_result = cmp->verify(raw_encode_a, raw_encode_b);
 
-    print(expect_result, 10, "expect_result ");
-    print(actural_result, 10, "actural_result");
+    print_vec(expect_result, 10, "expect_result ");
+    print_vec(actural_result, 10, "actural_result");
     auto is_correct = cmp->verify(actural_result, expect_result);
 
     long comm = cmp->communication_cost(cmp_encode_b_cipher, result);

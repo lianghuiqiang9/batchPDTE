@@ -1,7 +1,5 @@
-
 #include "lhe.h"
 #include "utils.h"
-
 
 // g++ -o lhe_depth_test -O3 lhe_depth_test.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1
 
@@ -24,7 +22,7 @@ int main() {
     cout << "  - Slots:         " << slots << endl;
     cout << "  - Plain Modulus: " << mod << endl;
     cout << "  - Rotation Steps: ";
-    print(steps, steps.size(), ""); 
+    print_vec(steps, steps.size(), ""); 
     cout << endl;
 
     cout << endl << "--- Actural Depth ---" << endl;
@@ -44,8 +42,8 @@ int main() {
             auto pt = lhe.decrypt(ct);
             auto result = lhe.decode(pt);
 
-            print(result, 10);
-            print(a, 10);
+            print_vec(result, 10);
+            print_vec(a, 10);
 
             if (a!=result){
                 cout<<"actural max depth : "<<i<<endl;
@@ -73,8 +71,8 @@ int main() {
             auto pt = lhe.decrypt(ct);
             auto result = lhe.decode(pt);
 
-            print(result, 10);
-            print(a, 10);
+            print_vec(result, 10);
+            print_vec(a, 10);
 
             if (a!=result){
                 cout<<"actural max depth (fresh ciphertext) : "<<i<<endl;

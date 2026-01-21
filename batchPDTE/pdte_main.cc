@@ -5,9 +5,9 @@
 #include"pdte.h"
 using namespace std;
 
-// g++ -o pdte_test -O3 pdte_test.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1
+// g++ -o pdte_main -O3 pdte_main.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1 -L ./lib -lpdte -Wl,-rpath,./lib
 
-// ./pdte_test -i ./data/heart_11bits -s 2048 -t 0 -l 8 -m 2 -n 16 -e 0
+// ./pdte_main -i ./data/heart_11bits -r 2048 -t 0 -l 8 -m 2 -n 16 -e 0
 
 
 int main(int argc, char* argv[]){
@@ -17,7 +17,7 @@ int main(int argc, char* argv[]){
     }
     string input_address;
     int data_rows = 10;
-    int l, m, n;    // make sure l * m or n >= data_bit_length
+    int l =8, m = 2, n = 16;    // make sure l * m or n >= data_bit_length
     int cmp_type = 0;
     //int d;
     int extra = 0;

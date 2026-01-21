@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __CMP__
+#define __CMP__
+
 #include <seal/seal.h>
 #include <vector>
 #include <string>
@@ -50,29 +52,13 @@ public:
     // 
     virtual vector<bool> verify(const vector<vector<uint64_t>>& a, const vector<vector<uint64_t>>& b) = 0;
 
-    bool verify(const vector<bool>& actural_result, const vector<uint64_t>& result){
-        for(int i=0;i<num_cmps;i++){
-            //cout<<"actural_result: "<<actural_result[i]<< " result: "<<result[i]<<endl;
-            
-            if (actural_result[i]!=(result[i]==1)){
-                return false;
-            }
-        }
-        return true;
-    }
+    bool verify(const vector<bool>& actural_result, const vector<uint64_t>& result);
 
-    long communication_cost(const vector<Ciphertext>& ct1, const Ciphertext& ct2) {
-        long comm = 0;
-        for(const auto& e : ct1) comm += e.save_size();
-        comm += ct2.save_size();
-        return comm;
-    }
+    long communication_cost(const vector<Ciphertext>& ct1, const Ciphertext& ct2);
 
-    long communication_cost(const Ciphertext& ct1, const Ciphertext& ct2){
-        long comm = 0;
-        comm+=ct1.save_size();
-        comm+=ct2.save_size();
-        return comm;
-    }
+    long communication_cost(const Ciphertext& ct1, const Ciphertext& ct2);
 
 };
+
+
+#endif

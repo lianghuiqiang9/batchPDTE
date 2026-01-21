@@ -1,7 +1,8 @@
-*.bin
-*.exe
 
-cmp_test
-pdte_test
+cmp_main
+pdte_main
 lhe_test
 lhe_depth_test
+serial_test
+lib/*
+build/*
