@@ -3,6 +3,19 @@
 
 g++ -o cmp_main -O3 cmp_main.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1 -L ./build -lpdte -Wl,-dpath,./lib
 
+# tecmp
+# cdcmp
+# rdcmp
+
+./cmp_main -c 0 -m 8 -l 2
+
+
+./cmp_main -c 1 -n 8
+
+./cmp_main -c 2 -n 8
+
+
+
 
 g++ -o pdte_main -O3 pdte_main.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1 -L ./build -lpdte -Wl,-dpath,./lib
 

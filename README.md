@@ -20,6 +20,13 @@ make install
 
 ./pdte_main -i ../data/heart_11bits -d 1024 -l 8 -m 2 -n 16 -c 0 -e 6 -p 1
 
+# the params setting
+1. -l 
+2. -m
+3. -n
+4. -c
+5. -
+
 # benchmark
 
 

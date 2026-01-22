@@ -9,7 +9,7 @@
 // ./cmp_main -m 8 -l 2 -n 16 -c 0
 
 int main(int argc, char* argv[]) {
-    int l =8, m = 2, n = 16;
+    int l = 8, m = 2, n = -1;
     int opt;
     int cmp_type = 0;
     unique_ptr<CMP> cmp;
@@ -32,13 +32,27 @@ int main(int argc, char* argv[]) {
     //auto raw_encode_a = cmp->random_raw_encode_a();
     //auto raw_encode_b = cmp->random_raw_encode_b();
 
-    auto a = random_k_bit(l*m, num_cmps);
-    auto b = random_k_bit(l*m, num_cmps);
-    print_vec(a, 10, "a: ");
-    print_vec(b, 10, "b: ");
+    if ( n == -1 ){n = l * m;}
 
-    auto raw_encode_a = cmp->raw_encode_a(a);
-    auto raw_encode_b = cmp->raw_encode_b(b);
+    vector<vector<uint64_t>> raw_encode_a;
+    vector<vector<uint64_t>> raw_encode_b;
+    if ( n <= 64){
+        auto a = random_k_bit(n, num_cmps);
+        auto b = random_k_bit(n, num_cmps);
+
+        print_vec(a, 10, "a: ");
+        print_vec(b, 10, "b: ");
+
+        raw_encode_a = cmp->raw_encode_a(a);
+        raw_encode_b = cmp->raw_encode_b(b);
+    }else{
+        raw_encode_a = cmp->random_raw_encode_a();
+        raw_encode_b = cmp->random_raw_encode_b();
+
+        print_vec(raw_encode_a, 10, "raw_encode_a: ");
+        print_vec(raw_encode_a, 10, "raw_encode_a: ");
+    }
+
 
     auto cmp_encode_a = cmp->encode_a(raw_encode_a);
     auto cmp_encode_b = cmp->encode_b(raw_encode_b);
@@ -59,11 +73,11 @@ int main(int argc, char* argv[]) {
     long comm = cmp->communication_cost(cmp_encode_b_cipher, result);
 
     cmp->print();
-    cout<< " decrypt result a > b                      : "<< is_correct 
-        << " \n overall time cost                         : "<< finish/1000     
-        << " ms\n overall comm. cost                        : "<< comm/1024 // /8 or not?
-        << " kB\n amortized time cost                       : "<< (float)finish/1024/num_cmps 
-        << " ms\n amortized comm. cost                      : "<< (float)comm/1024 /num_cmps 
+    cout<< " decrypt result a > b                     : "<< is_correct 
+        << " \n overall time cost                        : "<< finish/1000     
+        << " ms\n overall comm. cost                       : "<< comm/1024 // /8 or not?
+        << " kB\n amortized time cost                      : "<< (float)finish/1024/num_cmps 
+        << " ms\n amortized comm. cost                     : "<< (float)comm/1024 /num_cmps 
         << " kB" << endl;
 
 }
