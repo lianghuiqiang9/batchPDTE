@@ -4,8 +4,8 @@ Cdcmp::Cdcmp(int l, int m, int n, int tree_depth, int extra) {
     this->scheme = "cdcmp";
     this->n = n;
 
-    int cmp_depth_need =  static_cast<int>(std::ceil(std::log2(n)) + 1);
-    int tree_depth_need = (tree_depth == 0) ? 0 : static_cast<int>(std::ceil(std::log2(tree_depth)) + 1);
+    int cmp_depth_need =  static_cast<int>(std::floor(std::log2(n)) + 1); // plus one for additive and rotate operation
+    int tree_depth_need = (tree_depth == 0) ? 0 : static_cast<int>(std::ceil(std::log2(tree_depth)));
     depth = cmp_depth_need + tree_depth_need + extra;
 
     this->lhe = make_unique<BFV>(depth);
@@ -25,9 +25,7 @@ Cdcmp::Cdcmp(int l, int m, int n, int tree_depth, int extra) {
         index_map[i] = flag ? (i * num_slots_per_element) : (row_count + (i - num_cmps_per_row) * num_slots_per_element);
     }
 
-    // for cmp
     one_zero_zero = init_one_zero_zero();
-    //one_zero_zero_cipher = lhe->encrypt(one_zero_zero);
 }
 
 

@@ -12,7 +12,7 @@ Tecmp::Tecmp(int l, int m, int n, int tree_depth, int extra, uint8_t id) {
         cout<<" l should be 2^x, error"<<endl;
         exit(0);
     }
-    int tree_depth_need = (tree_depth == 0) ? 0 : static_cast<int>(std::ceil(std::log2(tree_depth)) + 1);
+    int tree_depth_need = (tree_depth == 0) ? 0 : static_cast<int>(std::ceil(std::log2(tree_depth)));
     depth = cmp_depth_need + tree_depth_need + extra;
     //cout<<"depth: "<<depth<<endl;
 
@@ -39,7 +39,6 @@ Tecmp::Tecmp(int l, int m, int n, int tree_depth, int extra, uint8_t id) {
         index_map[i] = flag ? (i * num_slots_per_element) : (row_count + (i - num_cmps_per_row) * num_slots_per_element);
     }
 
-    // for cmp
     one_zero_zero = init_one_zero_zero();
     one_zero_zero_cipher = lhe->encrypt(one_zero_zero);
 }

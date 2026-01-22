@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
     int cmp_type = 0;
     unique_ptr<CMP> cmp;
 
-    while ((opt = getopt(argc, argv, "fl:m:n:t:")) != -1) {
+    while ((opt = getopt(argc, argv, "fl:m:n:c:")) != -1) {
         switch (opt) {
         case 'l': l = atoi(optarg); break;
         case 'm': m = atoi(optarg); break;
@@ -22,6 +22,7 @@ int main(int argc, char* argv[]) {
         case 'c': cmp_type = atoi(optarg);break;
         }
     }
+    if ( n == -1 ){n = l * m;}
 
     switch (cmp_type) {
         case 0: cmp = make_unique<Tecmp>(l, m, n); break;
@@ -31,8 +32,6 @@ int main(int argc, char* argv[]) {
     auto num_cmps = cmp->num_cmps;
     //auto raw_encode_a = cmp->random_raw_encode_a();
     //auto raw_encode_b = cmp->random_raw_encode_b();
-
-    if ( n == -1 ){n = l * m;}
 
     vector<vector<uint64_t>> raw_encode_a;
     vector<vector<uint64_t>> raw_encode_b;
@@ -75,7 +74,7 @@ int main(int argc, char* argv[]) {
     cmp->print();
     cout<< " decrypt result a > b                     : "<< is_correct 
         << " \n overall time cost                        : "<< finish/1000     
-        << " ms\n overall comm. cost                       : "<< comm/1024 // /8 or not?
+        << " ms\n overall comm. cost                       : "<< comm/1024 //
         << " kB\n amortized time cost                      : "<< (float)finish/1024/num_cmps 
         << " ms\n amortized comm. cost                     : "<< (float)comm/1024 /num_cmps 
         << " kB" << endl;

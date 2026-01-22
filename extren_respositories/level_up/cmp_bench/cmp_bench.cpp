@@ -159,7 +159,7 @@ public:
 
                 break;
             case FOLKLORE:
-                depth = log2(n) + 1;
+                depth = ceil(log2(n));
                 break;
             case XCMP:
                 if (n<=12){
@@ -731,7 +731,7 @@ int main(int argc, char* argv[]) {
                 delete bench;
             }
 
-            if (n<=128){
+            if (n <= 128){
                 for (uint64_t hw: {2,4,8,16,32,64}){
                     if ((float)n/hw>=9) continue;
                     if (2*hw>=n+1) continue;

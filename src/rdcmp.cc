@@ -4,21 +4,18 @@ Rdcmp::Rdcmp(int l, int m, int n, int tree_depth, int extra) {
     this->scheme = "rdcmp";
     this->n = n;
 
-    int cmp_depth_need =  static_cast<int>(std::ceil(std::log2(n)) + 1);
-    int tree_depth_need = (tree_depth == 0) ? 0 : static_cast<int>(std::ceil(std::log2(tree_depth)) + 1);
+    int cmp_depth_need = static_cast<int>(std::floor(std::log2(n)) + 1); // plus one for additive operation
+    int tree_depth_need = (tree_depth == 0) ? 0 : static_cast<int>(std::ceil(std::log2(tree_depth)));
     depth = cmp_depth_need + tree_depth_need + extra;
 
     this->lhe = make_unique<BFV>(depth);
 
     slot_count = lhe->slot_count;
     row_count = slot_count / 2;
-    //num_slots_per_element = n;
-    //num_cmps_per_row = row_count / num_slots_per_element;
-    num_cmps = slot_count - 1;//Reserve a padding bit to prevent the plaintext from being 0
+    
+    num_cmps = slot_count - 1; //Reserve a padding bit to prevent the plaintext from being 0
 
-    // for cmp
     one_one_zero = init_one_one_zero();
-    //one_zero_zero_cipher = lhe->encrypt(one_zero_zero);
 }
 
 // input

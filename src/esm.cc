@@ -72,7 +72,7 @@ vector<vector<Ciphertext>> ESM::shuffle(vector<vector<Ciphertext>> out, int leaf
     }
 
     // shuffle the leaf in different row.
-    int log_data_rows = log2(data_rows + 1);
+    int log_data_rows = ceil(log2(data_rows));
     int half_data_rows = (data_rows + 1) / 2;
     vector<uint64_t> W0(lhe->slot_count);
     vector<uint64_t> W1(lhe->slot_count); 
