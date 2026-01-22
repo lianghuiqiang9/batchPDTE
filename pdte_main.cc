@@ -2,7 +2,9 @@
 #include<unistd.h>
 #include<vector>
 #include<random>
-#include"pdte.h"
+#include"cdcmp.h"
+#include"tecmp.h"
+#include"rdcmp.h"
 #include"asm.h"
 #include"esm.h"
 using namespace std;

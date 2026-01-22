@@ -1,7 +1,8 @@
+
+cmp_main
+pdte_main
+lhe_test
+lhe_depth_test
+serial_test
+lib/*
 build/*
-CMP/build/*
-CMP/lib/*
-cmp_bench/build/*
-cmp_bench/depth_test
-data/heart_16bits
-data/heart_32bits

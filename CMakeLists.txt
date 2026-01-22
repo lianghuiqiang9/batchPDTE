@@ -1,45 +1,57 @@
 cmake_minimum_required(VERSION 3.16)
+project(pdte)
 
-project(bpdte)
+find_package(SEAL 4.1 REQUIRED)
 
-find_package(SEAL 4.1)
 
-link_directories (${PROJECT_SOURCE_DIR}/CMP/lib)
+set(CMAKE_CXX_STANDARD 17) 
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_executable(tecmp_pdte_asm tecmp_pdte_asm.cpp)
-target_include_directories(tecmp_pdte_asm PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/CMP/include)
-target_link_libraries (tecmp_pdte_asm SEAL::seal libcmp.so)
 
-add_executable(tecmp_norm_pdte_asm tecmp_norm_pdte_asm.cpp)
-target_include_directories(tecmp_norm_pdte_asm PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/CMP/include)
-target_link_libraries (tecmp_norm_pdte_asm SEAL::seal libcmp.so)
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -Wall")
 
-add_executable(rdcmp_pdte_asm rdcmp_pdte_asm.cpp)
-target_include_directories(rdcmp_pdte_asm PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/CMP/include)
-target_link_libraries (rdcmp_pdte_asm SEAL::seal libcmp.so)
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
 
-add_executable(cdcmp_pdte_asm cdcmp_pdte_asm.cpp)
-target_include_directories(cdcmp_pdte_asm PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/CMP/include)
-target_link_libraries (cdcmp_pdte_asm SEAL::seal libcmp.so)
+file(GLOB SOURCE_FILES "${PROJECT_SOURCE_DIR}/src/*.cc")
 
-add_executable(tecmp_pdte_esm tecmp_pdte_esm.cpp)
-target_include_directories(tecmp_pdte_esm PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/CMP/include)
-target_link_libraries (tecmp_pdte_esm SEAL::seal libcmp.so)
+set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
-add_executable(tecmp_norm_pdte_esm tecmp_norm_pdte_esm.cpp)
-target_include_directories(tecmp_norm_pdte_esm PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/CMP/include)
-target_link_libraries (tecmp_norm_pdte_esm SEAL::seal libcmp.so)
+add_library(pdte SHARED ${SOURCE_FILES})
 
-add_executable(rdcmp_pdte_esm rdcmp_pdte_esm.cpp)
-target_include_directories(rdcmp_pdte_esm PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/CMP/include)
-target_link_libraries (rdcmp_pdte_esm SEAL::seal libcmp.so)
+target_include_directories(pdte PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_link_libraries(pdte PUBLIC SEAL::seal)
 
-add_executable(cdcmp_pdte_esm cdcmp_pdte_esm.cpp)
-target_include_directories(cdcmp_pdte_esm PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/CMP/include)
-target_link_libraries (cdcmp_pdte_esm SEAL::seal libcmp.so)
+set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR})
+install(TARGETS pdte LIBRARY DESTINATION lib)
 
-add_executable(new_tree_and_data new_tree_and_data.cpp)
-target_include_directories(new_tree_and_data PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/CMP/include)
-target_link_libraries(new_tree_and_data SEAL::seal libcmp.so)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+set(TEST_SOURCES 
+    cmp_main.cc 
+    cmp_test.cc 
+    lhe_depth_test.cc 
+    lhe_test.cc 
+    pdte_main.cc 
+    serial_test.cc
+)
+
+foreach(source_file ${TEST_SOURCES})
+
+    get_filename_component(exe_name ${source_file} NAME_WE)
+    
+    if(EXISTS ${PROJECT_SOURCE_DIR}/${source_file})
+        add_executable(${exe_name} ${source_file})
+        
+        target_include_directories(${exe_name} PRIVATE ${PROJECT_SOURCE_DIR}/include)
+        
+        target_link_libraries(${exe_name} pdte SEAL::seal)
+        
+        set_target_properties(${exe_name} PROPERTIES 
+            BUILD_WITH_INSTALL_RPATH TRUE
+            INSTALL_RPATH "${PROJECT_SOURCE_DIR}/lib"
+        )
+        
+        message(STATUS "Created build target: ${exe_name}")
+    endif()
+endforeach()
