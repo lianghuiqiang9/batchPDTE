@@ -5,7 +5,6 @@
 #include <string>
 #include <memory>  
 #include <cmath> 
-#include "lhe.h"
 #include "cmp.h"
 
 class Rdcmp : public CMP {

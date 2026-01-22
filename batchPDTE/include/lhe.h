@@ -11,7 +11,6 @@ using namespace seal;
 class LHE {
 public:
     string scheme;
-    uint8_t scheme_id; // 
     uint64_t depth;
     vector<int> steps;
 
@@ -21,16 +20,14 @@ public:
     unique_ptr<Encryptor> encryptor;
     unique_ptr<Evaluator> evaluator;
     unique_ptr<BatchEncoder> batch_encoder;
+    unique_ptr<Decryptor> decryptor;
+
     RelinKeys rlk;
     GaloisKeys gal_keys;
     
     uint64_t log_poly_mod_degree;
     uint64_t plain_modulus;
     uint64_t slot_count;
-    
-
-    LHE(string scheme, int depth = 3, vector<int> steps = vector<int>{});
-
 
     ~LHE() = default;
 
@@ -46,11 +43,11 @@ public:
 
     int get_noise_budget(const Ciphertext& ct);
 
-    void mod_switch(Ciphertext& ct1, Ciphertext& ct2);
+    virtual void mod_switch(Ciphertext& ct1, Ciphertext& ct2) = 0;
 
-    void mod_switch(const Ciphertext& ct, Plaintext& pt);
+    virtual void mod_switch(const Ciphertext& ct, Plaintext& pt) = 0;
 
-    void print();
+    virtual void print() = 0;
 
     Ciphertext multiply_plain(const Ciphertext& ct, Plaintext& pt);
 
@@ -93,9 +90,6 @@ public:
     void negate_inplace(Ciphertext& ct);
 
     void negate(Ciphertext& ct1, Ciphertext& ct2);
-
-private:
-    unique_ptr<Decryptor> decryptor;
 
 };
 

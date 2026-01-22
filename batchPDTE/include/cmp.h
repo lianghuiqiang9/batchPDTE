@@ -6,13 +6,12 @@
 #include <string>
 #include <memory>
 #include "lhe.h"
-
-using namespace std;
-using namespace seal;
+#include "bfv.h"
+#include "bgv.h"
 
 class CMP {
 public:
-    string name;
+    string scheme;
     int n;
     uint64_t num_cmps;
     uint64_t slot_count;

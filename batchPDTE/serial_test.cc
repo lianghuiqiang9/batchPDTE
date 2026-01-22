@@ -10,7 +10,7 @@ using namespace std;
 
 // g++ -o serial_test -O3 serial_test.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1
 
-// ./serial_test -i ./data/heart_11bits -o ./data/heart_11bits_temp -r 16
+// ./serial_test -i ./data/heart_11bits -o ./data/heart_11bits_temp -d 16
 
 int main(int argc, char* argv[]){
     string input_address;
@@ -21,7 +21,7 @@ int main(int argc, char* argv[]){
         switch (opt) {
         case 'i': input_address = string(optarg); break;
         case 'o': output_address = string(optarg); break;
-        case 'r': data_rows = atoi(optarg); break;
+        case 'd': data_rows = atoi(optarg); break;
         }
     }
 

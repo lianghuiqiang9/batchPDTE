@@ -1,10 +1,10 @@
 
 # build
 
-g++ -o cmp_main -O3 cmp_main.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1 -L ./build -lpdte -Wl,-rpath,./lib
+g++ -o cmp_main -O3 cmp_main.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1 -L ./build -lpdte -Wl,-dpath,./lib
 
 
-g++ -o pdte_main -O3 pdte_main.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1 -L ./build -lpdte -Wl,-rpath,./lib
+g++ -o pdte_main -O3 pdte_main.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1 -L ./build -lpdte -Wl,-dpath,./lib
 
 
 # heart_11bits
@@ -14,22 +14,22 @@ g++ -o pdte_main -O3 pdte_main.cc -I ./include -I /usr/local/include/SEAL-4.1 -l
 
 # pdte
 
-./pdte_main -i ./data/heart_11bits -r 2048 -t 0 -l 8 -m 2 -n 16 -e 0 
+./pdte_main -i ./data/heart_11bits -d 2048 -l 8 -m 2 -n 16 -c 0 -e 0 
 
-./pdte_main -i ./data/heart_11bits -r 512 -t 1 -l 8 -m 2 -n 16 -e 0
+./pdte_main -i ./data/heart_11bits -d 512 -l 8 -m 2 -n 16 -c 1 -e 0
 
-./pdte_main -i ./data/heart_11bits -r 8191 -t 2 -l 8 -m 2 -n 16 -e 0
+./pdte_main -i ./data/heart_11bits -d 8191 -l 8 -m 2 -n 16 -c 2 -e 0
 
-./pdte_main -i ./data/breast_11bits -r 2048 -t 0 -l 8 -m 2 -n 16 -e 0
+./pdte_main -i ./data/breast_11bits -d 2048 -l 8 -m 2 -n 16 -c 0 -e 0
 
 # pdte-esm
 
-./pdte_main -i ./data/heart_11bits -r 1024 -t 0 -l 4 -m 4 -n 16 -e 7 -s 1
+./pdte_main -i ./data/heart_11bits -d 1024 -l 4 -m 4 -n 16 -c 0 -e 7 -p 1
 
-./pdte_main -i ./data/heart_11bits -r 256 -t 1 -l 8 -m 2 -n 16 -e 4 -s 1
+./pdte_main -i ./data/heart_11bits -d 256 -l 8 -m 2 -n 16 -c 1 -e 4 -p 1
 
-./pdte_main -i ./data/heart_11bits -r 256 -t 2 -l 8 -m 2 -n 16 -e 4 -s 1
+./pdte_main -i ./data/heart_11bits -d 256 -l 8 -m 2 -n 16 -c 2 -e 4 -p 1
 
-./pdte_main -i ./data/breast_11bits -r 1024 -t 0 -l 8 -m 2 -n 16 -e 5 -s 1
+./pdte_main -i ./data/breast_11bits -d 1024 -l 8 -m 2 -n 16 -c 0 -e 5 -p 1
 
 

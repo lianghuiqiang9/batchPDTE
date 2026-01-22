@@ -6,7 +6,6 @@
 #include <string>
 #include <memory>  
 #include <cmath> 
-#include "lhe.h"
 #include "cmp.h"
 
 class Cdcmp : public CMP{

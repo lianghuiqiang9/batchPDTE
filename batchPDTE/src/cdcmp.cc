@@ -1,14 +1,14 @@
 #include"cdcmp.h"
 
 Cdcmp::Cdcmp(int l, int m, int n, int tree_depth, int extra) {
-    this->name = "cdcmp";
+    this->scheme = "cdcmp";
     this->n = n;
 
     int cmp_depth_need =  static_cast<int>(std::ceil(std::log2(n)) + 1);
     int tree_depth_need = (tree_depth == 0) ? 0 : static_cast<int>(std::ceil(std::log2(tree_depth)) + 1);
-    int total_depth = cmp_depth_need + tree_depth_need + extra;
+    depth = cmp_depth_need + tree_depth_need + extra;
 
-    this->lhe = make_unique<LHE>("bfv", total_depth);
+    this->lhe = make_unique<BFV>(depth);
 
     slot_count = lhe->slot_count;
     row_count = slot_count / 2;
@@ -208,7 +208,8 @@ vector<vector<uint64_t>> Cdcmp::random_raw_encode_a() {
 }
 
 void Cdcmp::print() {
-    cout << " name                                     : " << name
+    cout << " name                                     : " << scheme
+            << " \n lhe name                                 : "<< lhe->scheme          
             << " \n max depth                                : "<< depth
             << " \n bit precision (n)                        : "<< n 
             << " \n compare number                           : "<< num_cmps
