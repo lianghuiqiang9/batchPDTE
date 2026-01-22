@@ -54,7 +54,7 @@ vector<vector<Ciphertext>> PDTE::encode_data(const vector<vector<uint64_t>>& dat
     for(size_t i = 0; i < len; i++){        
         auto raw_encode_data = cmp->raw_encode_b(data_trans[i]);
         auto cmp_encode_data = cmp->encode_b(raw_encode_data);
-        client_input[i] = cmp->encrypt(cmp_encode_data)
+        client_input[i] = cmp->encrypt(cmp_encode_data);
     }
     return client_input;
 }

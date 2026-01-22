@@ -6,25 +6,33 @@ BFV::BFV( int depth, vector<int> steps) {
         this->depth = depth;
         this->steps = steps;
 
+/////////////////////////////////
         uint64_t log_poly_mod_degree = 13;
         uint64_t prime_bitlength = 17;
         vector<int> bits;
-
-        if (depth <= 4) {
+        if (depth <=1){
+            log_poly_mod_degree = 12;
+            prime_bitlength = 16;
+            bits = vector<int>{36, 36, 37}; 
+        }else if (depth <= 4) {
+            log_poly_mod_degree = 13;
+            prime_bitlength = 17;
             bits = vector<int>{43, 43, 44, 44, 44}; 
 
         } else if (depth <= 8) {
+            log_poly_mod_degree = 14;
+            prime_bitlength = 17;
             bits = vector<int>{ 48, 48, 48, 48, 48, 48, 48 }; 
 
         } else if (depth <= 12){
             log_poly_mod_degree = 14;
+            prime_bitlength = 17;
             bits = vector<int>{48, 48, 48, 49, 49, 49, 49, 49, 49}; 
-
         } else{
             cout<<" the max depth is large than 12, should choose params manually"<<endl;
             exit(0);
         }
-
+/////////////////////////////////
 
         auto coeff_modulus = CoeffModulus::Create(1 << log_poly_mod_degree, bits);
 

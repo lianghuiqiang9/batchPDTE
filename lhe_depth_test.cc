@@ -6,21 +6,22 @@
 
 // g++ -o lhe_depth_test -O3 lhe_depth_test.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1
 
-// ./lhe_depth_test -t 0
+// ./lhe_depth_test -t 0 -d 2
 
 int main(int argc, char* argv[]) {
 
     cout << "--- Initializing LHE System ---" << endl;
-    const int depth = 12;
+    int depth = 12;
     const vector<int> steps;
 
     int opt;
     int lhe_type = 0;
     unique_ptr<LHE> lhe;
 
-    while ((opt = getopt(argc, argv, "ft:")) != -1) {
+    while ((opt = getopt(argc, argv, "ft:d:")) != -1) {
         switch (opt) {
         case 't': lhe_type = atoi(optarg); break;
+        case 'd': depth = atoi(optarg); break;
         }
     }
     switch (lhe_type) {
@@ -89,7 +90,16 @@ int main(int argc, char* argv[]) {
         }
     }
 
+        auto &coeff_modulus = lhe->parms.coeff_modulus();
+        vector<uint64_t> q_vec(coeff_modulus.size());
+        for (size_t i = 0; i < coeff_modulus.size(); i++) {
+            q_vec[i] = log2(coeff_modulus[i].value())+1;
+        }
 
+cout<<   "lhe params: "
+    << "\n N: "<< (1<<lhe->log_poly_mod_degree)
+    << ",\n p: "<< lhe->plain_modulus
+    << ",\n"; print_vec(q_vec, q_vec.size()," q:");
 
     return 0;
 }

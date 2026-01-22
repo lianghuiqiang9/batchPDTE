@@ -107,6 +107,7 @@ public:
     uint64_t poly_modulus_degree;
     uint64_t row_count;
     int n;
+    int depth = 1;
     int hamming_weight;
     int code_length = 1;
     uint64_t num_slots_per_element;
@@ -144,23 +145,60 @@ public:
         n = nn;
         hamming_weight = hw;
 
-        uint64_t prime_bitlength=20;
+/////////////////////////////////
         switch (comparison) {
             case RANGE_COVER:
-                if (2<=hamming_weight && hamming_weight<=4) this->log_poly_mod_degree=13;
-                if (hamming_weight==1) this->log_poly_mod_degree=12;
+
+                if (2<=hamming_weight && hamming_weight<=4){
+                    depth = 4;
+                } 
+
+                if (hamming_weight>4){
+                    depth = 8;
+                }
+
                 break;
             case FOLKLORE:
-                log_poly_mod_degree=14;
+                depth = log2(n) + 1;
                 break;
             case XCMP:
-                log_poly_mod_degree=13;
-                prime_bitlength=18;
                 if (n<=12){
-                    log_poly_mod_degree=12;                    
-                    prime_bitlength=16;
+                    depth = 1;
+                }else{
+                    depth = 4;
                 }
+                break;
         }
+/////////////////////////////////
+
+/////////////////////////////////
+        log_poly_mod_degree = 13;
+        uint64_t prime_bitlength = 17;
+        vector<int> bits;
+
+        if (depth <=1){
+            log_poly_mod_degree = 12;
+            prime_bitlength = 16;
+            bits = vector<int>{36, 36, 37}; 
+        }else if (depth <= 4) {
+            log_poly_mod_degree = 13;
+            prime_bitlength = 17;
+            bits = vector<int>{43, 43, 44, 44, 44}; 
+
+        } else if (depth <= 8) {
+            log_poly_mod_degree = 14;
+            prime_bitlength = 17;
+            bits = vector<int>{ 48, 48, 48, 48, 48, 48, 48 }; 
+
+        } else if (depth <= 12){
+            log_poly_mod_degree = 14;
+            prime_bitlength = 17;
+            bits = vector<int>{48, 48, 48, 49, 49, 49, 49, 49, 49}; 
+        } else{
+            cout<<" the max depth is large than 12, should choose params manually"<<endl;
+            exit(0);
+        }
+////////////////////////////////
 
         poly_modulus_degree=1<<log_poly_mod_degree;
         row_count=poly_modulus_degree/2;
@@ -169,7 +207,7 @@ public:
         parms = EncryptionParameters(scheme_type::bfv);
         parms.set_poly_modulus_degree(poly_modulus_degree);
         parms.set_plain_modulus(PlainModulus::Batching(poly_modulus_degree, prime_bitlength));
-        parms.set_coeff_modulus(get_coeff_modulus(poly_modulus_degree));
+        parms.set_coeff_modulus(CoeffModulus::Create(1 << log_poly_mod_degree, bits));
         context = new SEALContext(parms);
         
         
@@ -198,9 +236,13 @@ public:
         plain_modulus = parms.plain_modulus().value();
         inv = mod_inverse(poly_modulus_degree, plain_modulus);
 
-        srand(time(NULL));
-        plain_op = rand() % ((uint64_t)1 << n);
-        encrypted_op = rand() % ((uint64_t)1 << n);
+        static std::random_device rd;
+        static std::mt19937_64 gen(rd());
+        uint64_t max_val = (n >=64) ? ~0ULL : (1ULL << n) - 1;
+        std::uniform_int_distribution<uint64_t> dis(0, max_val);
+
+        plain_op = dis(gen);
+        encrypted_op = dis(gen);
         cout<<"plain_op = "<<plain_op<<" encrypted_op = "<<encrypted_op<<endl;
 
     }
@@ -472,7 +514,7 @@ public:
 
         // batch_encoder->encode(vector<uint64_t>(poly_modulus_degree, 1), a);
 
-        const auto &neg_b = client_input;//引用名
+        const auto &neg_b = client_input;
         Plaintext one("1");
         Ciphertext eq, gt;
         evaluator->add_plain(neg_b, a, eq);//a-b
@@ -497,17 +539,16 @@ public:
             evaluator->rotate_rows(comparisonResult, i, *gal_keys_server, eqShifts[i]);//进行移位
         }
 
-        evaluator->add_many(eqShifts, comparisonResult);//进行累加
+        evaluator->add_many(eqShifts, comparisonResult);
         evaluator->mod_switch_to_next_inplace(comparisonResult);
 
         cmp_comm+=comparisonResult.save(folklore_send);
 
-        Plaintext pt;//解密得到结果
+        Plaintext pt;
         decryptor->decrypt(comparisonResult, pt);
         vector<uint64_t> res;
         batch_encoder->decode(pt, res);
         this->correct = (res[n] == (encrypted_op <= plain_op));
-
 
     }
 
@@ -630,6 +671,19 @@ public:
 
         timer.end();
 
+        auto &coeff_modulus = parms.coeff_modulus();
+        vector<uint64_t> q_vec(coeff_modulus.size());
+        for (size_t i = 0; i < coeff_modulus.size(); i++) {
+            q_vec[i] = log2(coeff_modulus[i].value())+1;
+        }
+
+cout<<   "lhe params: "
+    << ",\n N: "<< (1<<log_poly_mod_degree)
+    << ",\n p: "<< plain_modulus
+    << ",\n q: ["; for(auto e:q_vec){cout<<e<<" ";}
+cout<< "],\n";
+
+
 cout<<    " decrypt result res[0] == b > a            : "<< correct 
     << ",\n bit precision                             : "<< n 
     << ",\n compare number                            : "<< num_cmps 
@@ -665,7 +719,7 @@ int main(int argc, char* argv[]) {
     ComparisonBenchmark* bench;
     //for (int run=0;run<runs;run++){
         //for (int n=10;n<=11;n+=2){
-            cout<<"0 - "<<pow(2,n)<<endl;
+            cout<<"0 - 2^"<<n<<endl;
 
             if (n<=36){
                 bench = new ComparisonBenchmark();
@@ -677,16 +731,18 @@ int main(int argc, char* argv[]) {
                 delete bench;
             }
 
-            for (uint64_t hw: {2,4,8,16,32}){
-                if ((float)n/hw>=9) continue;
-                if (2*hw>=n+1) continue;
-                cout<<"****************** RCC start ******************"<<endl;
-                cout<<"n = "<<n<<" hw = "<<hw<<endl;
-                bench = new ComparisonBenchmark();
-                bench->init(RANGE_COVER, n, hw);
-                bench->batched_comparison();
-                cout<<"****************** RCC end ******************"<<endl;
-                delete bench;
+            if (n<=128){
+                for (uint64_t hw: {2,4,8,16,32,64}){
+                    if ((float)n/hw>=9) continue;
+                    if (2*hw>=n+1) continue;
+                    cout<<"****************** RCC start ******************"<<endl;
+                    cout<<"n = "<<n<<" hw = "<<hw<<endl;
+                    bench = new ComparisonBenchmark();
+                    bench->init(RANGE_COVER, n, hw);
+                    bench->batched_comparison();
+                    cout<<"****************** RCC end ******************"<<endl;
+                    delete bench;
+                }
             }
 
             cout<<"****************** FOLKLORE start ******************"<<endl;
