@@ -49,13 +49,12 @@ vector<vector<uint64_t>> PDTE::load_data(string filename, int data_rows){
 // client
 vector<vector<Ciphertext>> PDTE::encode_data(const vector<vector<uint64_t>>& data){
     auto data_trans = transpose(data);
-
-    vector<vector<Ciphertext>> client_input;
-    for(size_t i = 0; i < data_trans.size(); i++){        
+    size_t len = data_trans.size();
+    vector<vector<Ciphertext>> client_input(len);
+    for(size_t i = 0; i < len; i++){        
         auto raw_encode_data = cmp->raw_encode_b(data_trans[i]);
         auto cmp_encode_data = cmp->encode_b(raw_encode_data);
-        auto cmp_encode_data_cipher = cmp->encrypt(cmp_encode_data);
-        client_input.push_back(cmp_encode_data_cipher);
+        client_input[i] = cmp->encrypt(cmp_encode_data)
     }
     return client_input;
 }
