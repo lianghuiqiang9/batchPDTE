@@ -1,6 +1,6 @@
 #include"tecmp.h"
 
-Tecmp::Tecmp(int l, int m, int n, int tree_depth, int extra, uint8_t id) {
+Tecmp::Tecmp(int l, int m, int n, int extra, uint8_t id) {
     this->scheme = "tecmp";
     this->id = id;
     this->l = l;
@@ -12,11 +12,17 @@ Tecmp::Tecmp(int l, int m, int n, int tree_depth, int extra, uint8_t id) {
         cout<<" l should be 2^x, error"<<endl;
         exit(0);
     }
-    int tree_depth_need = (tree_depth == 0) ? 0 : static_cast<int>(std::ceil(std::log2(tree_depth)));
-    depth = cmp_depth_need + tree_depth_need + extra;
+    depth = cmp_depth_need + extra;
     //cout<<"depth: "<<depth<<endl;
 
-    this->lhe = make_unique<BFV>(depth);
+    std::vector<int> steps;
+    if (m <= 4){
+        for (int i = 1; i <= pow(2,m); i++) { // 1, 2, 3, ..., 2^m
+            steps.push_back(i);
+        }
+    }
+
+    this->lhe = make_unique<BFV>(depth, steps);
 
     if (m >= int(this->lhe->log_poly_mod_degree - 1)) {
         cout<< m <<" " << this->lhe->log_poly_mod_degree<<endl;

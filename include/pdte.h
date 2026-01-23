@@ -17,7 +17,7 @@ struct LeafFlatten {
 class PDTE {
     public:
     string scheme;
-    int tree_depth = 10;        // set it first
+    int tree_depth = 8;        // set it first
     int data_cols;
     int data_rows;
     unique_ptr<CMP> cmp;
@@ -33,7 +33,7 @@ class PDTE {
     shared_ptr<Node> load_tree(string filename);
 
     // client
-    void setup_cmp(int cmp_type, int l, int m, int n = 0, int extra = 0);
+    virtual void setup_cmp(int cmp_type, int l, int m, int n = 0, int extra = 0) = 0;
 
     // client
     vector<vector<uint64_t>> load_data(string filename, int data_rows);
@@ -52,8 +52,12 @@ class PDTE {
     vector<Ciphertext> sum_path(shared_ptr<Node> root, vector<vector<Ciphertext>>& data_cipher, LeafFlatten& leaf_flatten);
 
     void clear_up(vector<vector<Ciphertext>>& result);
+
+    long keys_size();
     
-    long communication_cost(const vector<vector<Ciphertext>>& ct1, const vector<vector<Ciphertext>>& ct2);
+    long comm_cost(const vector<vector<Ciphertext>>& ct1, const vector<vector<Ciphertext>>& ct2);
+
+    long comm_cost_estimate(const vector<vector<Ciphertext>>& ct1, const vector<vector<Ciphertext>>& ct2);
 
     virtual vector<uint64_t> recover(vector<vector<Ciphertext>>& a) = 0;
 

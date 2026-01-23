@@ -134,6 +134,8 @@ public:
 
 
     long cmp_comm=0;
+    std::stringstream data_stream;
+    Timer timer;
 
     bool correct;
 
@@ -145,6 +147,7 @@ public:
         n = nn;
         hamming_weight = hw;
 
+        // estimate the depth
 /////////////////////////////////
         switch (comparison) {
             case RANGE_COVER:
@@ -171,6 +174,7 @@ public:
         }
 /////////////////////////////////
 
+        // choose the params from the depth.
 /////////////////////////////////
         log_poly_mod_degree = 13;
         uint64_t prime_bitlength = 17;
@@ -248,9 +252,9 @@ public:
     }
 
     void range_cover_compare(){
-        stringstream rcc_send;
         cmp_comm=0;
 
+        // init the data ************************************************
         uint64_t num_cmps_per_row = row_count/num_slots_per_element;
         this->num_cmps = 2*num_cmps_per_row;
         code_length = find_code_length(n, hamming_weight);
@@ -266,10 +270,8 @@ public:
             server_values.push_back(plain_op);
         }
 
-        // Ciphertext ct;
-        // encryptor->encrypt(Plaintext("1"), ct);
-        // vector<Ciphertext> client_input(code_length, ct);
-        
+        // client encode ************************************************
+
         vector<Ciphertext> client_input(code_length);
         vector<vector<vector<uint64_t>>> codes;
 
@@ -296,8 +298,6 @@ public:
 
         }
 
-        /////
-        // Constructing plaintexts/ciphertexts from the bits of the range codes
         for (int i = 0; i < code_length; ++i) {
             vector<uint64_t> pod_matrix(poly_modulus_degree, 0ULL);
             for (int k = 0; k < codes.size(); k++) {
@@ -318,12 +318,12 @@ public:
         }
 
         for(auto e:client_input){
-            cmp_comm+=e.save(rcc_send);
+            cmp_comm+=e.save(data_stream);
         }
 
+        // server encode ************************************************
         vector<Plaintext> cts_range_bits_pathcode_vec;
 
-        // inner is the array from previous code
         vector<vector<uint64_t>> paths(num_cmps_per_row, vector<uint64_t>());
 
         for (int i=0; i < num_cmps_per_row; i++) {
@@ -337,7 +337,6 @@ public:
 
         uint64_t m = code_length;
 
-        // middle is for array in old code
         std::vector<std::vector<std::vector<uint64_t>>> pathcodes;
 
         for (int j = 0; j < num_cmps_per_row; ++j) {
@@ -349,8 +348,6 @@ public:
             }
             pathcodes.push_back(pathcode);
         }
-
-        // std::vector<Plaintext> cts_range_bits_pathcode;
 
         Plaintext plain_matrix;
         // Ciphertext ct;
@@ -370,9 +367,10 @@ public:
             cts_range_bits_pathcode_vec.push_back(plain_matrix);
         }
 
-        // Constant-weight Comparison
-        ////////////////
+        // greater than ************************************************
 
+        timer.start();
+        // Constant-weight Comparison
             vector<Ciphertext> operands;
             //sum x[i]*y[i]
             //#pragma omp parallel for
@@ -430,7 +428,7 @@ public:
                 result_cts = cts_ops[0];
             }
 
-        ////////////////
+
 
         Ciphertext batchedComparison=result_cts;
 
@@ -445,8 +443,11 @@ public:
 
         Ciphertext comparisonResult;
         evaluator->add_many(ops, comparisonResult);
-        
-        cmp_comm+=comparisonResult.save(rcc_send);
+
+        timer.end();
+        cmp_comm+=comparisonResult.save(data_stream);
+
+        // client decrypt ************************************************
 
         Plaintext pt;
         decryptor->decrypt(comparisonResult, pt);
@@ -460,8 +461,10 @@ public:
 
     void folklore_compare(){
         // 14 20 48
-        stringstream folklore_send;
+
         cmp_comm=0;
+
+        // init the data ************************************************
 
         uint64_t num_cmps_per_row = row_count/num_slots_per_element;
         this->num_cmps = poly_modulus_degree/num_slots_per_element;
@@ -473,6 +476,12 @@ public:
             attribute_vector.push_back(encrypted_op);
         }
 
+        vector<uint64_t> server_values;
+        for (int i = 0; i < num_cmps_per_row; i++) {
+            server_values.push_back(plain_op);
+        }
+
+        // client encode ************************************************
         Ciphertext client_input;
         Plaintext plaintext; 
         {
@@ -488,14 +497,9 @@ public:
         }
         encryptor->encrypt(plaintext, client_input);
 
-
-        cmp_comm+=client_input.save(folklore_send);
-
-        vector<uint64_t> server_values;
-        for (int i = 0; i < num_cmps_per_row; i++) {
-            server_values.push_back(plain_op);
-        }
+        cmp_comm+=client_input.save(data_stream);
         
+        //server encode ************************************************
 
         Plaintext a; 
         {
@@ -511,8 +515,8 @@ public:
             batch_encoder->encode(bit_reps, a);
         }
 
-
-        // batch_encoder->encode(vector<uint64_t>(poly_modulus_degree, 1), a);
+        // greater than ************************************************
+        timer.start();
 
         const auto &neg_b = client_input;
         Plaintext one("1");
@@ -541,8 +545,12 @@ public:
 
         evaluator->add_many(eqShifts, comparisonResult);
         evaluator->mod_switch_to_next_inplace(comparisonResult);
+        
+        timer.end();
+        cmp_comm+=comparisonResult.save(data_stream);
+        
 
-        cmp_comm+=comparisonResult.save(folklore_send);
+        //client decrypt ************************************************
 
         Plaintext pt;
         decryptor->decrypt(comparisonResult, pt);
@@ -553,6 +561,7 @@ public:
     }
 
     void xcmp(Ciphertext enc_a, uint64_t b, Ciphertext& dest) {
+        
         // SEAL does not support multiplying plain zero polynomial, hence the case split
         if(b < poly_modulus_degree - 1) {
             Plaintext T(poly_modulus_degree - b);
@@ -605,15 +614,11 @@ public:
     }
 
     void xcmp_compare(){
-        stringstream xcmp_send;
+
         cmp_comm=0;
 
-        this->num_cmps = 1;
-        
-        uint64_t b0 = plain_op % poly_modulus_degree;
-        uint64_t b1 = (plain_op / poly_modulus_degree) % poly_modulus_degree;
-        uint64_t b2 = (plain_op / poly_modulus_degree / poly_modulus_degree) % poly_modulus_degree;
-
+        // init the data ************************************************
+        // client encode ************************************************
         auto encode = [](uint64_t n) {
             return (n == 0 ? string("1") : "1x^" + to_string(n));
         };
@@ -626,6 +631,16 @@ public:
         encryptor->encrypt(pt2, enc_a2);
         encryptor->encrypt(pt1, enc_a1);
         encryptor->encrypt(pt0, enc_a0);
+
+        // server encode ************************************************
+        this->num_cmps = 1;
+        uint64_t b0 = plain_op % poly_modulus_degree;
+        uint64_t b1 = (plain_op / poly_modulus_degree) % poly_modulus_degree;
+        uint64_t b2 = (plain_op / poly_modulus_degree / poly_modulus_degree) % poly_modulus_degree;
+        
+        // great than ************************************************
+        timer.start();
+
         Ciphertext ans;
         if(n <= 12) {
             xcmp(enc_a0, b0, ans);
@@ -638,10 +653,12 @@ public:
         } else {
             throw "bitlength too large";
         }
+        timer.end();
 
-        cmp_comm+=enc_a2.save(xcmp_send)*code_length;
-        cmp_comm+=ans.save(xcmp_send);
+        cmp_comm+=enc_a2.save(data_stream)*code_length;
+        cmp_comm+=ans.save(data_stream);
 
+        // client decrypt ************************************************
         Plaintext pt;
         decryptor->decrypt(ans, pt);
         correct = (pt.data()[0] == (encrypted_op > plain_op));
@@ -653,8 +670,6 @@ public:
 
         Ciphertext comparisonResult;
 
-        Timer timer;
-        timer.start();
         //clock_t start=clock();
 
         switch (comparison){
@@ -668,8 +683,6 @@ public:
                 xcmp_compare();
                 break;
         }
-
-        timer.end();
 
         auto &coeff_modulus = parms.coeff_modulus();
         vector<uint64_t> q_vec(coeff_modulus.size());
@@ -687,7 +700,7 @@ cout<< "],\n";
 cout<<    " decrypt result res[0] == b > a            : "<< correct 
     << ",\n bit precision                             : "<< n 
     << ",\n compare number                            : "<< num_cmps 
-    << ",\n overall time cost                         : "<< timer.get_time_in_microseconds()    
+    << ",\n cmp time cost                             : "<< timer.get_time_in_microseconds()    
     << " \\mus\n overall comm. cost                        : "<< cmp_comm/1000 
     << " KB\n amortized time cost                       : "<< (float)timer.get_time_in_microseconds()/num_cmps 
     << " \\mus\n amortized comm. cost                      : "<< (float)cmp_comm/1000 /num_cmps <<" KB"

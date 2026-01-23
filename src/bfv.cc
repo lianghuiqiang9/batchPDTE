@@ -1,10 +1,6 @@
 #include"bfv.h"
 
-BFV::BFV( int depth, vector<int> steps) {
-        this->parms = EncryptionParameters(scheme_type::bfv);
-        this->scheme = "bfv";
-        this->depth = depth;
-        this->steps = steps;
+BFV::BFV( int depth, vector<int> steps, bool is_rotate) {
 
 /////////////////////////////////
         uint64_t log_poly_mod_degree = 13;
@@ -33,7 +29,10 @@ BFV::BFV( int depth, vector<int> steps) {
             exit(0);
         }
 /////////////////////////////////
-
+        this->parms = EncryptionParameters(scheme_type::bfv);
+        this->scheme = "bfv";
+        this->depth = depth;
+        this->steps = steps;
         auto coeff_modulus = CoeffModulus::Create(1 << log_poly_mod_degree, bits);
 
         this->log_poly_mod_degree = log_poly_mod_degree;
@@ -43,12 +42,19 @@ BFV::BFV( int depth, vector<int> steps) {
 
         context = make_shared<SEALContext>(parms);
         KeyGenerator keygen(*context);
-        PublicKey pk;
         keygen.create_public_key(pk);
         keygen.create_relin_keys(rlk);
         
-        // vector<uint32_t> elts = { 3, 9, 27 }; // for steps: 1, 2, 3
-        steps.size() == 0 ? keygen.create_galois_keys(gal_keys) : keygen.create_galois_keys(steps, gal_keys);
+        // vector<uint32_t> elts = { 3, 9, 27 }; // for steps: 1, 2, 3          
+        if (is_rotate){
+            if(steps.size() == 0){
+                keygen.create_galois_keys(gal_keys);
+            }else{
+                auto elts = context->key_context_data()->galois_tool()->get_elts_from_steps(steps);
+                keygen.create_galois_keys(elts, gal_keys);
+            }
+        }
+             
         
         encryptor = make_unique<Encryptor>(*context, pk);
         decryptor = make_unique<Decryptor>(*context, keygen.secret_key());
@@ -69,13 +75,23 @@ void BFV::mod_switch(const Ciphertext& ct, Plaintext& pt) {
 
 }
 
+Plaintext BFV::decrypt(const Ciphertext& ct){
+    Plaintext pt;
+    decryptor->decrypt(ct, pt);
+    return pt;
+}
+
+int BFV::get_noise_budget(const Ciphertext& ct) {
+    return decryptor->invariant_noise_budget(ct);
+}
+
 void BFV::print(){
     cout << "System Parameters:" << endl;
     cout << "  - Scheme:        " << scheme << endl;
     cout << "  - Max Depth:     " << depth << endl;
     cout << "  - Slots:         " << slot_count << endl;
     cout << "  - Plain Modulus: " << plain_modulus << endl;
-    cout << "  - Rotation Steps: [ "; 
+    cout << "  - Rotate Steps: [ "; 
                             for (auto e:this->steps){ cout << e << " "; } 
                                 cout <<" ]"<< endl;
 }

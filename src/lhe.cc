@@ -24,16 +24,6 @@ std::vector<uint64_t> LHE::decode(const Plaintext& pt){
     return a;
 }
 
-Plaintext LHE::decrypt(const Ciphertext& ct){
-    Plaintext pt;
-    decryptor->decrypt(ct, pt);
-    return pt;
-}
-
-int LHE::get_noise_budget(const Ciphertext& ct) {
-    return decryptor->invariant_noise_budget(ct);
-}
-
 Ciphertext LHE::multiply_plain(const Ciphertext& ct, Plaintext& pt){
     mod_switch(ct, pt);
 
@@ -155,4 +145,19 @@ void LHE::negate_inplace(Ciphertext& ct){
 
 void LHE::negate(Ciphertext& ct1, Ciphertext& ct2){
     evaluator->negate(ct1, ct2);
+}
+
+long LHE::rlk_size() {
+    std::stringstream data_stream;
+    return rlk.save(data_stream);
+}
+
+long LHE::pk_size() {
+    std::stringstream data_stream;
+    return pk.save(data_stream);
+}
+
+long LHE::glk_size() {
+    std::stringstream data_stream;
+    return gal_keys.save(data_stream);
 }

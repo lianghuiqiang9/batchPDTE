@@ -1,14 +1,24 @@
 #include"cdcmp.h"
 
-Cdcmp::Cdcmp(int l, int m, int n, int tree_depth, int extra) {
+Cdcmp::Cdcmp(int l, int m, int n, int extra) {
     this->scheme = "cdcmp";
     this->n = n;
 
-    int cmp_depth_need =  static_cast<int>(std::floor(std::log2(n)) + 1); // plus one for additive and rotate operation
-    int tree_depth_need = (tree_depth == 0) ? 0 : static_cast<int>(std::ceil(std::log2(tree_depth)));
-    depth = cmp_depth_need + tree_depth_need + extra;
+    int cmp_depth_need =  static_cast<int>(std::ceil(std::log2(n)) + 1); 
+    depth = cmp_depth_need + extra;
 
-    this->lhe = make_unique<BFV>(depth);
+    std::vector<int> steps;
+    for (int i = 1; i < n; i<<=1) { // 1, 2, 3, ..., 2^m
+        steps.push_back(i);
+    }
+    
+    cout<<" steps.size(): "<< steps.size() << endl;
+    for(auto e:steps){
+        cout<<e<<" ";
+    }
+    cout<<"steps"<<endl;
+
+    this->lhe = make_unique<BFV>(depth, steps);
 
     slot_count = lhe->slot_count;
     row_count = slot_count / 2;

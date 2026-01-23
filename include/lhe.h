@@ -20,8 +20,8 @@ public:
     unique_ptr<Encryptor> encryptor;
     unique_ptr<Evaluator> evaluator;
     unique_ptr<BatchEncoder> batch_encoder;
-    unique_ptr<Decryptor> decryptor;
 
+    PublicKey pk;
     RelinKeys rlk;
     GaloisKeys gal_keys;
     
@@ -39,9 +39,9 @@ public:
 
     std::vector<uint64_t> decode(const Plaintext& pt);
 
-    Plaintext decrypt(const Ciphertext& ct);
+    virtual Plaintext decrypt(const Ciphertext& ct) = 0;
 
-    int get_noise_budget(const Ciphertext& ct);
+    virtual int get_noise_budget(const Ciphertext& ct) = 0;
 
     virtual void mod_switch(Ciphertext& ct1, Ciphertext& ct2) = 0;
 
@@ -90,6 +90,11 @@ public:
     void negate_inplace(Ciphertext& ct);
 
     void negate(Ciphertext& ct1, Ciphertext& ct2);
+
+    long rlk_size();
+    long pk_size();
+    long glk_size();
+
 
 };
 

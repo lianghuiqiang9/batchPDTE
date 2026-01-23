@@ -11,7 +11,7 @@ class Rdcmp : public CMP {
 public:
     Plaintext one_one_zero;
 
-    Rdcmp(int l, int m, int n, int tree_depth = 0, int extra = 0);
+    Rdcmp(int l, int m, int n, int extra = 0);
 
     ~Rdcmp() override = default;
 

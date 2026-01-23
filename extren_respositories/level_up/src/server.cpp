@@ -598,7 +598,7 @@ void TreeEvaluationServer::respond_to_classification(
 ){
 
     // Setting threads
-    if (query_parameters->num_threads == 0) query_parameters->num_threads = 1;//omp_get_max_threads();
+    if (query_parameters->num_threads > 0) query_parameters->num_threads = 1;//omp_get_max_threads();
     //omp_set_num_threads(query_parameters->num_threads);
     if (_verbose)
         cout << "\tNumber of Threads: " << query_parameters->num_threads << endl

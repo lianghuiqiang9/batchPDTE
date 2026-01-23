@@ -15,6 +15,7 @@ class ESM : public PDTE {
     // server
     LeafFlatten encode_tree(shared_ptr<Node> root) override ;
 
+    void setup_cmp(int cmp_type, int l, int m, int n, int extra = 0);
     // server
     vector<vector<Ciphertext>> evaluate(shared_ptr<Node> root, vector<vector<Ciphertext>>& data_cipher, LeafFlatten& leaf_flatten) override ;
 

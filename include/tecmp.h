@@ -18,7 +18,7 @@ public:
     Ciphertext one_zero_zero_cipher;
     vector<uint64_t> index_map;
 
-    Tecmp(int l, int m, int n = 0, int tree_depth = 0, int extra = 0, uint8_t id = 0x1);
+    Tecmp(int l, int m, int n = 0, int extra = 0, uint8_t id = 0x1);
 
     ~Tecmp() = default;
 

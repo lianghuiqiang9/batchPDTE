@@ -53,9 +53,15 @@ public:
 
     bool verify(const vector<bool>& actural_result, const vector<uint64_t>& result);
 
-    long communication_cost(const vector<Ciphertext>& ct1, const Ciphertext& ct2);
+    long keys_size();
 
-    long communication_cost(const Ciphertext& ct1, const Ciphertext& ct2);
+    long comm_cost(const vector<Ciphertext>& ct1, const Ciphertext& ct2);
+
+    long comm_cost(const Ciphertext& ct1, const Ciphertext& ct2);
+
+    long comm_cost_estimate(const vector<Ciphertext>& ct1, const Ciphertext& ct2);
+
+    long comm_cost_estimate(const Ciphertext& ct1, const Ciphertext& ct2);
 
 };
 

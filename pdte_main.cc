@@ -69,14 +69,15 @@ int main(int argc, char* argv[]){
     auto actural_result = root->eval(data);
     auto is_correct = pdte->verify(expect_result, actural_result);
 
-    long comm = pdte->communication_cost(data_cipher, result);
+    long comm = pdte->comm_cost(data_cipher, result);
 
     pdte->print();
     cout<< " pdte result is correct                   : "<< is_correct 
         << " \n input_address                            : "<<input_address
         << " \n data_rows                                : "<< data_rows
-        << " \n overall time cost                        : "<< finish/1000     
-        << " ms\n overall comm. cost                       : "<< comm/1024 
+        << " \n keys size                                : "<< pdte->keys_size()/1024
+        << " kB\n evaluate time cost                       : "<< finish/1000     
+        << " ms\n evaluate comm. cost                      : "<< comm/1024 
         << " kB\n amortized time cost                      : "<< finish/1024/data_rows 
         << " ms\n amortized comm. cost                     : "<< comm/1024 /data_rows 
         << " kB"<< endl;

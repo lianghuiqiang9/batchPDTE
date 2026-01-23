@@ -36,7 +36,6 @@ g++ -o cmp_main -O3 cmp_main.cc -I ./include -I /usr/local/include/SEAL-4.1 -lse
 
 g++ -o pdte_main -O3 pdte_main.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1 -L ./build -lpdte -Wl,-dpath,./lib
 
-
 # heart_11bits
 # breast_11bits
 # spam_11bits

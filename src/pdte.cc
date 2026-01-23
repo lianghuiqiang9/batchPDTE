@@ -9,24 +9,7 @@ shared_ptr<Node> PDTE::load_tree(string filename){
     return root;
 }
 
-// client
-void PDTE::setup_cmp(int cmp_type, int l, int m, int n, int extra){
-    switch (cmp_type) {
-        case 0: cmp = make_unique<Tecmp>(l, m, n, tree_depth, extra); break;
-        case 1: cmp = make_unique<Cdcmp>(l, m, n, tree_depth, extra); break;
-        case 2: cmp = make_unique<Rdcmp>(l, m, n, tree_depth, extra);break;
-    }
 
-    batch_size = cmp->num_cmps;
-    lhe = cmp->lhe;
-
-    vector<uint64_t> one(cmp->slot_count, 1ULL);
-    one_one_one = lhe->encode(one);
-
-    vector<uint64_t> zero(cmp->slot_count, 0ULL);
-    zero_zero_zero = lhe->encrypt(zero);
-
-}
 
 // client
 vector<vector<uint64_t>> PDTE::load_data(string filename, int data_rows){
@@ -138,7 +121,27 @@ void PDTE::clear_up(vector<vector<Ciphertext>>& result) {
     } 
 }
 
-long PDTE::communication_cost(const vector<vector<Ciphertext>>& ct1, const vector<vector<Ciphertext>>& ct2) {
+long PDTE::keys_size(){
+    return cmp->keys_size();
+}
+
+long PDTE::comm_cost(const vector<vector<Ciphertext>>& ct1, const vector<vector<Ciphertext>>& ct2) {
+    std::stringstream data_stream;
+    long comm = 0;
+    for(const auto& cte : ct1){
+        for(const auto& e : cte){
+            comm += e.save(data_stream);
+        }
+    } 
+    for(const auto& cte : ct2){
+        for(const auto& e : cte){
+            comm += e.save(data_stream);
+        }
+    } 
+    return comm;
+}
+
+long PDTE::comm_cost_estimate(const vector<vector<Ciphertext>>& ct1, const vector<vector<Ciphertext>>& ct2) {
     long comm = 0;
     for(const auto& cte : ct1){
         for(const auto& e : cte){

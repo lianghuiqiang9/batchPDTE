@@ -420,8 +420,9 @@ bool Client::end_to_end_evaluation(QueryParameters* query_parameters,
              << endl
              << "\tData Independant: " << comm_relin / 1000 << " KB (Relin keys) + "
              << comm_gals / 1000 << " KB (Gal Keys)" << endl
-             << "\tData Dependant: " << comm_query / 1000 << " KB (Query) + "
-             << comm_response / 1000 << " KB (Reponse)" << endl
+             << "\tData Dependant: " << comm_query / 1024 << " KB (Query) + "
+             << comm_response / 1024 << " KB (Reponse) = " << (comm_query + comm_response) / 1024
+             << " KB (Total)" << endl
              << endl
              << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
                 "<<<<<<<<<<<<<<<<<<<<<<"

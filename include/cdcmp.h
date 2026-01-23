@@ -16,7 +16,7 @@ public:
     //Ciphertext one_zero_zero_cipher;
     vector<uint64_t> index_map;
 
-    Cdcmp(int l, int m, int n, int tree_depth = 0, int extra = 0);
+    Cdcmp(int l, int m, int n, int extra = 0);
 
     ~Cdcmp() = default;
 

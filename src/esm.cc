@@ -14,6 +14,26 @@ LeafFlatten ESM::encode_tree(shared_ptr<Node> root){
 
 }
 
+// client
+void ESM::setup_cmp(int cmp_type, int l, int m, int n, int extra){
+    switch (cmp_type) {
+        case 0: cmp = make_unique<Tecmp>(l, m, n, extra); break;
+        case 1: cmp = make_unique<Cdcmp>(l, m, n, extra); break;
+        case 2: cmp = make_unique<Rdcmp>(l, m, n, extra);break;
+    }
+
+    batch_size = cmp->num_cmps;
+    lhe = cmp->lhe;
+
+    vector<uint64_t> one(cmp->slot_count, 1ULL);
+    one_one_one = lhe->encode(one);
+
+    vector<uint64_t> zero(cmp->slot_count, 0ULL);
+    zero_zero_zero = lhe->encrypt(zero);
+
+}
+
+
 vector<vector<Plaintext>> ESM::init_salts(int row, int cols){
     std::random_device rd;  
     std::mt19937 gen(rd()); 

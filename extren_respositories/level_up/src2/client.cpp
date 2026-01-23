@@ -226,8 +226,9 @@ bool Client::run_protocol(const vector<uint64_t> &attr_vec, const Config &config
              << metrics->metrics_["comm_gal_keys"] / 1000000 << " MB (Gal Keys) + " 
              << metrics->metrics_["comm_pk"] / 1000 << " KB (Public Keys)" 
              << endl << "\tData Dependant: "
-             << metrics->metrics_["comm_request"] / 1000 << " KB (Query) + "
-             << metrics->metrics_["comm_response"] / 1000 << " KB (Reponse)" << endl
+             << metrics->metrics_["comm_request"] / 1024 << " KB (Query) + "
+             << metrics->metrics_["comm_response"] / 1024 << " KB (Reponse)  = " << (metrics->metrics_["comm_request"] + metrics->metrics_["comm_response"]) / 1024
+             << " KB (Total)" << endl
              << endl
              << string(88, '<')
              << endl;

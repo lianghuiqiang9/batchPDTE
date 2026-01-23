@@ -1,14 +1,14 @@
 #include"rdcmp.h"
 
-Rdcmp::Rdcmp(int l, int m, int n, int tree_depth, int extra) {
+Rdcmp::Rdcmp(int l, int m, int n, int extra) {
     this->scheme = "rdcmp";
     this->n = n;
 
-    int cmp_depth_need = static_cast<int>(std::floor(std::log2(n)) + 1); // plus one for additive operation
-    int tree_depth_need = (tree_depth == 0) ? 0 : static_cast<int>(std::ceil(std::log2(tree_depth)));
-    depth = cmp_depth_need + tree_depth_need + extra;
+    int cmp_depth_need = static_cast<int>(std::ceil(std::log2(n)) + 1); 
+    depth = cmp_depth_need + extra;
 
-    this->lhe = make_unique<BFV>(depth);
+    vector<int> steps;
+    this->lhe = make_unique<BFV>(depth, steps, false);
 
     slot_count = lhe->slot_count;
     row_count = slot_count / 2;

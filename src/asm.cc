@@ -13,6 +13,28 @@ LeafFlatten ASM::encode_tree(shared_ptr<Node> root){
     return leaf;
 }
 
+// client
+void ASM::setup_cmp(int cmp_type, int l, int m, int n, int extra){
+    
+    int log_tree_depth = (tree_depth <= 1) ? 0 : static_cast<int>(std::ceil(std::log2(tree_depth)));
+   
+    switch (cmp_type) {
+        case 0: cmp = make_unique<Tecmp>(l, m, n, log_tree_depth + extra); break;
+        case 1: cmp = make_unique<Cdcmp>(l, m, n, log_tree_depth + extra); break;
+        case 2: cmp = make_unique<Rdcmp>(l, m, n, log_tree_depth + extra);break;
+    }
+
+    batch_size = cmp->num_cmps;
+    lhe = cmp->lhe;
+
+    vector<uint64_t> one(cmp->slot_count, 1ULL);
+    one_one_one = lhe->encode(one);
+
+    vector<uint64_t> zero(cmp->slot_count, 0ULL);
+    zero_zero_zero = lhe->encrypt(zero);
+
+}
+
 // server
 
 vector<vector<Ciphertext>> ASM::evaluate(shared_ptr<Node> root, vector<vector<Ciphertext>>& data_cipher, LeafFlatten& leaf_flatten){

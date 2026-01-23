@@ -1,17 +1,11 @@
 #include"bgv.h"
 
-BGV::BGV(int depth, vector<int> steps) {
-    this->parms = EncryptionParameters(scheme_type::bgv);
-    this->scheme = "bgv";
-    this->depth = depth;
-    this->steps = steps;
+BGV::BGV(int depth, vector<int> steps, bool is_rotate) {
 
+    // this depth is for fresh ciphertext.
     uint64_t log_poly_mod_degree = 13;
     uint64_t prime_bitlength = 17;
     vector<int> bits;
-
-
-    // this depth is for fresh ciphertext.
     if (depth <= 4) {
         bits = {50, 30, 30, 30, 30, 40}; 
     } 
@@ -30,6 +24,12 @@ BGV::BGV(int depth, vector<int> steps) {
         cout<<" the max depth is large than 12, should choose params manually"<<endl;
         exit(0);
     }
+    
+    this->parms = EncryptionParameters(scheme_type::bgv);
+    this->scheme = "bgv";
+    this->depth = depth;
+    this->steps = steps;
+
 
     auto coeff_modulus = CoeffModulus::Create(1 << log_poly_mod_degree, bits);
 
@@ -40,13 +40,18 @@ BGV::BGV(int depth, vector<int> steps) {
 
     context = make_shared<SEALContext>(parms);
     KeyGenerator keygen(*context);
-    PublicKey pk;
     keygen.create_public_key(pk);
     keygen.create_relin_keys(rlk);
-    
-    // vector<uint32_t> elts = { 3, 9, 27 }; // for steps: 1, 2, 3
-    steps.size() == 0 ? keygen.create_galois_keys(gal_keys) : keygen.create_galois_keys(steps, gal_keys);
-    
+
+    if (is_rotate){
+        if(steps.size() == 0){
+            keygen.create_galois_keys(gal_keys);
+        }else{
+            auto elts = context->key_context_data()->galois_tool()->get_elts_from_steps(steps);
+            keygen.create_galois_keys(elts, gal_keys);
+        }
+    }
+
     encryptor = make_unique<Encryptor>(*context, pk);
     decryptor = make_unique<Decryptor>(*context, keygen.secret_key());
     evaluator = make_unique<Evaluator>(*context);
@@ -82,6 +87,16 @@ void BGV::mod_switch(const Ciphertext& ct, Plaintext& pt) {
             evaluator->mod_switch_to_inplace(pt, ct.parms_id());
         }
     }
+}
+
+Plaintext BGV::decrypt(const Ciphertext& ct){
+    Plaintext pt;
+    decryptor->decrypt(ct, pt);
+    return pt;
+}
+
+int BGV::get_noise_budget(const Ciphertext& ct) {
+    return decryptor->invariant_noise_budget(ct);
 }
 
 void BGV::print(){
