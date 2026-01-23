@@ -1,7 +1,8 @@
 
-# tecmp
-# cdcmp
-# rdcmp
+# cmp
+## tecmp
+## cdcmp
+## rdcmp
 
 ./cmp_main -c 0 -m 4 -l 2
 ./cmp_main -c 0 -m 4 -l 4
@@ -30,10 +31,15 @@
 ./cmp_main -c 2 -n 512
 ./cmp_main -c 2 -n 1024
 
-# heart_11bits
-# breast_11bits
-# spam_11bits
-# electricity_10bits
+# pdte
+## pdte-asm
+## pdte-esm
+
+# tree and data
+## heart_11bits
+## breast_11bits
+## spam_11bits
+## electricity_10bits
 
 # pdte-asm
 ./pdte_main -i ../data/heart_11bits -d 128 -l 2 -m 6
@@ -67,3 +73,8 @@
 ./pdte_main -i ../data/spam_11bits -d 256 -n 16 -c 2 -p 1 -e 6
 # ./pdte_main -i ../data/electricity_10bits -d 128 -n 16 -c 2 -p 1 -e 6
 
+# small batch size
+./pdte_main -i ../data/heart_11bits -d 128 -l 2 -m 6
+./pdte_main -i ../data/breast_11bits -d 128 -l 2 -m 6
+./pdte_main -i ../data/spam_11bits -d 128 -l 2 -m 6
+./pdte_main -i ../data/electricity_10bits -d 4 -l 1 -m 10
