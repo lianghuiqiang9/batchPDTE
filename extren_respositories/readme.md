@@ -1,12 +1,14 @@
 # note
 
-1. "batch_pdte_single_core" is our main work.
-
-2. "level_up_pdte_single_core" and "level_up_pdte_multi_core" from 
+1. "level_up" from
    https://github.com/RasoulAM/private-decision-tree-evaluation 
 
-   "sortinghat_pdte_single_core" from 
+   "sortinghat" from 
    https://github.com/KULeuven-COSIC/SortingHat
 
-   Only used to compare with our solution, we made modifications to the input and output, which did not affect the main performance.
+   "We utilized this version strictly for benchmarking. Although we adjusted the input and output components, these changes did not alter the primary performance characteristics."
 
+2. run
+
+./sortinghat/Readme.md
+./level_up/Readme.md
