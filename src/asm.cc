@@ -50,10 +50,6 @@ vector<vector<Ciphertext>> ASM::adapted_sum_path(vector<Ciphertext>& sum_path_re
     // [0, ..., d-1] --> [0,1]
     auto out_temp = map_to_boolean(sum_path_result);
 
-    // auto zero_temp_pt = lhe->decrypt(zero_zero_zero);
-    // auto zero_temp = lhe->decode(zero_temp_pt);
-    // print(zero_temp, 100, "zero_zero_zero: ");
-
     // pir
     auto out_temp1 = private_info_retrieval(out_temp, leaf_flatten.leaf_vec_pt, leaf_flatten.leaf_vec);
     
@@ -97,13 +93,11 @@ vector<Ciphertext> ASM::map_to_boolean(vector<Ciphertext>& a){
 Ciphertext ASM::private_info_retrieval(vector<Ciphertext> a, vector<Plaintext> b, vector<uint64_t> b_vec){
     for(size_t i = 0; i < a.size(); ++i){
         if(b_vec[i] != 0){ //seal ciphertext can not mult zero
-            //evaluator->multiply_plain_inplace(in_first[i],in_second[i]);
             lhe->multiply_plain_inplace(a[i], b[i]);
         }else{
             a[i] = zero_zero_zero;
         }
     }
-    //evaluator->add_many(in_first, out);
 
     return lhe->add_many(a);
 }

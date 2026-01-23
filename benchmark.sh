@@ -1,8 +1,4 @@
 
-# build
-
-g++ -o cmp_main -O3 cmp_main.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1 -L ./build -lpdte -Wl,-dpath,./lib
-
 # tecmp
 # cdcmp
 # rdcmp
@@ -34,31 +30,40 @@ g++ -o cmp_main -O3 cmp_main.cc -I ./include -I /usr/local/include/SEAL-4.1 -lse
 ./cmp_main -c 2 -n 512
 ./cmp_main -c 2 -n 1024
 
-g++ -o pdte_main -O3 pdte_main.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1 -L ./build -lpdte -Wl,-dpath,./lib
-
 # heart_11bits
 # breast_11bits
 # spam_11bits
 # electricity_10bits
 
-# pdte
+# pdte-asm
+./pdte_main -i ../data/heart_11bits -d 128 -l 2 -m 6
+./pdte_main -i ../data/breast_11bits -d 2048 -l 4 -m 3
+./pdte_main -i ../data/spam_11bits -d 2048 -l 4 -m 3
+./pdte_main -i ../data/electricity_10bits -d 2048 -l 4 -m 3
 
-./pdte_main -i ./data/heart_11bits -d 2048 -l 8 -m 2 -n 16 -c 0 -e 0 
+./pdte_main -i ../data/heart_11bits -d 1024 -n 16 -c 1
+./pdte_main -i ../data/breast_11bits -d 1024 -n 16 -c 1
+./pdte_main -i ../data/spam_11bits -d 1024 -n 16 -c 1
+./pdte_main -i ../data/electricity_10bits -d 1024 -n 16 -c 1
 
-./pdte_main -i ./data/heart_11bits -d 512 -l 8 -m 2 -n 16 -c 1 -e 0
-
-./pdte_main -i ./data/heart_11bits -d 8191 -l 8 -m 2 -n 16 -c 2 -e 0
-
-./pdte_main -i ./data/breast_11bits -d 2048 -l 8 -m 2 -n 16 -c 0 -e 0
+./pdte_main -i ../data/heart_11bits -d 16383 -n 16 -c 2 
+./pdte_main -i ../data/breast_11bits -d 16383 -n 16 -c 2 -e 1
+./pdte_main -i ../data/spam_11bits -d 16383 -n 16 -c 2
+./pdte_main -i ../data/electricity_10bits -d 16383 -n 16 -c 2 
 
 # pdte-esm
+./pdte_main -i ../data/heart_11bits -d 2048 -l 4 -m 3 -p 1 -e 9
+./pdte_main -i ../data/breast_11bits -d 2048 -l 4 -m 3 -p 1 -e 9
+./pdte_main -i ../data/spam_11bits -d 2048 -l 4 -m 3 -p 1 -e 9
+# ./pdte_main -i ../data/electricity_10bits -d 1024 -l 4 -m 3 -p 1 -e 9
 
-./pdte_main -i ./data/heart_11bits -d 1024 -l 4 -m 4 -n 16 -c 0 -e 6 -p 1
+./pdte_main -i ../data/heart_11bits -d 512 -n 16 -c 1 -p 1 -e 6
+./pdte_main -i ../data/breast_11bits -d 256 -n 16 -c 1 -p 1 -e 6
+./pdte_main -i ../data/spam_11bits -d 256 -n 16 -c 1 -p 1 -e 6
+# ./pdte_main -i ../data/electricity_10bits -d 256 -n 16 -c 1 -p 1 -e 6
 
-./pdte_main -i ./data/heart_11bits -d 256 -l 8 -m 2 -n 16 -c 1 -e 3 -p 1
-
-./pdte_main -i ./data/heart_11bits -d 256 -l 8 -m 2 -n 16 -c 2 -e 3 -p 1
-
-./pdte_main -i ./data/breast_11bits -d 1024 -l 8 -m 2 -n 16 -c 0 -e 4 -p 1
-
+./pdte_main -i ../data/heart_11bits -d 256 -n 16 -c 2 -p 1 -e 6
+./pdte_main -i ../data/breast_11bits -d 256 -n 16 -c 2 -p 1 -e 6
+./pdte_main -i ../data/spam_11bits -d 256 -n 16 -c 2 -p 1 -e 6
+# ./pdte_main -i ../data/electricity_10bits -d 128 -n 16 -c 2 -p 1 -e 6
 

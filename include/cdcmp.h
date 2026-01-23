@@ -26,21 +26,6 @@ public:
     // neg_b = [ 1 - b00, 1 - b01, 1 - b02, ..., 1 - b10, 1 - b11, 1 - b12, ...]
     vector<vector<uint64_t>> encode_b(const vector<vector<uint64_t>>& raw_b) override;
 
-    /*
-    vector<uint64_t> _encode_process(const vector<vector<uint64_t>>& raw_b){
-        auto b = raw_b[0];
-        vector<uint64_t> out(slot_count, 0ULL);     
-        size_t num_elements = std::min((size_t)num_cmps, b.size() / n);
-        for (size_t i = 0; i < num_elements; ++i) {
-            size_t target_base_pos = index_map[i];
-            size_t source_base_pos = i * n;
-            for (int j = 0; j < n; ++j) {
-                out[target_base_pos + j] = b[source_base_pos + j];
-            }
-        }
-        return out;
-    }
-    */
 
     vector<Ciphertext> encrypt(const vector<vector<uint64_t>>& raw_b) override;
 
@@ -56,6 +41,7 @@ public:
 
     Plaintext init_x_zero_zero(const vector<uint64_t>& salt) override;
 
+    // a > E(b)
     Ciphertext great_than(vector<Plaintext>& raw_a, vector<Ciphertext>& raw_b);
 
     void clear_up(Ciphertext& result) override;

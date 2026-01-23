@@ -2,20 +2,26 @@
 
 BGV::BGV(int depth, vector<int> steps, bool is_rotate) {
 
-    // this depth is for fresh ciphertext.
+    this->parms = EncryptionParameters(scheme_type::bgv);
+    this->scheme = "bgv";
+    this->steps = steps;
+/////////////////////////////////////
     uint64_t log_poly_mod_degree = 13;
     uint64_t prime_bitlength = 17;
     vector<int> bits;
     if (depth <= 4) {
+        this->depth = 4;
         bits = {50, 30, 30, 30, 30, 40}; 
     } 
     else if (depth <= 8) {
+        this->depth = 8;
         log_poly_mod_degree = 14;
         bits = vector<int>(depth + 2, 40);
         bits.front() = 50;
         bits.back() = 50; 
     } 
     else if (depth <= 12) {
+        this->depth = 12;
         log_poly_mod_degree = 15;
         bits = vector<int>(depth + 2, 45);
         bits.front() = 55;
@@ -24,12 +30,7 @@ BGV::BGV(int depth, vector<int> steps, bool is_rotate) {
         cout<<" the max depth is large than 12, should choose params manually"<<endl;
         exit(0);
     }
-    
-    this->parms = EncryptionParameters(scheme_type::bgv);
-    this->scheme = "bgv";
-    this->depth = depth;
-    this->steps = steps;
-
+////////////////////////////////
 
     auto coeff_modulus = CoeffModulus::Create(1 << log_poly_mod_degree, bits);
 

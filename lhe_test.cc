@@ -30,7 +30,6 @@ int main(int argc, char* argv[]) {
     const uint64_t slots = lhe->slot_count;
     const uint64_t mod = lhe->plain_modulus;
 
-
     vector<uint64_t> a(slots, 0);
     vector<uint64_t> b(slots, 0);
     for(size_t i = 0; i < slots; i++) {

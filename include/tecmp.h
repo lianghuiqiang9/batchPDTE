@@ -50,6 +50,7 @@ public:
 
     Plaintext init_x_zero_zero(const vector<uint64_t>& salt) override;
 
+    // a > E(b)
     Ciphertext great_than(vector<Plaintext>& pt_a, vector<Ciphertext>& b) override;
 
     void clear_up(Ciphertext& result) override;

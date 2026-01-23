@@ -54,18 +54,12 @@ vector<vector<Plaintext>> ESM::init_salts(int row, int cols){
 }
 
 // server
-
 vector<vector<Ciphertext>> ESM::evaluate(shared_ptr<Node> root, vector<vector<Ciphertext>>& data_cipher, LeafFlatten& leaf_flatten){
-    
     auto sum_path_result = sum_path(root, data_cipher, leaf_flatten);
-    
     return extended_sum_path(sum_path_result, leaf_flatten);
-    
 }
 
-
 vector<vector<Ciphertext>> ESM::extended_sum_path(vector<Ciphertext>& sum_path_result, LeafFlatten& leaf_flatten){
-
     // record the zero position
     vector<vector<Ciphertext>> out(2, vector<Ciphertext>(0));
     out[0] = sum_path_result;
@@ -102,7 +96,7 @@ vector<vector<Ciphertext>> ESM::shuffle(vector<vector<Ciphertext>> out, int leaf
     vector<Ciphertext> x_temp1(leaf_num);
     vector<Ciphertext> y_temp1(leaf_num);
 
-    cout<<"log_data_rows " <<log_data_rows<<endl;
+    cout<<"Shuffling, log_data_rows " <<log_data_rows<<endl;
     for(int i = 0; i < log_data_rows ; ++i){
         auto data_rows_perm = random_permutation(data_rows); //+ 1
 
@@ -115,7 +109,6 @@ vector<vector<Ciphertext>> ESM::shuffle(vector<vector<Ciphertext>> out, int leaf
                 W1[data_rows_perm[half_data_rows + j]] = 1;
             }
         }
-
 
         Plaintext W0_pt = cmp->init_x_zero_zero(W0);
         Plaintext W1_pt = cmp->init_x_zero_zero(W1);
@@ -143,11 +136,8 @@ vector<vector<Ciphertext>> ESM::shuffle(vector<vector<Ciphertext>> out, int leaf
             x[j] = std::move(x_temp1[j]);
             y[j] = std::move(y_temp1[j]);
         }
-
-        
     }
     return {std::move(x), std::move(y)};
-    
 }
 
 vector<uint64_t> ESM::recover(vector<vector<Ciphertext>>& a){
@@ -177,7 +167,6 @@ vector<uint64_t> ESM::recover(vector<vector<Ciphertext>>& a){
     }
     return out;
 }
-
 
 void ESM::print(){
     cout << " pdte name                                : " << scheme

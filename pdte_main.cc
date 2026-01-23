@@ -9,23 +9,16 @@
 #include"esm.h"
 using namespace std;
 
-// g++ -o pdte_main -O3 pdte_main.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1 -L ./lib -lpdte -Wl,-rpath,./lib
+// g++ -o pdte_main -O3 pdte_main.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1 -L ./build -lpdte -Wl,-dpath,./lib
 
-// ./pdte_main -i ./data/heart_11bits -d 2048 -l 8 -m 2 -n 16 -c 0 -e 0 -p 0
-
+// ./pdte_main -i ./data/heart_11bits -d 128 -l 2 -m 6
 
 int main(int argc, char* argv[]){
-    if (argc < 2) {
-        cout << "Need at least a model and data" << endl;
-        return -1;
-    }
+
     string input_address;
     int data_rows = 10;
-    int l =8, m = 2, n = 16;    // make sure l * m or n >= data_bit_length
-    int cmp_type = 0;
-    //int d;
-    int extra = 0;
-    int pdte_type = 0;
+    int l = 8, m = 2, n = 16;    // make sure l * m or n >= data_bit_length
+    int cmp_type = 0, pdte_type = 0, extra = 0;
     int opt;
     while ((opt = getopt(argc, argv, "fi:d:l:m:n:c:e:p:")) != -1) {
         switch (opt) {
@@ -39,16 +32,16 @@ int main(int argc, char* argv[]){
         case 'p': pdte_type = atoi(optarg);break;    
         }
     }
+
     // pdte setup
     unique_ptr<PDTE> pdte;
-
     switch (pdte_type) {
         case 0: pdte = make_unique<ASM>(); break;
         case 1: pdte = make_unique<ESM>(); break;
     }
 
     auto root = pdte->load_tree(input_address + "/model.json");
-    //root->print_tree();
+    // root->print_tree();
     pdte->setup_cmp(cmp_type, l, m, n, extra);
     auto leaf_flatten = pdte->encode_tree(root); 
 
@@ -56,11 +49,12 @@ int main(int argc, char* argv[]){
     //print_vec(data,pdte.data_cols,"data");
     auto data_cipher = pdte->encode_data(data);
 
-
     // evaluate
     vector<vector<Ciphertext>> result;
-    auto finish = profile("PDTE", [&]() { result = pdte->evaluate(root, data_cipher, leaf_flatten);});
-    pdte->clear_up(result);
+    auto finish = profile("PDTE", [&]() { 
+        result = pdte->evaluate(root, data_cipher, leaf_flatten);
+        pdte->clear_up(result);
+    });
 
     // recover
     auto expect_result = pdte->recover(result);
@@ -69,7 +63,8 @@ int main(int argc, char* argv[]){
     auto actural_result = root->eval(data);
     auto is_correct = pdte->verify(expect_result, actural_result);
 
-    long comm = pdte->comm_cost(data_cipher, result);
+    //long comm = pdte->comm_cost(data_cipher, result);
+    long comm = pdte->comm_cost_estimate(data_cipher, result);
 
     pdte->print();
     cout<< " pdte result is correct                   : "<< is_correct 

@@ -47,7 +47,6 @@ vector<uint64_t> rotate(const vector<uint64_t> &a, int k) {
 
     for (size_t i = 0; i < half; i++) {
         result[(i + half - s) % half] = a[i];
-        
         result[((i + half - s) % half) + half] = a[i + half];
     }
     
@@ -61,7 +60,6 @@ vector<vector<uint64_t>> transpose(const vector<vector<uint64_t>>& A) {
     size_t cols = A[0].size();
 
     vector<vector<uint64_t>> B(cols);
-
     for (size_t i = 0; i < cols; ++i) {
         B[i].resize(rows);
     }
@@ -114,10 +112,7 @@ uint64_t factorial(uint64_t n) {
     return n * factorial(n-1);
 }
 
-
-/*
-    return a ^ e mod n
-*/
+// a ^ e mod n
 uint64_t mod_exp(uint64_t a, uint64_t e, uint64_t n)
 {
     if (e == 0)
@@ -141,9 +136,9 @@ uint64_t prime_mod_inverse(uint64_t a, uint64_t n)
     return mod_exp(a, n - 2, n);
 }
 
+// \theta = 1 / d! \prod ^{d}_{i = 1) (i - x )
+// if i = {1,...,d}, the \theta = 0; if i = 0, the \theta = 1;    
 uint64_t d_factorial_inv_with_sign(uint64_t d, uint64_t mod){
-    // \theta_EQzero = 1 / d! \prod ^{d}_{i = 1) (i - x )
-    // i = 1...d, \theta_EQzero = 0; i = 0, \theta_EQzero = 1;    
     uint64_t d_factorial_inv = prime_mod_inverse(factorial(d), mod);
     uint64_t d_factorial_inv_with_sign = (d % 2) ? mod - d_factorial_inv : d_factorial_inv;
     return d_factorial_inv_with_sign;

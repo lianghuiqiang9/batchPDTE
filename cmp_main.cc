@@ -30,8 +30,6 @@ int main(int argc, char* argv[]) {
         case 2: cmp = make_unique<Rdcmp>(l, m, n);break;
     }
     auto num_cmps = cmp->num_cmps;
-    //auto raw_encode_a = cmp->random_raw_encode_a();
-    //auto raw_encode_b = cmp->random_raw_encode_b();
 
     vector<vector<uint64_t>> raw_encode_a;
     vector<vector<uint64_t>> raw_encode_b;
@@ -52,16 +50,17 @@ int main(int argc, char* argv[]) {
         print_vec(raw_encode_a, 10, "raw_encode_a: ");
     }
 
-
     auto cmp_encode_a = cmp->encode_a(raw_encode_a);
     auto cmp_encode_b = cmp->encode_b(raw_encode_b);
     auto cmp_encode_b_cipher = cmp->encrypt(cmp_encode_b);
     
     //cmp
     Ciphertext result;
-    auto finish = profile("CMP", [&]() { result = cmp->great_than(cmp_encode_a, cmp_encode_b_cipher);});
+    auto finish = profile("CMP", [&]() { 
+        result = cmp->great_than(cmp_encode_a, cmp_encode_b_cipher);
+        cmp->clear_up(result);
+    });
     
-    cmp->clear_up(result);
     auto expect_result = cmp->recover(result);
     auto actural_result = cmp->verify(raw_encode_a, raw_encode_b);
 
@@ -79,5 +78,4 @@ int main(int argc, char* argv[]) {
         << " kB\n amortized time cost                      : "<< (float)finish/1024/num_cmps 
         << " ms\n amortized comm. cost                     : "<< (float)comm/1024/num_cmps 
         << " kB" << endl;
-
 }

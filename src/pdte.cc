@@ -96,16 +96,18 @@ vector<Ciphertext> PDTE::sum_path(shared_ptr<Node> root, vector<vector<Ciphertex
             //      c
             //  r      1-r
             //  r+c    1-r+c
-            node->right->value = cmp->great_than(node->cmp_encode_threshold, data_cipher[node->index]);
-
+            if (node->threshold == 0){
+                node->right->value = zero_zero_zero;
+            }else{
+                node->right->value = cmp->great_than(node->cmp_encode_threshold, data_cipher[node->index]);
+            }
+            
             lhe->negate(node->right->value, node->left->value);
             lhe->add_plain_inplace(node->left->value, one_one_one);
             lhe->add_inplace(node->left->value, node->value);
             lhe->add_inplace(node->right->value, node->value);
 
-
             stk.push(StackFrame{ node, true });
-
             stk.push(StackFrame{ node->right.get(), false });
             stk.push(StackFrame{ node->left.get(), false });
         }

@@ -12,12 +12,6 @@ Cdcmp::Cdcmp(int l, int m, int n, int extra) {
         steps.push_back(i);
     }
     
-    cout<<" steps.size(): "<< steps.size() << endl;
-    for(auto e:steps){
-        cout<<e<<" ";
-    }
-    cout<<"steps"<<endl;
-
     this->lhe = make_unique<BFV>(depth, steps);
 
     slot_count = lhe->slot_count;

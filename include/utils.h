@@ -25,7 +25,6 @@ void print_vec(const std::vector<T> &vec, size_t k, std::string name = "Resutl: 
     }
 
     k = std::min(k, vec.size());
-    
     cout << name << " [ ";
     for (size_t i = 0; i < k; i++) {
         cout << vec[i] << (i == k - 1 ? "" : ", ");
@@ -47,14 +46,6 @@ void print_vec(const std::vector<std::vector<T>> &matrix, size_t k, std::string 
     }
 }
 
-/*
-template <typename T>
-void print(const T &a, size_t k = 1, std::string name = "Result") {
-    
-    cout << "[ "<< a << " ] (first " << k << " slots):" << endl;
-
-}
-*/
 vector<uint64_t> add(const vector<uint64_t> &a, const vector<uint64_t> &b, uint64_t mod);
 
 vector<uint64_t> mul(const vector<uint64_t> &a, const vector<uint64_t> &b, uint64_t mod);

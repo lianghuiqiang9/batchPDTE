@@ -17,7 +17,7 @@ int main(int argc, char* argv[]){
     string output_address;
     int data_rows = 10;
     int opt;
-    while ((opt = getopt(argc, argv, "ft:i:o:s:")) != -1) {
+    while ((opt = getopt(argc, argv, "ft:i:o:d:")) != -1) {
         switch (opt) {
         case 'i': input_address = string(optarg); break;
         case 'o': output_address = string(optarg); break;

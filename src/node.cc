@@ -150,9 +150,6 @@ void eval_rec(uint64_t &out, const Node& node, const vector<uint64_t> &features,
     }
 }
 
-
-
-
 vector<vector<uint64_t>> load_matrix(string filename, int data_size){
     vector<vector<uint64_t>> data;
     ifstream file(filename);

@@ -3,7 +3,6 @@
 bool CMP::verify(const vector<bool>& actural_result, const vector<uint64_t>& result){
     for(uint64_t i = 0;i < num_cmps; ++i){
         //cout<<"actural_result: "<<actural_result[i]<< " result: "<<result[i]<<endl;
-        
         if (actural_result[i]!=(result[i]==1)){
             return false;
         }

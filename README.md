@@ -1,12 +1,12 @@
 
-# build
+# ======================= Quick Start =======================
 
 mkdir build
 cd build
 make
 make install
 
-# run
+# =========================== Run ===========================
 
 ./lhe_test -t 0
 
@@ -20,20 +20,64 @@ make install
 
 ./pdte_main -i ../data/heart_11bits -d 1024 -l 8 -m 2 -n 16 -c 0 -e 5 -p 1
 
-# the params setting
-1. -l 
-2. -m
-3. -n
-4. -c
-5. -
+# ==================== Parameter Settings ====================
 
-# benchmark
+1.  -i  [Path]
+        The directory path containing the decision tree model and the dataset.
+
+2.  -d  [Batch Size]
+        The number of input data rows for batch evaluation.
+
+3.  -l  [TE Expansion Factor]
+        Controls the number of ciphertexts in TEcmp; 
+        The total bit length is (l * m).
+
+4.  -m  [TE Encoding Length]
+        Controls the encoding granularity in TEcmp; 
+        The total bit length is (l * m).
+
+5.  -n  [Bit Precision]
+        Specifies the bit length used in RDcmp and CDcmp.
+
+6.  -c  [Comparison Mode]
+        Select the comparison algorithm:
+        0: TEcmp (Threshold Encoding Comparison)
+        1: CDcmp (Coefficient Decomposition Comparison)
+        2: RDcmp (Range Decomposition Comparison)
+
+7.  -e  [Reserved Depth]
+        The extra multiplicative depth reserved after the comparison step.
+
+8.  -p  [Evaluation Strategy]
+        Select the Private Decision Tree Evaluation (PDTE) method:
+        0: PDTE with ASM (Adapted Sum Path)
+        1: PDTE with ESM (Extended Sum Path)
+
+9.  -t  [Scheme Type]
+        Select the underlying Homomorphic Encryption scheme:
+        0: BFV
+        1: BGV
 
 
-# the comparison
+# ======================== Benchmark =========================
 
-cd level_up_bench
+For detailed instructions on running the performance benchmarks, 
+please refer to the execution sequences documented in:
+./benchmark.sh
 
-cd ..
+This script contains the automated terminal commands required to 
+evaluate the throughput and latency of the privCMP and PDTE system.
 
-cd sortinghat_bench
+
+# ==================== Comparison Protocols ==================
+
+Detailed terminal commands and environment setup for the 
+baseline comparison protocols can be found in the following 
+sub-repositories:
+
+1.  Level Up Comparison:
+    Location: ./extern_respositories/level_up/Readme.md
+
+2.  SortingHat Comparison:
+    Location: ./extern_respositories/sortinghat/Readme.md
+
