@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(pdte)
+project(bpdte)
 
 find_package(SEAL 4.1 REQUIRED)
 
@@ -18,13 +18,13 @@ file(GLOB SOURCE_FILES "${PROJECT_SOURCE_DIR}/src/*.cc")
 
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
-add_library(pdte SHARED ${SOURCE_FILES})
+add_library(bpdte SHARED ${SOURCE_FILES})
 
-target_include_directories(pdte PUBLIC ${PROJECT_SOURCE_DIR}/include)
-target_link_libraries(pdte PUBLIC SEAL::seal)
+target_include_directories(bpdte PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_link_libraries(bpdte PUBLIC SEAL::seal)
 
 set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR})
-install(TARGETS pdte LIBRARY DESTINATION lib)
+install(TARGETS bpdte LIBRARY DESTINATION lib)
 
 
 set(TEST_SOURCES 
@@ -32,7 +32,7 @@ set(TEST_SOURCES
     cmp_test.cc 
     lhe_depth_test.cc 
     lhe_test.cc 
-    pdte_main.cc 
+    bpdte_main.cc 
     serial_test.cc
 )
 
@@ -45,7 +45,7 @@ foreach(source_file ${TEST_SOURCES})
         
         target_include_directories(${exe_name} PRIVATE ${PROJECT_SOURCE_DIR}/include)
         
-        target_link_libraries(${exe_name} pdte SEAL::seal)
+        target_link_libraries(${exe_name} bpdte SEAL::seal)
         
         set_target_properties(${exe_name} PROPERTIES 
             BUILD_WITH_INSTALL_RPATH TRUE

@@ -1,7 +1,7 @@
 #include"esm.h"
 
 ESM::ESM(){
-    scheme = "pdte_esm";
+    scheme = "bpdte_esm";
 }
 
 // server
@@ -166,12 +166,4 @@ vector<uint64_t> ESM::recover(vector<vector<Ciphertext>>& a){
         //exit(0);
     }
     return out;
-}
-
-void ESM::print(){
-    cout << " pdte name                                : " << scheme
-            << " \n cmp info" << endl;
-    cmp->print();
-    cout << endl;
-
 }

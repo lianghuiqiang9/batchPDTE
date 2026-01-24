@@ -16,9 +16,9 @@ make install
 
 ./serial_test -i ../data/heart_11bits -o ../data/heart_11bits_temp -d 16
 
-./pdte_main -i ../data/heart_11bits -d 2048 -l 8 -m 2 -n 16 -c 0 -e 0 -p 0
+./bpdte_main -i ../data/heart_11bits -d 2048 -l 8 -m 2 -n 16 -c 0 -e 0 -p 0
 
-./pdte_main -i ../data/heart_11bits -d 1024 -l 8 -m 2 -n 16 -c 0 -e 5 -p 1
+./bpdte_main -i ../data/heart_11bits -d 1024 -l 8 -m 2 -n 16 -c 0 -e 5 -p 1
 
 # ==================== Parameter Settings ====================
 
@@ -49,9 +49,9 @@ make install
         The extra multiplicative depth reserved after the comparison step.
 
 8.  -p  [Evaluation Strategy]
-        Select the Private Decision Tree Evaluation (PDTE) method:
-        0: PDTE with ASM (Adapted Sum Path)
-        1: PDTE with ESM (Extended Sum Path)
+        Select the Private Decision Tree Evaluation (bpdte) method:
+        0: bpdte with ASM (Adapted Sum Path)
+        1: bpdte with ESM (Extended Sum Path)
 
 9.  -t  [Scheme Type]
         Select the underlying Homomorphic Encryption scheme:
@@ -66,7 +66,7 @@ please refer to the execution sequences documented in:
 ./benchmark.sh
 
 This script contains the automated terminal commands required to 
-evaluate the throughput and latency of the privCMP and PDTE system.
+evaluate the throughput and latency of the privCMP and bpdte system.
 
 
 # ==================== Comparison Protocols ==================

@@ -4,7 +4,7 @@
 #include"utils.h"
 #include<unistd.h>
 
-// g++ -o cmp_main -O3 cmp_main.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1 -L ./lib -lpdte -Wl,-rpath,./lib
+// g++ -o cmp_main -O3 cmp_main.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1 -L ./lib -lbpdte -Wl,-rpath,./lib
 
 // ./cmp_main -m 8 -l 2 -n 16 -c 0
 

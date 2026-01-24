@@ -1,7 +1,7 @@
 #include"asm.h"
 
 ASM::ASM(){
-    scheme = "pdte_asm";
+    scheme = "bpdte_asm";
 }
 // server
 LeafFlatten ASM::encode_tree(shared_ptr<Node> root){
@@ -107,11 +107,3 @@ vector<uint64_t> ASM::recover(vector<vector<Ciphertext>>& a){
     return cmp->recover(a[0][0]);
 }
 
-
-void ASM::print(){
-    cout << " pdte name                                : " << scheme
-            << " \n cmp info" << endl;
-    cmp->print();
-    cout << endl;
-
-}

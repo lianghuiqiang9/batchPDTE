@@ -1,10 +1,10 @@
 #ifndef __ASM__
 #define __ASM__
 
-#include"pdte.h"
+#include"bpdte.h"
 using namespace std;
 
-class ASM : public PDTE {
+class ASM : public BPDTE {
     public:
 
     //asm
@@ -34,7 +34,6 @@ class ASM : public PDTE {
 
     vector<uint64_t> recover(vector<vector<Ciphertext>>& a) override;
 
-    void print() override;
 };
 
 

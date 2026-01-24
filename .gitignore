@@ -1,8 +1,13 @@
 
 cmp_main
-pdte_main
+bpdte_main
 lhe_test
 lhe_depth_test
 serial_test
 lib/*
 build/*
+output.txt
+output_cmp.txt
+output_pdte.txt
+output_bpdte.txt
+output_run.txt

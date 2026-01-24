@@ -40,9 +40,13 @@ void print_vec(const std::vector<std::vector<T>> &matrix, size_t k, std::string 
     if (matrix.size()==0){
         return;
     }
+    auto limit = matrix.size()>100? 100 : matrix.size();
     cout << name;
-    for (size_t i = 0;i<matrix.size();i++){
+    for (size_t i = 0;i < limit;i++){
         print_vec(matrix[i], k, "");
+    }
+    if (matrix.size()>100){
+        cout<< "..., "<<matrix.size()<<" rows." <<endl;
     }
 }
 

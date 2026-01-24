@@ -1,18 +1,17 @@
-#include"pdte.h"
+#include"bpdte.h"
 
 
 
 //server
-shared_ptr<Node> PDTE::load_tree(string filename){
+shared_ptr<Node> BPDTE::load_tree(string filename){
     auto root = std::make_shared<Node>(filename);
     tree_depth = root->get_depth(); // only for tree_depth 
     return root;
 }
 
 
-
 // client
-vector<vector<uint64_t>> PDTE::load_data(string filename, int data_rows){
+vector<vector<uint64_t>> BPDTE::load_data(string filename, int data_rows){
     this->data_rows = data_rows;
     auto data = load_matrix(filename, data_rows);
     
@@ -30,7 +29,7 @@ vector<vector<uint64_t>> PDTE::load_data(string filename, int data_rows){
 }
 
 // client
-vector<vector<Ciphertext>> PDTE::encode_data(const vector<vector<uint64_t>>& data){
+vector<vector<Ciphertext>> BPDTE::encode_data(const vector<vector<uint64_t>>& data){
     auto data_trans = transpose(data);
     size_t len = data_trans.size();
     vector<vector<Ciphertext>> client_input(len);
@@ -43,7 +42,7 @@ vector<vector<Ciphertext>> PDTE::encode_data(const vector<vector<uint64_t>>& dat
 }
 
 // server
-LeafFlatten PDTE::raw_encode_tree(shared_ptr<Node> root){
+LeafFlatten BPDTE::raw_encode_tree(shared_ptr<Node> root){
     stack<StackFrame> stk;
     stk.push({root.get()});
 
@@ -75,7 +74,7 @@ LeafFlatten PDTE::raw_encode_tree(shared_ptr<Node> root){
     return LeafFlatten{leaf_vec, leaf_vec_pt};
 }
 
-vector<Ciphertext> PDTE::sum_path(shared_ptr<Node> root, vector<vector<Ciphertext>>& data_cipher, LeafFlatten& leaf_flatten){
+vector<Ciphertext> BPDTE::sum_path(shared_ptr<Node> root, vector<vector<Ciphertext>>& data_cipher, LeafFlatten& leaf_flatten){
     vector<Ciphertext> out;
     root->value = zero_zero_zero;
     stack<StackFrame> stk;
@@ -115,7 +114,7 @@ vector<Ciphertext> PDTE::sum_path(shared_ptr<Node> root, vector<vector<Ciphertex
     return out;
 }
 
-void PDTE::clear_up(vector<vector<Ciphertext>>& result) {
+void BPDTE::clear_up(vector<vector<Ciphertext>>& result) {
     for(size_t i = 0; i < result.size(); ++i){
         for(size_t j = 0; j < result[0].size(); ++j){
             cmp->clear_up(result[i][j]);
@@ -123,11 +122,11 @@ void PDTE::clear_up(vector<vector<Ciphertext>>& result) {
     } 
 }
 
-long PDTE::keys_size(){
+long BPDTE::keys_size(){
     return cmp->keys_size();
 }
 
-long PDTE::comm_cost(const vector<vector<Ciphertext>>& ct1, const vector<vector<Ciphertext>>& ct2) {
+long BPDTE::comm_cost(const vector<vector<Ciphertext>>& ct1, const vector<vector<Ciphertext>>& ct2) {
     std::stringstream data_stream;
     long comm = 0;
     for(const auto& cte : ct1){
@@ -143,7 +142,7 @@ long PDTE::comm_cost(const vector<vector<Ciphertext>>& ct1, const vector<vector<
     return comm;
 }
 
-long PDTE::comm_cost_estimate(const vector<vector<Ciphertext>>& ct1, const vector<vector<Ciphertext>>& ct2) {
+long BPDTE::comm_cost_estimate(const vector<vector<Ciphertext>>& ct1, const vector<vector<Ciphertext>>& ct2) {
     long comm = 0;
     for(const auto& cte : ct1){
         for(const auto& e : cte){
@@ -158,7 +157,7 @@ long PDTE::comm_cost_estimate(const vector<vector<Ciphertext>>& ct1, const vecto
     return comm;
 }
 
-bool PDTE::verify(const vector<uint64_t>& result, shared_ptr<Node> root, const vector<vector<uint64_t>>& data){
+bool BPDTE::verify(const vector<uint64_t>& result, shared_ptr<Node> root, const vector<vector<uint64_t>>& data){
     auto actural_result = root->eval(data);
     for(size_t i = 0; i < actural_result.size(); ++i){
         
@@ -169,8 +168,8 @@ bool PDTE::verify(const vector<uint64_t>& result, shared_ptr<Node> root, const v
     return true;
 }
 
-bool PDTE::verify(const vector<uint64_t>& expect_result, const vector<uint64_t>& actural_result){
-    //print_vec(expect_result, expect_result.size(),         "pdte_result   : ");
+bool BPDTE::verify(const vector<uint64_t>& expect_result, const vector<uint64_t>& actural_result){
+    //print_vec(expect_result, expect_result.size(),         "bpdte_result   : ");
     //print_vec(actural_result, actural_result.size(), "actural_result: ");
     
     for(size_t i = 0; i < actural_result.size(); ++i){
@@ -179,4 +178,10 @@ bool PDTE::verify(const vector<uint64_t>& expect_result, const vector<uint64_t>&
         }
     }
     return true;
+}
+
+void BPDTE::print(){
+    cmp->print();
+    cout << " name                                     : " << cmp->scheme+"_"+scheme <<endl;
+    cout << " tree depth                               : " << tree_depth <<endl;
 }

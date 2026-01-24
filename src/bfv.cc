@@ -90,7 +90,7 @@ int BFV::get_noise_budget(const Ciphertext& ct) {
 }
 
 void BFV::print(){
-    cout << "System Parameters:" << endl;
+    cout << "LHE Parameters:" << endl;
     cout << "  - Scheme:        " << scheme << endl;
     cout << "  - Max Depth:     " << depth << endl;
     cout << "  - Slots:         " << slot_count << endl;

@@ -1,5 +1,8 @@
 data/*
 cmp_bench/cmp
+cmp_bench/output.txt
 src/build
 src2/build
 experiments/*.csv
+src/output.txt
+src2/output.txt

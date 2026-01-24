@@ -183,10 +183,10 @@ vector<vector<uint64_t>> Rdcmp::random_raw_encode_a() {
 }
 
 void Rdcmp::print() {
-    cout << " name                                     : " << scheme
-         << " \n lhe name                                 : "<< lhe->scheme          
-         << " \n max depth                                : "<< depth
-            << " \n bit precision (n)                        : "<< n 
-            << " \n compare number                           : "<< num_cmps
-            << " \n";
+    lhe->print();
+    cout << " name                                     : " << scheme 
+        << " \n depth                                    : "<< depth    
+        << " \n bit precision (n)                        : "<< n 
+        << " \n max batch size                           : "<< num_cmps
+        << endl;
 }

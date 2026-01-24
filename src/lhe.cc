@@ -125,7 +125,7 @@ Ciphertext LHE::add_plain(const Ciphertext& ct, Plaintext& pt){
 Ciphertext LHE::add_plain(const Ciphertext& ct, const std::vector<uint64_t>& a){
     auto pt = encode(a);
     mod_switch(ct, pt);
-    return add_plain(ct,a);
+    return add_plain(ct,pt);
 }
 
 Ciphertext LHE::add_many(vector<Ciphertext>& ct_many){

@@ -1,5 +1,5 @@
-#ifndef __PDTE__
-#define __PDTE__
+#ifndef __BPDTE__
+#define __BPDTE__
 
 #include"node.h"
 #include"cmp.h"
@@ -14,7 +14,7 @@ struct LeafFlatten {
     vector<Plaintext> leaf_vec_pt; 
 };
 
-class PDTE {
+class BPDTE {
     public:
     string scheme;
     int tree_depth = 8;        // set it first
@@ -26,8 +26,8 @@ class PDTE {
     Plaintext one_one_one;
     Ciphertext zero_zero_zero;
 
-    // PDTE() = default;
-    virtual ~PDTE() = default;
+    // BPDTE() = default;
+    virtual ~BPDTE() = default;
 
     //server
     shared_ptr<Node> load_tree(string filename);
@@ -65,7 +65,7 @@ class PDTE {
 
     bool verify(const vector<uint64_t>& expect_result, const vector<uint64_t>& actural_result);
 
-    virtual void print() = 0;
+    void print();
 };
 
 

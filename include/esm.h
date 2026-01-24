@@ -1,10 +1,10 @@
 #ifndef __ESM__
 #define __ESM__
 
-#include"pdte.h"
+#include"bpdte.h"
 using namespace std;
 
-class ESM : public PDTE {
+class ESM : public BPDTE {
     public:
 
     vector<vector<Plaintext>> salts;
@@ -27,7 +27,6 @@ class ESM : public PDTE {
 
     vector<uint64_t> recover(vector<vector<Ciphertext>>& a) override;
 
-    void print() override;
 };
 
 

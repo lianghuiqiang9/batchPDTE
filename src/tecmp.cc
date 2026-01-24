@@ -274,12 +274,12 @@ vector<vector<uint64_t>> Tecmp::random_raw_encode_a()  {
 }
 
 void Tecmp::print()  {
-    cout << " name                                     : " << scheme
-            << " \n lhe name                                 : "<< lhe->scheme  
-            << " \n max depth                                : "<< depth    
-            << " \n l                                        : "<< l 
-            << " \n m                                        : "<< m
-            << " \n bit precision (n)                        : "<< n 
-            << " \n compare number                           : "<< num_cmps
-            <<endl ;
+    lhe->print();
+    cout << " name                                     : " << scheme 
+        << " \n depth                                    : "<< depth    
+        << " \n l                                        : "<< l 
+        << " \n m                                        : "<< m
+        << " \n bit precision (n)                        : "<< n 
+        << " \n max batch size                           : "<< num_cmps
+        <<endl ;
 }
