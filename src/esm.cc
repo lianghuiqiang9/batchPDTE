@@ -15,11 +15,10 @@ LeafFlatten ESM::encode_tree(shared_ptr<Node> root){
 }
 
 // client
-void ESM::setup_cmp(int cmp_type, int l, int m, int n, int extra){
+void ESM::setup_cmp(int cmp_type, int l, int m, int extra){
     switch (cmp_type) {
-        case 0: cmp = make_unique<Tecmp>(l, m, n, extra); break;
-        case 1: cmp = make_unique<Cdcmp>(l, m, n, extra); break;
-        case 2: cmp = make_unique<Rdcmp>(l, m, n, extra);break;
+        case 0: cmp = make_unique<TCMP>(l, m, extra); break;
+        case 1: cmp = make_unique<DCMP>(l, m, extra); break;
     }
 
     batch_size = cmp->num_cmps;

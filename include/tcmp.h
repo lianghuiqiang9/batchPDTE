@@ -1,5 +1,5 @@
-#ifndef __TECMP__
-#define __TECMP__
+#ifndef __TCMP__
+#define __TCMP__
 #include <seal/seal.h>
 #include <vector>
 #include <string>
@@ -7,20 +7,14 @@
 #include <cmath> 
 #include "cmp.h"
 
-class Tecmp : public CMP {
+class TCMP : public CMP {
 public:
     uint8_t id; // 0x1, 0x2
-    int l;  // 
-    int m;
-    uint64_t num_slots_per_element; // m_degree = (1<<m)
-    uint64_t num_cmps_per_row;
-    Plaintext one_zero_zero;
     Ciphertext one_zero_zero_cipher;
-    vector<uint64_t> index_map;
 
-    Tecmp(int l, int m, int n = 0, int extra = 0, uint8_t id = 0x1);
+    TCMP(int l, int m, int extra = 0, uint8_t id = 0x1);
 
-    ~Tecmp() = default;
+    ~TCMP() = default;
 
     // input
     // num_cmps 

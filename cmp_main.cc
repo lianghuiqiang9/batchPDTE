@@ -1,34 +1,32 @@
-#include"cdcmp.h"
-#include"tecmp.h"
-#include"rdcmp.h"
+#include"dcmp.h"
+#include"tcmp.h"
 #include"utils.h"
 #include<unistd.h>
 
 // g++ -o cmp_main -O3 cmp_main.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1 -L ./lib -lbpdte -Wl,-rpath,./lib
 
-// ./cmp_main -m 8 -l 2 -n 16 -c 0
+// ./cmp_main -m 8 -l 2 -c 0
 
 int main(int argc, char* argv[]) {
-    int l = 8, m = 2, n = -1;
+    int l = 8, m = 2;
     int opt;
     int cmp_type = 0;
     unique_ptr<CMP> cmp;
 
-    while ((opt = getopt(argc, argv, "fl:m:n:c:")) != -1) {
+    while ((opt = getopt(argc, argv, "fl:m:c:")) != -1) {
         switch (opt) {
         case 'l': l = atoi(optarg); break;
         case 'm': m = atoi(optarg); break;
-        case 'n': n = atoi(optarg);break;
         case 'c': cmp_type = atoi(optarg);break;
         }
     }
-    if ( n == -1 ){n = l * m;}
+    int n = l * m;
 
     switch (cmp_type) {
-        case 0: cmp = make_unique<Tecmp>(l, m, n); break;
-        case 1: cmp = make_unique<Cdcmp>(l, m, n); break;
-        case 2: cmp = make_unique<Rdcmp>(l, m, n);break;
+        case 0: cmp = make_unique<TCMP>(l, m); break;
+        case 1: cmp = make_unique<DCMP>(l, m); break;
     }
+    
     auto num_cmps = cmp->num_cmps;
 
     vector<vector<uint64_t>> raw_encode_a;
@@ -53,7 +51,7 @@ int main(int argc, char* argv[]) {
     auto cmp_encode_a = cmp->encode_a(raw_encode_a);
     auto cmp_encode_b = cmp->encode_b(raw_encode_b);
     auto cmp_encode_b_cipher = cmp->encrypt(cmp_encode_b);
-    
+
     //cmp
     Ciphertext result;
     auto finish = profile("CMP", [&]() { 

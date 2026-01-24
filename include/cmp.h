@@ -12,12 +12,20 @@
 class CMP {
 public:
     string scheme;
+    int l;  // 
+    int m;
     int n;
+    uint64_t depth;
+    shared_ptr<LHE> lhe;
     uint64_t num_cmps;
     uint64_t slot_count;
     uint64_t row_count;
-    uint64_t depth;
-    shared_ptr<LHE> lhe;
+    uint64_t num_slots_per_element; // m_degree = (1<<m)
+    uint64_t num_cmps_per_row;
+    Plaintext one_zero_zero;
+    //Ciphertext one_zero_zero_cipher;
+    vector<uint64_t> index_map;
+
     inline static std::mt19937 gen{ std::random_device{}() };
 
     virtual ~CMP() = default;

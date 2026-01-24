@@ -143,3 +143,14 @@ uint64_t d_factorial_inv_with_sign(uint64_t d, uint64_t mod){
     uint64_t d_factorial_inv_with_sign = (d % 2) ? mod - d_factorial_inv : d_factorial_inv;
     return d_factorial_inv_with_sign;
 }
+
+uint64_t get_nearest_power_of_two(uint64_t n) {
+    if (n == 0) return 0;
+    n |= (n >> 1);
+    n |= (n >> 2);
+    n |= (n >> 4);
+    n |= (n >> 8);
+    n |= (n >> 16);
+    n |= (n >> 32);
+    return n - (n >> 1);
+}

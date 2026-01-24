@@ -72,5 +72,6 @@ uint64_t prime_mod_inverse(uint64_t a, uint64_t n);
 
 uint64_t d_factorial_inv_with_sign(uint64_t d, uint64_t mod);
 
+uint64_t get_nearest_power_of_two(uint64_t n);
 
 #endif

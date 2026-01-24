@@ -62,6 +62,14 @@ void eval_rec(uint64_t &out, const Node& node, const std::vector<uint64_t> &feat
 
 vector<vector<uint64_t>> load_matrix(string filename, int data_size);
 void save_data(const vector<vector<uint64_t>>& data, const string& filename);
+
+vector<shared_ptr<Node>> get_standard_level(shared_ptr<Node> root, int target_depth);
+vector<vector<shared_ptr<Node>>> extract_aligned_layers(shared_ptr<Node> root);
+void print_aligned_matrix(const vector<vector<shared_ptr<Node>>>& matrix);
+void extract_matrices(const vector<vector<shared_ptr<Node>>>& aligned_layers,
+                      vector<vector<uint64_t>>& index_matrix,
+                      vector<vector<uint64_t>>& threshold_matrix,
+                      vector<uint64_t>& class_vec);
 ////
 
 #endif

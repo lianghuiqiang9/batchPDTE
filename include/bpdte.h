@@ -3,9 +3,8 @@
 
 #include"node.h"
 #include"cmp.h"
-#include"cdcmp.h"
-#include"tecmp.h"
-#include"rdcmp.h"
+#include"dcmp.h"
+#include"tcmp.h"
 #include"utils.h"
 using namespace std;
 
@@ -33,7 +32,7 @@ class BPDTE {
     shared_ptr<Node> load_tree(string filename);
 
     // client
-    virtual void setup_cmp(int cmp_type, int l, int m, int n = 0, int extra = 0) = 0;
+    virtual void setup_cmp(int cmp_type, int l, int m, int extra = 0) = 0;
 
     // client
     vector<vector<uint64_t>> load_data(string filename, int data_rows = 1);

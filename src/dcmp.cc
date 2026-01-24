@@ -1,0 +1,261 @@
+#include"dcmp.h"
+
+DCMP::DCMP(int l, int m, int extra) {
+    this->scheme = "dcmp";
+    this->l = l;
+    this->m = m;
+    this->n = l * m;
+
+    int cmp_depth_need =  static_cast<int>(std::ceil(std::log2(this->n)) + 1); 
+    depth = cmp_depth_need + extra;
+
+    std::vector<int> steps;
+    for (int i = 1; i < m; i<<=1) { // 1, 2, 3, ..., 2^m
+        steps.push_back(i);
+    }
+
+    this->lhe = make_unique<BFV>(depth, steps, (m!=1));
+
+    slot_count = lhe->slot_count;
+    row_count = slot_count / 2;
+    num_slots_per_element = m;
+    num_cmps_per_row = row_count / num_slots_per_element;
+
+    if (l!=1){
+        num_cmps = num_cmps_per_row * 2 - 1;
+    }else{
+        num_cmps = num_cmps_per_row * 2;
+    }
+
+    // index_map
+    //idx = 0            num_cmps_per_row                2 * num_cmps_per_row              ...
+    //    = row_count    row_count + num_cmps_per_row    row_count + 2 * num_cmps_per_row  ...
+    index_map.resize(num_cmps);
+    for(uint64_t i = 0; i < num_cmps; i++) {
+        bool flag = i < num_cmps_per_row;
+        index_map[i] = flag ? (i * num_slots_per_element) : (row_count + (i - num_cmps_per_row) * num_slots_per_element);
+    }
+
+    one_zero_zero = init_one_zero_zero();
+}
+
+
+// input
+// b = [ b00, b01, b02, ..., b10, b11, b12, ...
+//       b03, b04, b05, ..., b13, b14, b15, ... ]
+// output
+// neg_b = [ 1 - b000, 1 - b001, 1 - b002, ..., 1 - b100, 1 - b101, 1 - b102, ...
+//           1 - b030, 1 - b031, 1 - b032, ..., 1 - b130, 1 - b131, 1 - b132, ... ]
+vector<vector<uint64_t>> DCMP::encode_b(const vector<vector<uint64_t>>& raw_b) {
+    vector<vector<uint64_t>> out(l);
+    vector<uint64_t> temp(slot_count, 0);
+    for(int i = 0; i < l;i++){
+        std::fill(temp.begin(), temp.end(), 0ULL);
+         for(uint64_t j = 0; j < num_cmps; j++){
+            auto offset = j * m;
+            //uint64_t start_idx = index_map[j];
+            for(int k = 0; k < m; k++) {
+                temp[offset + k] = 1 - ((raw_b[i][j]>>k)&1);
+            }
+         }
+        out[i] = temp;
+    }
+    return out;
+}
+
+vector<Ciphertext> DCMP::encrypt(const vector<vector<uint64_t>>& raw_b) {
+    vector<Ciphertext> out(l);
+    for(int i = 0 ; i < l; i++){
+        out[i] = lhe->encrypt(raw_b[i]);
+    }
+
+    return out;
+}
+
+// input
+// a = [ a00, a01, a02 ]
+// output
+// a = [ a00, a01, a02 ]
+vector<Plaintext> DCMP::encode_a(const vector<vector<uint64_t>>& raw_a){
+    vector<Plaintext> out(l);
+    vector<uint64_t> temp(slot_count, 0);
+    for(int i = 0; i < l;i++){
+        std::fill(temp.begin(), temp.end(), 0ULL);
+         for(uint64_t j = 0; j < num_cmps; j++){
+            auto offset = j * m;
+            //uint64_t start_idx = index_map[j];
+            for(int k = 0; k < m; k++) {
+                temp[offset + k] = (raw_a[i][j]>>k)&1;
+            }
+         }
+        out[i] = lhe->encode(temp);
+    }
+    return out;
+}
+
+// [ 1,0,0,...,1,0,0,...
+//   1,0,0,...,1,0,0,... ]
+Plaintext DCMP::init_one_zero_zero(){
+    vector<uint64_t> one_zero_zero(slot_count, 0ULL);
+    for(size_t i = 0; i < num_cmps ; i++){
+        one_zero_zero[index_map[i]] = 1ULL;
+    }
+    return lhe->encode(one_zero_zero);
+}
+
+Plaintext DCMP::init_x_zero_zero(const vector<uint64_t>& x) {
+    vector<uint64_t> x_zero_zero(slot_count, 0ULL);
+    auto x_size = x.size();
+    auto limit = num_cmps > x_size ? x_size : num_cmps;
+    for(size_t i = 0; i < limit ; i++){
+        x_zero_zero[index_map[i]] = x[i];
+    }
+    return lhe->encode(x_zero_zero);
+}
+
+Ciphertext DCMP::great_than(vector<Plaintext>& a, vector<Ciphertext>& b) {
+    vector<Ciphertext> eq(l);
+    vector<Ciphertext> gt(l);
+
+    // in cols
+    for(int i = 0; i < l; ++i){
+        gt[i] = lhe->multiply_plain(b[i], a[i]);
+        eq[i] = lhe->add(gt[i], gt[i]);
+        lhe->negate_inplace(eq[i]);
+        lhe->add_inplace(eq[i], b[i]);
+        lhe->add_plain_inplace(eq[i], a[i]);
+        
+        int depth = static_cast<int>(std::log2(m));
+        for(int j = 0; j < depth ; j++){
+            int step = 1<<j;
+
+            auto gt_temp = lhe->rotate_rows(gt[i], step);
+            auto eq_temp = lhe->rotate_rows(eq[i], step);
+            lhe->multiply_inplace(eq[i], eq_temp);
+            lhe->relinearize_inplace(eq[i]);
+            lhe->multiply_inplace(gt[i], eq_temp);
+            lhe->relinearize_inplace(gt[i]);
+            lhe->add_inplace(gt[i], gt_temp);
+        }
+
+    }
+
+    // in rows
+
+    int depth = static_cast<int>(std::log2(l));
+    for(int i = 0; i < depth ; i++){
+        int temp1 = 1<<i;
+        int temp0 = 1<<(i + 1);
+        //cout<<"temp0 : "<<temp0<<" temp1 : "<<temp1<<endl;
+        for(int j = 0; j < l; j = j + temp0){                    
+            lhe->multiply_inplace(gt[j], eq[j + temp1]);
+            lhe->relinearize_inplace(gt[j]);
+            lhe->add_inplace(gt[j], gt[j + temp1]);
+            lhe->multiply_inplace(eq[j],eq[j + temp1]);
+            lhe->relinearize_inplace(eq[j]);
+        }   
+    }
+
+    return std::move(gt[0]);
+}
+
+void DCMP::clear_up(Ciphertext& result) {
+    lhe->multiply_plain_inplace(result, one_zero_zero);
+}
+
+vector<uint64_t> DCMP::decrypt(const Ciphertext& ct) {
+    auto pt = lhe->decrypt(ct);
+    return lhe->decode(pt);
+}
+
+vector<uint64_t> DCMP::decode(const std::vector<uint64_t>& res){
+    vector<uint64_t> ans(num_cmps);
+    for(uint64_t i = 0; i < num_cmps ; i++){
+        ans[i] = res[index_map[i]];
+    }
+    return ans;
+}
+
+vector<uint64_t> DCMP::recover(const Ciphertext& ct) {
+    auto res = this->decrypt(ct);
+    return this->decode(res);
+}
+
+// out = [ a[0]>b[0], a[0]>b[1], ... ]
+vector<bool> DCMP::verify(const vector<vector<uint64_t>>& a, const vector<vector<uint64_t>>& b) {
+    vector<bool> out(num_cmps, false);
+    for(uint64_t i = 0;i < num_cmps;i++){
+        for(int k = l-1;k>=0;k--){
+            if(a[k][i] > b[k][i]){
+                out[i] = true;
+                break;
+            }else if(a[k][i] == b[k][i]){
+                continue;
+            }else{
+                break;
+            }
+        }
+    }
+    return out;
+}
+
+// input= [ b0,  b1,  b2 ]
+// out  = [ b00, b01, b02, ..., b10, b11, b12, ..., b20, b21, b22, ... ]
+// b0 = b00 + 2 * b01 + 2^m * b02 + ...;
+// b1 = b10 + 2 * b11 + 2^m * b12 + ...;
+// b2 = b20 + 2 * b21 + 2^m * b22 + ...;
+vector<vector<uint64_t>> DCMP::raw_encode_b(const vector<uint64_t>& b) {
+    vector<vector<uint64_t>> out(l, vector<uint64_t>(slot_count, 0));
+    const uint64_t range = (1 << num_slots_per_element) - 1;
+    const size_t b_size = b.size();
+
+    for(int i = 0; i < l; i++) {
+        const auto offset = i * m;
+        uint64_t* out_ptr = out[i].data();
+        const uint64_t* in_ptr = b.data();
+        for(size_t j = 0; j < b_size; j++) {
+            out_ptr[j] = (in_ptr[j] >> offset) & range;
+        }
+
+        if(l!=1){
+            out_ptr[num_cmps] = 13; // Padding bit
+        }
+
+    }
+    return out;
+}
+
+vector<vector<uint64_t>> DCMP::raw_encode_a(const vector<uint64_t>& in) {
+    return raw_encode_b(in);
+}
+
+
+// low to high  
+vector<vector<uint64_t>> DCMP::random_raw_encode_b() {
+    vector<vector<uint64_t>> out(l, vector<uint64_t>(num_cmps));
+    std::uniform_int_distribution<uint64_t> dist(0, num_slots_per_element - 1);
+
+    for (int i = 0; i < l; i++) {
+        uint64_t* row_ptr = out[i].data(); 
+        for (uint64_t j = 0; j < num_cmps; j++) {
+            row_ptr[j] = dist(gen);
+        }
+    }
+    return out; 
+}
+
+// low to high
+vector<vector<uint64_t>> DCMP::random_raw_encode_a() {
+    return random_raw_encode_b();
+}
+
+void DCMP::print() {
+    lhe->print();
+    cout << " name                                     : " << scheme 
+        << " \n depth                                    : "<< depth    
+        << " \n l                                        : "<< l 
+        << " \n m                                        : "<< m
+        << " \n bit precision (n)                        : "<< n 
+        << " \n max batch size                           : "<< num_cmps
+        << endl;
+}

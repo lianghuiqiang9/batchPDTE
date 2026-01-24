@@ -41,17 +41,16 @@ make install
 
 6.  -c  [Comparison Mode]
         Select the comparison algorithm:
-        0: TEcmp (Threshold Encoding Comparison)
-        1: CDcmp (Coefficient Decomposition Comparison)
-        2: RDcmp (Range Decomposition Comparison)
+        0: tCMP (Thermometer Comparison)
+        1: dCMP (Dichotomy Comparison)
 
 7.  -e  [Reserved Depth]
         The extra multiplicative depth reserved after the comparison step.
 
 8.  -p  [Evaluation Strategy]
         Select the Private Decision Tree Evaluation (bpdte) method:
-        0: bpdte with ASM (Adapted Sum Path)
-        1: bpdte with ESM (Extended Sum Path)
+        0: bPDTE with ASM (Adapted Sum Path)
+        1: bPDTE with ESM (Extended Sum Path)
 
 9.  -t  [Scheme Type]
         Select the underlying Homomorphic Encryption scheme:

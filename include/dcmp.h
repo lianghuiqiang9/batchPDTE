@@ -1,5 +1,5 @@
-#ifndef __CDCMP__
-#define __CDCMP__
+#ifndef __DCMP__
+#define __DCMP__
 
 #include <seal/seal.h>
 #include <vector>
@@ -8,17 +8,12 @@
 #include <cmath> 
 #include "cmp.h"
 
-class Cdcmp : public CMP{
+class DCMP : public CMP {
 public:
-    uint64_t num_slots_per_element; // m_degree = (1<<m)
-    uint64_t num_cmps_per_row;
-    Plaintext one_zero_zero;
-    //Ciphertext one_zero_zero_cipher;
-    vector<uint64_t> index_map;
 
-    Cdcmp(int l, int m, int n, int extra = 0);
+    DCMP(int l, int m, int extra = 0);
 
-    ~Cdcmp() = default;
+    ~DCMP() = default;
 
     // input
     // b = [ b00, b01, b02, ..., b10, b11, b12, ...]

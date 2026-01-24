@@ -14,14 +14,13 @@ LeafFlatten ASM::encode_tree(shared_ptr<Node> root){
 }
 
 // client
-void ASM::setup_cmp(int cmp_type, int l, int m, int n, int extra){
+void ASM::setup_cmp(int cmp_type, int l, int m, int extra){
     
     int log_tree_depth = (tree_depth <= 1) ? 0 : static_cast<int>(std::ceil(std::log2(tree_depth)));
    
     switch (cmp_type) {
-        case 0: cmp = make_unique<Tecmp>(l, m, n, log_tree_depth + extra); break;
-        case 1: cmp = make_unique<Cdcmp>(l, m, n, log_tree_depth + extra); break;
-        case 2: cmp = make_unique<Rdcmp>(l, m, n, log_tree_depth + extra);break;
+        case 0: cmp = make_unique<TCMP>(l, m, log_tree_depth + extra); break;
+        case 1: cmp = make_unique<DCMP>(l, m, log_tree_depth + extra); break;
     }
 
     batch_size = cmp->num_cmps;

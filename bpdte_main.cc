@@ -2,9 +2,8 @@
 #include<unistd.h>
 #include<vector>
 #include<random>
-#include"cdcmp.h"
-#include"tecmp.h"
-#include"rdcmp.h"
+#include"dcmp.h"
+#include"tcmp.h"
 #include"asm.h"
 #include"esm.h"
 using namespace std;
@@ -17,16 +16,15 @@ int main(int argc, char* argv[]){
 
     string input_address;
     int data_rows = 10;
-    int l = 8, m = 2, n = 16;    // make sure l * m or n >= data_bit_length
+    int l = 8, m = 2;    // make sure l * m or n >= data_bit_length
     int cmp_type = 0, bpdte_type = 0, extra = 0;
     int opt;
-    while ((opt = getopt(argc, argv, "fi:d:l:m:n:c:e:p:")) != -1) {
+    while ((opt = getopt(argc, argv, "fi:d:l:m:c:e:p:")) != -1) {
         switch (opt) {
         case 'i': input_address = string(optarg); break;  
         case 'd': data_rows = atoi(optarg); break;
         case 'l': l = atoi(optarg); break;
         case 'm': m = atoi(optarg); break;
-        case 'n': n = atoi(optarg);break;
         case 'c': cmp_type = atoi(optarg);break;
         case 'e': extra = atoi(optarg);break;     
         case 'p': bpdte_type = atoi(optarg);break;    
@@ -42,7 +40,7 @@ int main(int argc, char* argv[]){
 
     auto root = bpdte->load_tree(input_address + "/model.json");
     // root->print_tree();
-    bpdte->setup_cmp(cmp_type, l, m, n, extra);
+    bpdte->setup_cmp(cmp_type, l, m, extra);
     auto leaf_flatten = bpdte->encode_tree(root); 
 
     auto data = bpdte->load_data(input_address + "/x_test.csv", data_rows);
