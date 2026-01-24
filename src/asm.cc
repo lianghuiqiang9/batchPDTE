@@ -32,7 +32,6 @@ void ASM::setup_cmp(int cmp_type, int l, int m, int n, int extra){
 
     vector<uint64_t> zero(cmp->slot_count, 0ULL);
     zero_zero_zero = lhe->encrypt(zero);
-
 }
 
 // server

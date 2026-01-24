@@ -15,9 +15,9 @@ vector<vector<uint64_t>> BPDTE::load_data(string filename, int data_rows){
     this->data_rows = data_rows;
     auto data = load_matrix(filename, data_rows);
     
-    //data_m < num_cmps 
-    if(batch_size < static_cast<uint64_t>(data_rows)){
-        cout<<"data_rows : "<<data_rows<<" >= batch_size : "<<batch_size<<endl;
+    //data_m > num_cmps 
+    if(static_cast<uint64_t>(data_rows) > batch_size){
+        cout<<"data_rows : "<<data_rows<<" > batch_size : "<<batch_size<<endl;
         cout<<"data_size is too large, please divide different page until the size is small than batch_size"<<endl;
         exit(0);
     }

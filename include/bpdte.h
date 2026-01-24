@@ -36,7 +36,7 @@ class BPDTE {
     virtual void setup_cmp(int cmp_type, int l, int m, int n = 0, int extra = 0) = 0;
 
     // client
-    vector<vector<uint64_t>> load_data(string filename, int data_rows);
+    vector<vector<uint64_t>> load_data(string filename, int data_rows = 1);
 
     // client
     vector<vector<Ciphertext>> encode_data(const vector<vector<uint64_t>>& data);

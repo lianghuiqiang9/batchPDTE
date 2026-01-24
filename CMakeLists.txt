@@ -33,6 +33,7 @@ set(TEST_SOURCES
     lhe_depth_test.cc 
     lhe_test.cc 
     bpdte_main.cc 
+    pdte_main.cc 
     serial_test.cc
 )
 
