@@ -4,7 +4,7 @@
 #include<seal/seal.h>
 #include <stack>
 #include<fstream>
-
+#include <set>
 #include "json.hpp"
 
 using namespace seal;
@@ -45,6 +45,10 @@ public:
 
     vector<uint64_t> eval(const vector<vector<uint64_t>> &features);
 
+    uint64_t eval2(const vector<uint64_t> &features);
+
+    vector<uint64_t> eval2(const vector<vector<uint64_t>> &features);
+
 };
 
 ////
@@ -54,22 +58,27 @@ struct StackFrame {
     bool visited; 
 };
 
+struct Path {
+    vector<shared_ptr<Node>> nodes;
+};
+
 void load_tree_rec(json::reference ref, Node& node);
 json save_tree_rec(Node& node);
 void print_node(Node& a, std::string tabs = "");
 void print_tree_rec(Node* a, string tabs);
-void eval_rec(uint64_t &out, const Node& node, const std::vector<uint64_t> &features, u_int64_t parent);
-
+uint64_t eval_rec(const Node& node, const vector<uint64_t>& features);
+uint64_t eval_rec2(const Node& node, const vector<uint64_t>& features);
 vector<vector<uint64_t>> load_matrix(string filename, int data_size);
 void save_data(const vector<vector<uint64_t>>& data, const string& filename);
 
-vector<shared_ptr<Node>> get_standard_level(shared_ptr<Node> root, int target_depth);
-vector<vector<shared_ptr<Node>>> extract_aligned_layers(shared_ptr<Node> root);
-void print_aligned_matrix(const vector<vector<shared_ptr<Node>>>& matrix);
-void extract_matrices(const vector<vector<shared_ptr<Node>>>& aligned_layers,
-                      vector<vector<uint64_t>>& index_matrix,
-                      vector<vector<uint64_t>>& threshold_matrix,
-                      vector<uint64_t>& class_vec);
+void find_all_paths(shared_ptr<Node> node, vector<shared_ptr<Node>>& current_path, vector<Path>& all_paths);
+vector<Path> get_raw_paths(shared_ptr<Node> root);
+void print_paths(const vector<Path>& paths);
+void extract_matrices_from_paths(const vector<Path>& paths, 
+                                 vector<vector<uint64_t>>& index_matrix,
+                                 vector<vector<uint64_t>>& threshold_matrix,
+                                 vector<vector<uint64_t>>& direction_matrix,
+                                 vector<uint64_t>& leaf_values);
 ////
 
 #endif

@@ -45,12 +45,10 @@ BGV::BGV(int depth, vector<int> steps, bool is_rotate) {
     keygen.create_relin_keys(rlk);
 
     if (is_rotate){
-        if(steps.size() == 0){
-            keygen.create_galois_keys(gal_keys);
-        }else{
-            auto elts = context->key_context_data()->galois_tool()->get_elts_from_steps(steps);
-            keygen.create_galois_keys(elts, gal_keys);
-        }
+        keygen.create_galois_keys(gal_keys);
+    }else{
+        auto elts = context->key_context_data()->galois_tool()->get_elts_from_steps(steps);
+        keygen.create_galois_keys(elts, gal_keys);
     }
 
     encryptor = make_unique<Encryptor>(*context, pk);

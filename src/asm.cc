@@ -17,7 +17,8 @@ LeafFlatten ASM::encode_tree(shared_ptr<Node> root){
 void ASM::setup_cmp(int cmp_type, int l, int m, int extra){
     
     int log_tree_depth = (tree_depth <= 1) ? 0 : static_cast<int>(std::ceil(std::log2(tree_depth)));
-   
+    log_tree_depth = log_tree_depth + 1; // for additive and rotate.
+    
     switch (cmp_type) {
         case 0: cmp = make_unique<TCMP>(l, m, log_tree_depth + extra); break;
         case 1: cmp = make_unique<DCMP>(l, m, log_tree_depth + extra); break;

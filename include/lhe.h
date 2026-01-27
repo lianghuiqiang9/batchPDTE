@@ -49,29 +49,51 @@ public:
 
     virtual void print() = 0;
 
-    Ciphertext multiply_plain(const Ciphertext& ct, Plaintext& pt);
-
     void multiply_plain_inplace(Ciphertext& ct, Plaintext& pt);
 
     void multiply_plain_inplace(Ciphertext& ct, vector<uint64_t>& a);
 
-    Ciphertext multiply_plain(const Ciphertext& ct, const std::vector<uint64_t>& a);
+    void multiply_plain_inplace(vector<Ciphertext>& cts, Plaintext& pt);
+    
+    vector<Ciphertext> multiply_plain(vector<Ciphertext> cts, Plaintext& pt);
 
-    Ciphertext multiply(Ciphertext& ct1, Ciphertext& ct2);
+    Ciphertext multiply_plain(Ciphertext ct, std::vector<uint64_t>& a);
+
+    Ciphertext multiply_plain(Ciphertext ct, Plaintext& pt);
+
+    Ciphertext multiply(Ciphertext ct1, Ciphertext& ct2);
     
     Ciphertext multiply_many(vector<Ciphertext>& ct_many);
+
+    vector<Ciphertext> multiply_many(vector<vector<Ciphertext>>& ct_manys);
     
     void multiply_inplace(Ciphertext& ct1, Ciphertext& ct2);
 
-    Ciphertext rotate_rows(const Ciphertext& ct, int step);
+    void rotate_rows_inplace(Ciphertext& ct, int step);
+
+    void rotate_rows_inplace(vector<Ciphertext>& cts, int step);
+
+    Ciphertext rotate_rows(Ciphertext ct, int step);
+
+    vector<Ciphertext> rotate_rows(vector<Ciphertext> cts, int step);
+
+    void rotate_columns_inplace(Ciphertext& ct);
+
+    void rotate_columns_inplace(vector<Ciphertext>& cts);
+
+    Ciphertext rotate_columns(Ciphertext ct);
+
+    vector<Ciphertext> rotate_columns(vector<Ciphertext> cts);
 
     void add_inplace(Ciphertext& ct1, Ciphertext& ct2);
+
+    void add_inplace(vector<Ciphertext>& ct1, vector<Ciphertext>& ct2);
 
     void sub_inplace(Ciphertext& ct1, Ciphertext& ct2);
 
     void sub_plain_inplace(Ciphertext& ct, Plaintext& pt);
 
-    Ciphertext sub_plain(Ciphertext& ct, Plaintext& pt);
+    Ciphertext sub_plain(Ciphertext ct, Plaintext& pt);
 
     Ciphertext add(Ciphertext& ct1, Ciphertext& ct2);
 
@@ -79,9 +101,9 @@ public:
 
     void add_plain_inplace(Ciphertext& ct, const std::vector<uint64_t>& a);
 
-    Ciphertext add_plain(const Ciphertext& ct, Plaintext& pt);
+    Ciphertext add_plain(Ciphertext ct, Plaintext& pt);
 
-    Ciphertext add_plain(const Ciphertext& ct, const std::vector<uint64_t>& a);
+    Ciphertext add_plain(Ciphertext ct, const std::vector<uint64_t>& a);
 
     Ciphertext add_many(vector<Ciphertext>& ct_many);
 
@@ -89,12 +111,11 @@ public:
 
     void negate_inplace(Ciphertext& ct);
 
-    void negate(Ciphertext& ct1, Ciphertext& ct2);
+    Ciphertext negate(Ciphertext ct);
 
     long rlk_size();
     long pk_size();
     long glk_size();
-
 
 };
 

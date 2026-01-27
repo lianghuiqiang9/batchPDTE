@@ -36,7 +36,7 @@ public:
 
     virtual vector<Plaintext> encode_a(const vector<vector<uint64_t>>& a) = 0;
 
-    virtual Plaintext init_x_zero_zero(const vector<uint64_t>& salt) = 0;
+    virtual Plaintext init_x_zero_zero(const vector<uint64_t>& x) = 0;
 
     virtual Ciphertext great_than(vector<Plaintext>& a, vector<Ciphertext>& b) = 0;
 
@@ -50,9 +50,23 @@ public:
     
     virtual vector<vector<uint64_t>> raw_encode_a(const vector<uint64_t>& a) = 0;
 
+    virtual vector<uint64_t> raw_decode_b(const vector<vector<uint64_t>>& encoded_out, size_t original_b_size) = 0;
+
+    virtual vector<vector<uint64_t>> decode_b(const vector<Ciphertext>& cts) = 0;
+
     virtual vector<vector<uint64_t>> random_raw_encode_b() = 0;
 
     virtual vector<vector<uint64_t>> random_raw_encode_a() = 0;
+
+    virtual Plaintext get_one_hot(uint64_t start, uint64_t width) = 0;
+
+    virtual vector<Ciphertext> rotate_m_rows(const vector<Ciphertext>& b, const vector<Ciphertext>& b_inv_rows, int step) = 0;
+    
+    virtual Ciphertext rotate_m_rows(const Ciphertext& b, const Ciphertext& b_inv_rows, int step) = 0;
+
+    virtual vector<Ciphertext> rotate_m_rows(const vector<Ciphertext>& b, int step) = 0;
+
+    virtual Ciphertext rotate_m_rows(const Ciphertext& b, int step) = 0;
 
     virtual void print() = 0;
 

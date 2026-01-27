@@ -24,36 +24,50 @@ std::vector<uint64_t> LHE::decode(const Plaintext& pt){
     return a;
 }
 
-Ciphertext LHE::multiply_plain(const Ciphertext& ct, Plaintext& pt){
-    mod_switch(ct, pt);
-
-    Ciphertext out;
-    evaluator->multiply_plain(ct, pt, out);
-    return out;
-}
-
 void LHE::multiply_plain_inplace(Ciphertext& ct, Plaintext& pt){
     mod_switch(ct, pt);
     evaluator->multiply_plain_inplace(ct, pt);
 }
+
+void LHE::multiply_plain_inplace(vector<Ciphertext>& cts, Plaintext& pt){
+    for(auto&ct:cts){
+        //mod_switch(ct, pt);
+        evaluator->multiply_plain_inplace(ct, pt);
+    }
+}
+
 void LHE::multiply_plain_inplace(Ciphertext& ct, vector<uint64_t>& a){
     auto pt = encode(a);
     mod_switch(ct, pt);
     evaluator->multiply_plain_inplace(ct, pt);
 }
 
-Ciphertext LHE::multiply_plain(const Ciphertext& ct, const std::vector<uint64_t>& a){
-    auto pt = encode(a);
-    mod_switch(ct, pt);
-
-    return multiply_plain(ct,pt);
+vector<Ciphertext> LHE::multiply_plain(vector<Ciphertext> cts, Plaintext& pt){
+    for(auto&ct:cts){
+        //mod_switch(ct, pt);
+        evaluator->multiply_plain_inplace(ct, pt);
+    }
+    return cts;
 }
 
-Ciphertext LHE::multiply(Ciphertext& ct1, Ciphertext& ct2){
-    mod_switch(ct1, ct2);
-    Ciphertext out;
-    evaluator->multiply(ct1, ct2, out);
-    return out;
+Ciphertext LHE::multiply_plain(Ciphertext ct, std::vector<uint64_t>& a){
+    auto pt = encode(a);
+    mod_switch(ct, pt); 
+    evaluator->multiply_plain_inplace(ct, pt);
+    return ct; 
+}
+
+Ciphertext LHE::multiply_plain(Ciphertext ct, Plaintext& pt) {
+    mod_switch(ct, pt); 
+    evaluator->multiply_plain_inplace(ct, pt);
+    return ct; 
+}
+
+
+Ciphertext LHE::multiply(Ciphertext ct1, Ciphertext& ct2) {
+    mod_switch(ct1, ct2); 
+    evaluator->multiply_inplace(ct1, ct2);
+    return ct1; 
 }
 
 Ciphertext LHE::multiply_many(vector<Ciphertext>& ct_many){
@@ -63,21 +77,83 @@ Ciphertext LHE::multiply_many(vector<Ciphertext>& ct_many){
     return out;
 }
 
+vector<Ciphertext> LHE::multiply_many(vector<vector<Ciphertext>>& ct_manys){
+    //mod_switch(ct1, ct2);
+    vector<Ciphertext> out(ct_manys.size());
+    for (size_t i = 0; i < ct_manys.size(); ++i) {
+        evaluator->multiply_many(ct_manys[i], rlk, out[i]);
+    }
+
+    return out;
+}
+
 
 void LHE::multiply_inplace(Ciphertext& ct1, Ciphertext& ct2){
     mod_switch(ct1, ct2);
     evaluator->multiply_inplace(ct1, ct2);
 }
 
-Ciphertext LHE::rotate_rows(const Ciphertext& ct, int step){
-    Ciphertext out;
-    evaluator->rotate_rows(ct, step, gal_keys, out);
-    return out;
+
+void LHE::rotate_rows_inplace(Ciphertext& ct, int step){
+    evaluator->rotate_rows_inplace(ct, step, gal_keys);
 }
+
+void LHE::rotate_rows_inplace(vector<Ciphertext>& cts, int step) {
+    for (auto& ct : cts) {
+        evaluator->rotate_rows_inplace(ct, step, gal_keys);
+    }
+}
+
+Ciphertext LHE::rotate_rows(Ciphertext ct, int step) { 
+    evaluator->rotate_rows_inplace(ct, step, gal_keys);
+    return ct;
+}
+
+vector<Ciphertext> LHE::rotate_rows(vector<Ciphertext> cts, int step) {
+    for(auto& e:cts){
+        evaluator->rotate_rows_inplace(e, step, gal_keys);
+    }
+    return cts;
+}
+
+void LHE::rotate_columns_inplace(Ciphertext& ct){
+    evaluator->rotate_columns_inplace(ct, gal_keys);
+}
+
+void LHE::rotate_columns_inplace(vector<Ciphertext>& cts) {
+    for (auto& ct : cts) {
+        evaluator->rotate_columns_inplace(ct, gal_keys);
+    }
+}
+
+Ciphertext LHE::rotate_columns(Ciphertext ct) { 
+    evaluator->rotate_columns_inplace(ct, gal_keys);
+    return ct;
+}
+
+vector<Ciphertext> LHE::rotate_columns(vector<Ciphertext> cts) {
+    for(auto& e:cts){
+        evaluator->rotate_columns_inplace(e, gal_keys);
+    }
+    return cts;
+}
+
 
 void LHE::add_inplace(Ciphertext& ct1, Ciphertext& ct2){
     mod_switch(ct1, ct2);
     evaluator->add_inplace(ct1, ct2);
+}
+
+void LHE::add_inplace(vector<Ciphertext>& ct1, vector<Ciphertext>& ct2){
+    if (ct1.size() != ct2.size()) {
+        throw std::invalid_argument("Vector sizes do not match in add_inplace");
+    }
+    
+    for(size_t i = 0; i < ct1.size(); i++){
+        mod_switch(ct1[i], ct2[i]);
+        evaluator->add_inplace(ct1[i], ct2[i]);
+    }
+
 }
 
 void LHE::sub_inplace(Ciphertext& ct1, Ciphertext& ct2){
@@ -90,11 +166,10 @@ void LHE::sub_plain_inplace(Ciphertext& ct, Plaintext& pt){
     evaluator->sub_plain_inplace(ct, pt);
 }
 
-Ciphertext LHE::sub_plain(Ciphertext& ct, Plaintext& pt){
-    mod_switch(ct, pt);
-    Ciphertext out;
-    evaluator->sub_plain(ct, pt, out);
-    return out;
+Ciphertext LHE::sub_plain(Ciphertext ct, Plaintext& pt) {
+    mod_switch(ct, pt); 
+    evaluator->sub_plain_inplace(ct, pt);
+    return ct; 
 }
 
 Ciphertext LHE::add(Ciphertext& ct1, Ciphertext& ct2){
@@ -115,14 +190,13 @@ void LHE::add_plain_inplace(Ciphertext& ct, const std::vector<uint64_t>& a){
     add_plain_inplace(ct, pt);
 }
 
-Ciphertext LHE::add_plain(const Ciphertext& ct, Plaintext& pt){
+Ciphertext LHE::add_plain(Ciphertext ct, Plaintext& pt){
     mod_switch(ct, pt);
-    Ciphertext out;
-    evaluator->add_plain(ct, pt, out);
-    return out;
+    evaluator->add_plain_inplace(ct, pt);
+    return ct;
 }
 
-Ciphertext LHE::add_plain(const Ciphertext& ct, const std::vector<uint64_t>& a){
+Ciphertext LHE::add_plain(Ciphertext ct, const std::vector<uint64_t>& a){
     auto pt = encode(a);
     mod_switch(ct, pt);
     return add_plain(ct,pt);
@@ -143,8 +217,9 @@ void LHE::negate_inplace(Ciphertext& ct){
     evaluator->negate_inplace(ct);
 }
 
-void LHE::negate(Ciphertext& ct1, Ciphertext& ct2){
-    evaluator->negate(ct1, ct2);
+Ciphertext LHE::negate(Ciphertext ct) { // 值传递
+    evaluator->negate_inplace(ct);
+    return ct; // 移动返回
 }
 
 long LHE::rlk_size() {

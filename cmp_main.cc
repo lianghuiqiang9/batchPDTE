@@ -5,7 +5,7 @@
 
 // g++ -o cmp_main -O3 cmp_main.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1 -L ./lib -lbpdte -Wl,-rpath,./lib
 
-// ./cmp_main -m 8 -l 2 -c 0
+// ./cmp_main -l 2 -m 8 -c 0
 
 int main(int argc, char* argv[]) {
     int l = 8, m = 2;
@@ -35,8 +35,8 @@ int main(int argc, char* argv[]) {
         auto a = random_k_bit(n, num_cmps);
         auto b = random_k_bit(n, num_cmps);
 
-        print_vec(a, 10, "a: ");
-        print_vec(b, 10, "b: ");
+        print_vector(a, 10, "a: ");
+        print_vector(b, 10, "b: ");
 
         raw_encode_a = cmp->raw_encode_a(a);
         raw_encode_b = cmp->raw_encode_b(b);
@@ -44,8 +44,8 @@ int main(int argc, char* argv[]) {
         raw_encode_a = cmp->random_raw_encode_a();
         raw_encode_b = cmp->random_raw_encode_b();
 
-        print_vec(raw_encode_a, 10, "raw_encode_a: ");
-        print_vec(raw_encode_a, 10, "raw_encode_a: ");
+        print_matrix(raw_encode_a, 10, 10, "raw_encode_a: ");
+        print_matrix(raw_encode_a, 10, 10, "raw_encode_a: ");
     }
 
     auto cmp_encode_a = cmp->encode_a(raw_encode_a);
@@ -62,8 +62,8 @@ int main(int argc, char* argv[]) {
     auto expect_result = cmp->recover(result);
     auto actural_result = cmp->verify(raw_encode_a, raw_encode_b);
 
-    print_vec(expect_result, 10, "expect_result ");
-    print_vec(actural_result, 10, "actural_result");
+    print_vector(expect_result, 10, "expect_result ");
+    print_vector(actural_result, 10, "actural_result");
     auto is_correct = cmp->verify(actural_result, expect_result);
 
     long comm = cmp->comm_cost(cmp_encode_b_cipher, result);

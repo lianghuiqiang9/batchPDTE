@@ -9,7 +9,7 @@ using namespace seal;
 class BFV : public LHE{
 public:
 
-    BFV(int depth = 3, vector<int> steps = vector<int>{}, bool is_rotate = true);
+    BFV(int depth = 3, vector<int> steps = vector<int>{}, bool is_rotate = false);
 
     ~BFV() = default;
 

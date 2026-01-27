@@ -34,7 +34,7 @@ vector<uint64_t> scalar_mul(const vector<uint64_t> &a, uint64_t s, uint64_t mod)
     return result;
 }
 
-vector<uint64_t> rotate(const vector<uint64_t> &a, int k) {
+vector<uint64_t> rotate_rows(const vector<uint64_t> &a, int k) {
     if (a.empty()) return a;
     size_t n = a.size();
     size_t half = n / 2;
@@ -53,6 +53,19 @@ vector<uint64_t> rotate(const vector<uint64_t> &a, int k) {
     return result;
 }
 
+vector<uint64_t> rotate_cols(const vector<uint64_t> &a) {
+    if (a.empty()) return a;
+    
+    size_t n = a.size();
+    size_t half = n / 2;
+    vector<uint64_t> result(n);
+    for (size_t i = 0; i < half; i++) {
+        result[i + half] = a[i];    
+        result[i] = a[i + half];  
+    }
+
+    return result;
+}
 
 vector<vector<uint64_t>> transpose(const vector<vector<uint64_t>>& A) {
     if (A.empty()) return {};
@@ -144,13 +157,3 @@ uint64_t d_factorial_inv_with_sign(uint64_t d, uint64_t mod){
     return d_factorial_inv_with_sign;
 }
 
-uint64_t get_nearest_power_of_two(uint64_t n) {
-    if (n == 0) return 0;
-    n |= (n >> 1);
-    n |= (n >> 2);
-    n |= (n >> 4);
-    n |= (n >> 8);
-    n |= (n >> 16);
-    n |= (n >> 32);
-    return n - (n >> 1);
-}

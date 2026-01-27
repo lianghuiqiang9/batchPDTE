@@ -11,7 +11,7 @@
 class DCMP : public CMP {
 public:
 
-    DCMP(int l, int m, int extra = 0);
+    DCMP(int l, int m, int extra = 0, bool is_rotate = false);
 
     ~DCMP() = default;
 
@@ -34,7 +34,7 @@ public:
     //   1,0,0,...,1,0,0,... ]
     Plaintext init_one_zero_zero();
 
-    Plaintext init_x_zero_zero(const vector<uint64_t>& salt) override;
+    Plaintext init_x_zero_zero(const vector<uint64_t>& x) override;
 
     // a > E(b)
     Ciphertext great_than(vector<Plaintext>& raw_a, vector<Ciphertext>& raw_b);
@@ -59,11 +59,24 @@ public:
 
     vector<vector<uint64_t>> raw_encode_a(const vector<uint64_t>& in) override;
 
+    vector<uint64_t> raw_decode_b(const vector<vector<uint64_t>>& encoded_out, size_t original_b_size) override;
+    
+    vector<vector<uint64_t>> decode_b(const vector<Ciphertext>& cts) override;
     // low to high  
     vector<vector<uint64_t>> random_raw_encode_b() override;
 
     // low to high
     vector<vector<uint64_t>> random_raw_encode_a() override;
+
+    Plaintext get_one_hot(uint64_t start, uint64_t width) override;
+
+    vector<Ciphertext> rotate_m_rows(const vector<Ciphertext>& b, const vector<Ciphertext>& b_inv_rows, int step) override;
+
+    Ciphertext rotate_m_rows(const Ciphertext& b, const Ciphertext& b_inv_rows, int step) override;
+
+    vector<Ciphertext> rotate_m_rows(const vector<Ciphertext>& b, int step) override;
+
+    Ciphertext rotate_m_rows(const Ciphertext& b, int step) override;
 
     void print() override;
 

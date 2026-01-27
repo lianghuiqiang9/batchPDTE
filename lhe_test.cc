@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
     profile("Rotate_Rows (step=1)", [&]() { ct1 = lhe->rotate_rows(ct1, step); });
     Ciphertext ct_res;
     profile("Multiply            ", [&]() { ct_res = lhe->multiply(ct1, ct2); lhe->relinearize_inplace(ct_res); });
-
+    profile("Rotate_Cols         ", [&]() { ct_res = lhe->rotate_columns(ct_res); });
 
     cout << endl << "--- Decrypting & Verifying ---" << endl;
     
@@ -61,18 +61,19 @@ int main(int argc, char* argv[]) {
     vector<uint64_t> result;
     profile("Decrypt             ", [&]() { pt_res = lhe->decrypt(ct_res); });
     profile("Decode              ", [&]() { result = lhe->decode(pt_res); });
-    print_vec(result, 10);
+    print_vector(result, 10);
 
-    auto actural_result = mul(
-                            rotate(
-                                mul( 
-                                    add(a, 
+    auto actural_result = rotate_cols(
+                            mul(
+                                rotate_rows(
+                                    mul( 
+                                        add(a, 
+                                            b, mod),
                                         b, mod),
-                                     b, mod),
-                                 step), 
-                            b, mod);
+                                    step), 
+                            b, mod));
 
-    print_vec(actural_result, 10);
+    print_vector(actural_result, 10);
 
     cout << endl << "--- Multiply Performance ---" << endl;
     {

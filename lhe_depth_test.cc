@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
         case 1: lhe = make_unique<BGV>(depth, steps); break;
     }
 
-    print_vec(steps, steps.size(), ""); 
+    print_vector(steps, steps.size(), ""); 
     cout << endl;
     auto mod = lhe->plain_modulus;
     auto slots = lhe->slot_count;
@@ -51,8 +51,8 @@ int main(int argc, char* argv[]) {
             auto pt = lhe->decrypt(ct);
             auto result = lhe->decode(pt);
 
-            print_vec(result, 10);
-            print_vec(a, 10);
+            print_vector(result, 10);
+            print_vector(a, 10);
 
             if (a!=result){
                 cout<<"actural max depth : "<<i<<endl;
@@ -80,8 +80,8 @@ int main(int argc, char* argv[]) {
             auto pt = lhe->decrypt(ct);
             auto result = lhe->decode(pt);
 
-            print_vec(result, 10);
-            print_vec(a, 10);
+            print_vector(result, 10);
+            print_vector(a, 10);
 
             if (a!=result){
                 cout<<"actural max depth (fresh ciphertext) : "<<i<<endl;
@@ -99,7 +99,7 @@ int main(int argc, char* argv[]) {
 cout<<   "lhe params: "
     << "\n N: "<< (1<<lhe->log_poly_mod_degree)
     << ",\n p: "<< lhe->plain_modulus
-    << ",\n"; print_vec(q_vec, q_vec.size()," q:");
+    << ",\n"; print_vector(q_vec, q_vec.size()," q:");
 
     return 0;
 }

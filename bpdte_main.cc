@@ -10,7 +10,7 @@ using namespace std;
 
 // g++ -o bpdte_main -O3 bpdte_main.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1 -L ./build -lbpdte -Wl,-dpath,./lib
 
-// ./bpdte_main -i ./data/heart_11bits -d 128 -l 2 -m 6
+// ./bpdte_main -i ../data/heart_11bits -d 128 -l 1 -m 16
 
 int main(int argc, char* argv[]){
 
@@ -44,7 +44,7 @@ int main(int argc, char* argv[]){
     auto leaf_flatten = bpdte->encode_tree(root); 
 
     auto data = bpdte->load_data(input_address + "/x_test.csv", data_rows);
-    //print_vec(data,bpdte.data_cols,"data");
+    //print_vector(data,bpdte.data_cols,"data");
     auto data_cipher = bpdte->encode_data(data);
 
     // evaluate

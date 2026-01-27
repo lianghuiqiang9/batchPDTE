@@ -1,28 +1,29 @@
 #include"tcmp.h"
 
-TCMP::TCMP(int l, int m, int extra, uint8_t id) {
+TCMP::TCMP(int l, int m, int extra, bool is_rotate, uint8_t id) {
     this->scheme = "tcmp";
     this->id = id;
+    l = 1 << static_cast<int>(std::ceil(std::log2(l)));
     this->l = l;
     this->m = m;
     this->n = l * m;
 
     int cmp_depth_need = (this->id == 0x1) ? static_cast<int>(std::ceil(std::log2(l))) : l;
-    if(((1<<cmp_depth_need) !=l) && (this->id == 0x1)){
-        cout<<" l should be 2^x, error"<<endl;
-        exit(0);
-    }
-    depth = cmp_depth_need + extra;
-    //cout<<"depth: "<<depth<<endl;
 
-    std::vector<int> steps;
+    depth = cmp_depth_need + extra;
+    //cout<<"*depth: "<<depth<< "cmp_depth_need: "<< cmp_depth_need <<" extra: "<< extra <<endl;
+
     if (m <= 4){
+        std::vector<int> steps;
         for (int i = 1; i <= pow(2,m); i++) { // 1, 2, 3, ..., 2^m
             steps.push_back(i);
         }
+        this->lhe = make_unique<BFV>(depth, steps, is_rotate);        
+    }else{
+        this->lhe = make_unique<BFV>(depth, vector<int>(0), true);
     }
 
-    this->lhe = make_unique<BFV>(depth, steps);
+
 
     if (m >= int(this->lhe->log_poly_mod_degree - 1)) {
         cout<< m <<" " << this->lhe->log_poly_mod_degree<<endl;
@@ -106,14 +107,14 @@ Plaintext TCMP::init_one_zero_zero(){
     return lhe->encode(one_zero_zero);
 }
 
-Plaintext TCMP::init_x_zero_zero(const vector<uint64_t>& salt)  {
-    vector<uint64_t> salt_zero_zero(slot_count, 0ULL);
-    auto salt_size = salt.size();
-    auto limit = num_cmps > salt_size ? salt_size : num_cmps;
+Plaintext TCMP::init_x_zero_zero(const vector<uint64_t>& x)  {
+    vector<uint64_t> x_zero_zero(slot_count, 0ULL);
+    auto x_size = x.size();
+    auto limit = num_cmps > x_size ? x_size : num_cmps;
     for(size_t i = 0; i < limit ; i++){
-        salt_zero_zero[index_map[i]] = salt[i];
+        x_zero_zero[index_map[i]] = x[i];
     }
-    return lhe->encode(salt_zero_zero);
+    return lhe->encode(x_zero_zero);
 }
 
 Ciphertext TCMP::great_than(vector<Plaintext>& pt_a, vector<Ciphertext>& b)  {
@@ -232,6 +233,33 @@ vector<vector<uint64_t>> TCMP::raw_encode_b(const vector<uint64_t>& b)  {
     return out;
 }
 
+vector<uint64_t> TCMP::raw_decode_b(const vector<vector<uint64_t>>& encoded_out, size_t original_b_size){
+    return vector<uint64_t>(0);
+}
+
+vector<vector<uint64_t>> TCMP::decode_b(const vector<Ciphertext>& cts){
+    return vector<vector<uint64_t>>(0);
+}
+
+Plaintext TCMP::get_one_hot(uint64_t start, uint64_t width){
+
+}
+
+vector<Ciphertext> TCMP::rotate_m_rows(const vector<Ciphertext>& b, const vector<Ciphertext>& b_inv_rows, int step){
+
+}
+
+Ciphertext TCMP::rotate_m_rows(const Ciphertext& b, const Ciphertext& b_inv_rows, int step){
+
+}
+
+vector<Ciphertext> TCMP::rotate_m_rows(const vector<Ciphertext>& b,  int step){
+
+}
+
+Ciphertext TCMP::rotate_m_rows(const Ciphertext& b, int step){
+
+}
 // input = a
 // out = [a01, a02, a03, ...]
 // a = a00 + 2^m * a01 + (2^m)^2 * a02 ;

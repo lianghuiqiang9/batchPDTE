@@ -19,7 +19,7 @@ auto profile(string name, Func&& func) {
 
 
 template <typename T>
-void print_vec(const std::vector<T> &vec, size_t k, std::string name = "Resutl: ") {
+void print_vector(const std::vector<T> &vec, size_t k, std::string name = "Result: ") {
     if (vec.size()==0){
         return;
     }
@@ -36,16 +36,16 @@ void print_vec(const std::vector<T> &vec, size_t k, std::string name = "Resutl: 
 }
 
 template <typename T>
-void print_vec(const std::vector<std::vector<T>> &matrix, size_t k, std::string name = "Resutl: ") {
+void print_matrix(const std::vector<std::vector<T>> &matrix, size_t l, size_t m, std::string name = "Resutl: ") {
     if (matrix.size()==0){
         return;
     }
-    auto limit = matrix.size()>100? 100 : matrix.size();
-    cout << name;
+    auto limit = matrix.size()>l? l : matrix.size();
+    cout << name << endl;
     for (size_t i = 0;i < limit;i++){
-        print_vec(matrix[i], k, "");
+        print_vector(matrix[i], m, "");
     }
-    if (matrix.size()>100){
+    if (matrix.size()>l){
         cout<< "..., "<<matrix.size()<<" rows." <<endl;
     }
 }
@@ -56,7 +56,9 @@ vector<uint64_t> mul(const vector<uint64_t> &a, const vector<uint64_t> &b, uint6
 
 vector<uint64_t> scalar_mul(const vector<uint64_t> &a, uint64_t s, uint64_t mod);
 
-vector<uint64_t> rotate(const vector<uint64_t> &a, int k);
+vector<uint64_t> rotate_rows(const vector<uint64_t> &a, int k);
+
+vector<uint64_t> rotate_cols(const vector<uint64_t> &a);
 
 vector<vector<uint64_t>> transpose(const vector<vector<uint64_t>>& A);
 
@@ -71,7 +73,5 @@ uint64_t mod_exp(uint64_t a, uint64_t e, uint64_t n);
 uint64_t prime_mod_inverse(uint64_t a, uint64_t n);
 
 uint64_t d_factorial_inv_with_sign(uint64_t d, uint64_t mod);
-
-uint64_t get_nearest_power_of_two(uint64_t n);
 
 #endif

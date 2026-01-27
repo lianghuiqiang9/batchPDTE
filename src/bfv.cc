@@ -36,27 +36,29 @@ BFV::BFV( int depth, vector<int> steps, bool is_rotate) {
         exit(0);
     }
 /////////////////////////////////
-
-    auto coeff_modulus = CoeffModulus::Create(1 << log_poly_mod_degree, bits);
-
     this->log_poly_mod_degree = log_poly_mod_degree;
-    parms.set_poly_modulus_degree(1 << log_poly_mod_degree);
-    parms.set_plain_modulus(PlainModulus::Batching(1 << log_poly_mod_degree, prime_bitlength));
+    auto poly_degree = 1 << log_poly_mod_degree;
+    auto coeff_modulus = CoeffModulus::Create(poly_degree, bits);
+
+    parms.set_poly_modulus_degree(poly_degree);
+    parms.set_plain_modulus(PlainModulus::Batching(poly_degree, prime_bitlength));
     parms.set_coeff_modulus(coeff_modulus);
 
     context = make_shared<SEALContext>(parms);
     KeyGenerator keygen(*context);
     keygen.create_public_key(pk);
     keygen.create_relin_keys(rlk);
-    
-    // vector<uint32_t> elts = { 3, 9, 27 }; // for steps: 1, 2, 3          
+           
     if (is_rotate){
-        if(steps.size() == 0){
-            keygen.create_galois_keys(gal_keys);
-        }else{
-            auto elts = context->key_context_data()->galois_tool()->get_elts_from_steps(steps);
-            keygen.create_galois_keys(elts, gal_keys);
-        }
+        keygen.create_galois_keys(gal_keys);
+    }else{
+        auto elts = context->key_context_data()->galois_tool()->get_elts_from_steps(steps);
+        
+        // rotate_columns key, maybe unnecessary.
+        uint32_t conj_elt = 2 * poly_degree - 1;
+        elts.push_back(conj_elt);
+
+        keygen.create_galois_keys(elts, gal_keys);
     }
             
     

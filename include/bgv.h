@@ -6,7 +6,7 @@
 class BGV :public LHE {
 public:
 
-    BGV(int depth = 3, vector<int> steps = vector<int>{}, bool is_rotate = true);
+    BGV(int depth = 3, vector<int> steps = vector<int>{}, bool is_rotate = false);
 
     ~BGV() = default;
 

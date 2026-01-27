@@ -1,7 +1,9 @@
 #include"dcmp.h"
 
-DCMP::DCMP(int l, int m, int extra) {
+DCMP::DCMP(int l, int m, int extra, bool is_rotate) {
     this->scheme = "dcmp";
+    l = 1 << static_cast<int>(std::ceil(std::log2(l)));
+    m = 1 << static_cast<int>(std::ceil(std::log2(m)));
     this->l = l;
     this->m = m;
     this->n = l * m;
@@ -14,7 +16,7 @@ DCMP::DCMP(int l, int m, int extra) {
         steps.push_back(i);
     }
 
-    this->lhe = make_unique<BFV>(depth, steps, (m!=1));
+    this->lhe = make_unique<BFV>(depth, steps, is_rotate);
 
     slot_count = lhe->slot_count;
     row_count = slot_count / 2;
@@ -58,6 +60,10 @@ vector<vector<uint64_t>> DCMP::encode_b(const vector<vector<uint64_t>>& raw_b) {
                 temp[offset + k] = 1 - ((raw_b[i][j]>>k)&1);
             }
          }
+
+        if(l!=1){
+            temp[slot_count - 1] = 13; // padding.
+        }
         out[i] = temp;
     }
     return out;
@@ -70,6 +76,31 @@ vector<Ciphertext> DCMP::encrypt(const vector<vector<uint64_t>>& raw_b) {
     }
 
     return out;
+}
+
+vector<vector<uint64_t>> DCMP::decode_b(const vector<Ciphertext>& cts) {
+    vector<vector<uint64_t>> decrypted_data(l);
+
+    for (int i = 0; i < l; i++) {
+        decrypted_data[i] = decrypt(cts[i]); 
+    }
+    vector<vector<uint64_t>> raw_b(l, vector<uint64_t>(num_cmps, 0));
+
+    for (int i = 0; i < l; i++) {
+        for (uint64_t j = 0; j < num_cmps; j++) {
+            auto offset = j * m;
+            uint64_t val = 0;
+
+            for (int k = 0; k < m; k++) {
+                uint64_t slot_val = decrypted_data[i][offset + k];
+                uint64_t bit = 1 - (slot_val & 1); 
+                val |= (bit << k);
+            }
+            raw_b[i][j] = val;
+        }
+    }
+
+    return raw_b;
 }
 
 // input
@@ -88,6 +119,11 @@ vector<Plaintext> DCMP::encode_a(const vector<vector<uint64_t>>& raw_a){
                 temp[offset + k] = (raw_a[i][j]>>k)&1;
             }
          }
+
+        if(l!=1){
+            temp[slot_count - 1] =13; // padding.
+        }
+
         out[i] = lhe->encode(temp);
     }
     return out;
@@ -113,6 +149,7 @@ Plaintext DCMP::init_x_zero_zero(const vector<uint64_t>& x) {
     return lhe->encode(x_zero_zero);
 }
 
+// a>E(b);
 Ciphertext DCMP::great_than(vector<Plaintext>& a, vector<Ciphertext>& b) {
     vector<Ciphertext> eq(l);
     vector<Ciphertext> gt(l);
@@ -128,7 +165,6 @@ Ciphertext DCMP::great_than(vector<Plaintext>& a, vector<Ciphertext>& b) {
         int depth = static_cast<int>(std::log2(m));
         for(int j = 0; j < depth ; j++){
             int step = 1<<j;
-
             auto gt_temp = lhe->rotate_rows(gt[i], step);
             auto eq_temp = lhe->rotate_rows(eq[i], step);
             lhe->multiply_inplace(eq[i], eq_temp);
@@ -141,7 +177,6 @@ Ciphertext DCMP::great_than(vector<Plaintext>& a, vector<Ciphertext>& b) {
     }
 
     // in rows
-
     int depth = static_cast<int>(std::log2(l));
     for(int i = 0; i < depth ; i++){
         int temp1 = 1<<i;
@@ -155,7 +190,6 @@ Ciphertext DCMP::great_than(vector<Plaintext>& a, vector<Ciphertext>& b) {
             lhe->relinearize_inplace(eq[j]);
         }   
     }
-
     return std::move(gt[0]);
 }
 
@@ -217,12 +251,23 @@ vector<vector<uint64_t>> DCMP::raw_encode_b(const vector<uint64_t>& b) {
             out_ptr[j] = (in_ptr[j] >> offset) & range;
         }
 
-        if(l!=1){
-            out_ptr[num_cmps] = 13; // Padding bit
-        }
-
     }
     return out;
+}
+
+vector<uint64_t> DCMP::raw_decode_b(const vector<vector<uint64_t>>& encoded_out, size_t original_b_size) {
+    vector<uint64_t> b(original_b_size, 0);
+    for (size_t j = 0; j < original_b_size; j++) {
+        uint64_t restored_val = 0;
+        for (int i = 0; i < l; i++) {
+            const auto offset = i * m;
+            uint64_t slice = encoded_out[i][j];
+            restored_val |= (slice << offset);
+        }
+        b[j] = restored_val;
+    }
+    
+    return b;
 }
 
 vector<vector<uint64_t>> DCMP::raw_encode_a(const vector<uint64_t>& in) {
@@ -247,6 +292,93 @@ vector<vector<uint64_t>> DCMP::random_raw_encode_b() {
 // low to high
 vector<vector<uint64_t>> DCMP::random_raw_encode_a() {
     return random_raw_encode_b();
+}
+
+
+Plaintext DCMP::get_one_hot(uint64_t start, uint64_t width) {
+    vector<uint64_t> onehot(lhe->slot_count, 0); 
+
+    uint64_t end_idx = std::min((start + width) * m, (uint64_t)onehot.size());
+    std::fill(onehot.begin() + start * m, onehot.begin() + end_idx, 1);
+    
+    return lhe->encode(onehot);
+}
+
+vector<Ciphertext> DCMP::rotate_m_rows(const vector<Ciphertext>& b, const vector<Ciphertext>& b_inv_rows, int step) {
+
+    int64_t absolute_step = (static_cast<int64_t>(step) * m) % slot_count;
+
+    if (absolute_step < 0) {
+        absolute_step += slot_count;
+    }
+
+    if (absolute_step < row_count) {
+        if (absolute_step == 0) return b;
+        return lhe->rotate_rows(b, static_cast<int>(absolute_step));
+    } 
+    else {
+        int64_t physical_shift = absolute_step - row_count;
+        if (physical_shift == 0) return b_inv_rows;
+        return lhe->rotate_rows(b_inv_rows, static_cast<int>(physical_shift));
+    }
+}
+
+vector<Ciphertext> DCMP::rotate_m_rows(const vector<Ciphertext>& b, int step) {
+
+    int64_t absolute_step = (static_cast<int64_t>(step) * m) % slot_count;
+    if (absolute_step < 0) {
+        absolute_step += slot_count;
+    }
+
+    if (absolute_step < row_count) {
+        if (absolute_step == 0) return b;
+        return lhe->rotate_rows(b, static_cast<int>(absolute_step));
+    } 
+    else {
+        int64_t physical_shift = absolute_step - row_count;
+        auto b_inv_rows = lhe->rotate_columns(b);
+        if (physical_shift == 0) return b_inv_rows;
+        return lhe->rotate_rows(b_inv_rows, static_cast<int>(physical_shift));
+    }
+}
+
+Ciphertext DCMP::rotate_m_rows(const Ciphertext& b, const Ciphertext& b_inv_rows, int step) {
+
+    int64_t absolute_step = (static_cast<int64_t>(step) * m) % slot_count;
+
+    if (absolute_step < 0) {
+        absolute_step += slot_count;
+    }
+
+    if (absolute_step < row_count) {
+        if (absolute_step == 0) return b;
+        return lhe->rotate_rows(b, static_cast<int>(absolute_step));
+    } 
+    else {
+        int64_t physical_shift = absolute_step - row_count;
+        if (physical_shift == 0) return b_inv_rows;
+        return lhe->rotate_rows(b_inv_rows, static_cast<int>(physical_shift));
+    }
+}
+
+Ciphertext DCMP::rotate_m_rows(const Ciphertext& b, int step) {
+
+    int64_t absolute_step = (static_cast<int64_t>(step) * m) % slot_count;
+
+    if (absolute_step < 0) {
+        absolute_step += slot_count;
+    }
+
+    if (absolute_step < row_count) {
+        if (absolute_step == 0) return b;
+        return lhe->rotate_rows(b, static_cast<int>(absolute_step));
+    } 
+    else {
+        int64_t physical_shift = absolute_step - row_count;
+        auto b_inv_rows = lhe->rotate_columns(b);
+        if (physical_shift == 0) return b_inv_rows;
+        return lhe->rotate_rows(b_inv_rows, static_cast<int>(physical_shift));
+    }
 }
 
 void DCMP::print() {
