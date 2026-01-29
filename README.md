@@ -8,17 +8,17 @@ make install
 
 # =========================== Run ===========================
 
-./lhe_test -t 0
-
-./lhe_depth_test -t 0
+./lhe_test -t 0 -d 5
 
 ./cmp_main -m 8 -l 2 -n 16 -t 0
 
-./serial_test -i ../data/heart_11bits -o ../data/heart_11bits_temp -d 16
+./tree_test -i ../data/heart_11bits -o ../data/heart_11bits_temp -d 16
 
 ./bpdte_main -i ../data/heart_11bits -d 2048 -l 8 -m 2 -n 16 -c 0 -e 0 -p 0
 
 ./bpdte_main -i ../data/heart_11bits -d 1024 -l 8 -m 2 -n 16 -c 0 -e 5 -p 1
+
+./pdte_main -i ../data/heart_11bits -l 1 -m 16 -d 10
 
 # ==================== Parameter Settings ====================
 

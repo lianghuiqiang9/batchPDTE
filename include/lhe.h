@@ -24,6 +24,7 @@ public:
     PublicKey pk;
     RelinKeys rlk;
     GaloisKeys gal_keys;
+    bool is_rotate = false;
     
     uint64_t log_poly_mod_degree;
     uint64_t plain_modulus;
@@ -47,7 +48,7 @@ public:
 
     virtual void mod_switch(const Ciphertext& ct, Plaintext& pt) = 0;
 
-    virtual void print() = 0;
+    void print();
 
     void multiply_plain_inplace(Ciphertext& ct, Plaintext& pt);
 

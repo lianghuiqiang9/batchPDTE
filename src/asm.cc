@@ -6,7 +6,6 @@ ASM::ASM(){
 // server
 LeafFlatten ASM::encode_tree(shared_ptr<Node> root){
     auto leaf = raw_encode_tree(root);
-  
     tree_depth_factorial_inv_pt = init_d_factorial_inv_pt();
     tree_depth_vec_pt = init_tree_depth_vec();  
 
@@ -16,9 +15,8 @@ LeafFlatten ASM::encode_tree(shared_ptr<Node> root){
 // client
 void ASM::setup_cmp(int cmp_type, int l, int m, int extra){
     
-    int log_tree_depth = (tree_depth <= 1) ? 0 : static_cast<int>(std::ceil(std::log2(tree_depth)));
-    log_tree_depth = log_tree_depth + 1; // for additive and rotate.
-    
+    int log_tree_depth = static_cast<int>(std::ceil(std::log2(tree_depth) + 1));
+        
     switch (cmp_type) {
         case 0: cmp = make_unique<TCMP>(l, m, log_tree_depth + extra); break;
         case 1: cmp = make_unique<DCMP>(l, m, log_tree_depth + extra); break;
@@ -37,9 +35,7 @@ void ASM::setup_cmp(int cmp_type, int l, int m, int extra){
 // server
 
 vector<vector<Ciphertext>> ASM::evaluate(shared_ptr<Node> root, vector<vector<Ciphertext>>& data_cipher, LeafFlatten& leaf_flatten){
-    
     auto sum_path_result = sum_path(root, data_cipher, leaf_flatten);
-    
     return adapted_sum_path(sum_path_result, leaf_flatten);
     
 }
@@ -102,7 +98,6 @@ Ciphertext ASM::private_info_retrieval(vector<Ciphertext> a, vector<Plaintext> b
 }
 
 vector<uint64_t> ASM::recover(vector<vector<Ciphertext>>& a){
-
     return cmp->recover(a[0][0]);
 }
 

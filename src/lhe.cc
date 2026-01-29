@@ -217,9 +217,9 @@ void LHE::negate_inplace(Ciphertext& ct){
     evaluator->negate_inplace(ct);
 }
 
-Ciphertext LHE::negate(Ciphertext ct) { // 值传递
+Ciphertext LHE::negate(Ciphertext ct) { 
     evaluator->negate_inplace(ct);
-    return ct; // 移动返回
+    return ct;
 }
 
 long LHE::rlk_size() {
@@ -235,4 +235,19 @@ long LHE::pk_size() {
 long LHE::glk_size() {
     std::stringstream data_stream;
     return gal_keys.save(data_stream);
+}
+
+void LHE::print(){
+    cout << "LHE Parameters:" << endl;
+    cout << "  - Scheme:        " << scheme << endl;
+    cout << "  - Max Depth:     " << depth << endl;
+    cout << "  - Slots:         " << slot_count << endl;
+    cout << "  - Plain Modulus: " << plain_modulus << endl;
+    cout << "  - Rotate Steps: [ "; 
+    if(is_rotate){
+        cout<<" 1 2 4 8, ... ]"<<endl;
+    }else{
+        for (auto e:this->steps){ cout << e << " "; } 
+             cout <<"]"<< endl;
+    }                         
 }

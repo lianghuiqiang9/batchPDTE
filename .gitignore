@@ -2,10 +2,11 @@
 cmp_main
 bpdte_main
 lhe_test
-lhe_depth_test
-serial_test
+tree_test
+
 lib/*
 build/*
+
 output.txt
 output_cmp.txt
 output_pdte.txt

@@ -71,7 +71,8 @@ int main(int argc, char* argv[]) {
     cmp->print();
     cout<< " decrypt result a > b                     : "<< is_correct 
         << " \n keys size                                : "<< cmp->keys_size()/1024
-        << " kB\n cmp time cost                            : "<< finish/1000     
+        << " kB\n batch nums                               : "<< num_cmps
+        << " \n cmp time cost                            : "<< finish/1000     
         << " ms\n cmp comm. cost                           : "<< comm/1024 //
         << " kB\n amortized time cost                      : "<< (float)finish/1024/num_cmps 
         << " ms\n amortized comm. cost                     : "<< (float)comm/1024/num_cmps 

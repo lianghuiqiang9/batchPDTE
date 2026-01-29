@@ -29,12 +29,10 @@ install(TARGETS bpdte LIBRARY DESTINATION lib)
 
 set(TEST_SOURCES 
     cmp_main.cc 
-    cmp_test.cc 
-    lhe_depth_test.cc 
     lhe_test.cc 
     bpdte_main.cc 
     pdte_main.cc 
-    serial_test.cc
+    tree_test.cc
 )
 
 foreach(source_file ${TEST_SOURCES})

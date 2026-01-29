@@ -63,17 +63,27 @@ struct Path {
 };
 
 void load_tree_rec(json::reference ref, Node& node);
+
 json save_tree_rec(Node& node);
+
 void print_node(Node& a, std::string tabs = "");
+
 void print_tree_rec(Node* a, string tabs);
+
 uint64_t eval_rec(const Node& node, const vector<uint64_t>& features);
+
 uint64_t eval_rec2(const Node& node, const vector<uint64_t>& features);
+
 vector<vector<uint64_t>> load_matrix(string filename, int data_size);
+
 void save_data(const vector<vector<uint64_t>>& data, const string& filename);
 
 void find_all_paths(shared_ptr<Node> node, vector<shared_ptr<Node>>& current_path, vector<Path>& all_paths);
+
 vector<Path> get_raw_paths(shared_ptr<Node> root);
+
 void print_paths(const vector<Path>& paths);
+
 void extract_matrices_from_paths(const vector<Path>& paths, 
                                  vector<vector<uint64_t>>& index_matrix,
                                  vector<vector<uint64_t>>& threshold_matrix,

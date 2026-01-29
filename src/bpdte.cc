@@ -9,7 +9,6 @@ shared_ptr<Node> BPDTE::load_tree(string filename){
     return root;
 }
 
-
 // client
 vector<vector<uint64_t>> BPDTE::load_data(string filename, int data_rows){
     this->data_rows = data_rows;
@@ -100,7 +99,6 @@ vector<Ciphertext> BPDTE::sum_path(shared_ptr<Node> root, vector<vector<Cipherte
             }else{
                 node->right->value = cmp->great_than(node->cmp_encode_threshold, data_cipher[node->index]);
             }
-            
             node->left->value = lhe->negate(node->right->value);
             lhe->add_plain_inplace(node->left->value, one_one_one);
             lhe->add_inplace(node->left->value, node->value);
@@ -169,7 +167,7 @@ bool BPDTE::verify(const vector<uint64_t>& result, shared_ptr<Node> root, const 
 }
 
 bool BPDTE::verify(const vector<uint64_t>& expect_result, const vector<uint64_t>& actural_result){
-    //print_vector(expect_result, expect_result.size(),         "bpdte_result   : ");
+    //print_vector(expect_result, expect_result.size(), "bpdte_result   : ");
     //print_vector(actural_result, actural_result.size(), "actural_result: ");
     
     for(size_t i = 0; i < actural_result.size(); ++i){

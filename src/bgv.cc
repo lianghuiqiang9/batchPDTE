@@ -5,6 +5,7 @@ BGV::BGV(int depth, vector<int> steps, bool is_rotate) {
     this->parms = EncryptionParameters(scheme_type::bgv);
     this->scheme = "bgv";
     this->steps = steps;
+    this->is_rotate = is_rotate;
 /////////////////////////////////////
     uint64_t log_poly_mod_degree = 13;
     uint64_t prime_bitlength = 17;
@@ -31,12 +32,12 @@ BGV::BGV(int depth, vector<int> steps, bool is_rotate) {
         exit(0);
     }
 ////////////////////////////////
-
-    auto coeff_modulus = CoeffModulus::Create(1 << log_poly_mod_degree, bits);
-
     this->log_poly_mod_degree = log_poly_mod_degree;
-    parms.set_poly_modulus_degree(1 << log_poly_mod_degree);
-    parms.set_plain_modulus(PlainModulus::Batching(1 << log_poly_mod_degree, prime_bitlength));
+    auto poly_degree = 1 << log_poly_mod_degree;
+    auto coeff_modulus = CoeffModulus::Create(poly_degree, bits);
+
+    parms.set_poly_modulus_degree(poly_degree);
+    parms.set_plain_modulus(PlainModulus::Batching(poly_degree, prime_bitlength));
     parms.set_coeff_modulus(coeff_modulus);
 
     context = make_shared<SEALContext>(parms);
@@ -48,6 +49,10 @@ BGV::BGV(int depth, vector<int> steps, bool is_rotate) {
         keygen.create_galois_keys(gal_keys);
     }else{
         auto elts = context->key_context_data()->galois_tool()->get_elts_from_steps(steps);
+        
+        // rotate_columns key, maybe unnecessary.
+        uint32_t conj_elt = 2 * poly_degree - 1;
+        elts.push_back(conj_elt);
         keygen.create_galois_keys(elts, gal_keys);
     }
 
@@ -98,13 +103,4 @@ int BGV::get_noise_budget(const Ciphertext& ct) {
     return decryptor->invariant_noise_budget(ct);
 }
 
-void BGV::print(){
-    cout << "LHE Parameters:" << endl;
-    cout << "  - Scheme:        " << scheme << endl;
-    cout << "  - Max Depth:     " << depth << endl;
-    cout << "  - Slots:         " << slot_count << endl;
-    cout << "  - Plain Modulus: " << plain_modulus << endl;
-    cout << "  - Rotation Steps: [ "; 
-                            for (auto e:this->steps){ cout << e << " "; } 
-                                cout <<" ]"<< endl;
-}
+

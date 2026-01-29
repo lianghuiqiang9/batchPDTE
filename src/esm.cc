@@ -7,11 +7,9 @@ ESM::ESM(){
 // server
 LeafFlatten ESM::encode_tree(shared_ptr<Node> root){
     auto leaf = raw_encode_tree(root);
-
     this->salts = init_salts(2, leaf.leaf_vec.size());
     
     return leaf;
-
 }
 
 // client
@@ -31,7 +29,6 @@ void ESM::setup_cmp(int cmp_type, int l, int m, int extra){
     zero_zero_zero = lhe->encrypt(zero);
 
 }
-
 
 vector<vector<Plaintext>> ESM::init_salts(int row, int cols){
     std::random_device rd;  
@@ -114,7 +111,6 @@ vector<vector<Ciphertext>> ESM::shuffle(vector<vector<Ciphertext>> out, int leaf
 
         auto L = random_permutation(leaf_num);
 
-        
         for(int j = 0; j < leaf_num; ++j){
             
             x_temp0[j] = x[j];
@@ -126,7 +122,6 @@ vector<vector<Ciphertext>> ESM::shuffle(vector<vector<Ciphertext>> out, int leaf
             lhe->multiply_plain_inplace(x_temp1[j], W1_pt);
             lhe->multiply_plain_inplace(y_temp0[j], W0_pt);
             lhe->multiply_plain_inplace(y_temp1[j], W1_pt);
-
         }
 
         for(int j = 0; j < leaf_num; ++j){

@@ -7,7 +7,10 @@ using namespace std;
 
 // g++ -o pdte_main -O3 pdte_main.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1 -L ./build -lbpdte -Wl,-dpath,./lib
 
-// ./pdte_main -i ../data/heart_11bits -l 1 -m 16
+// ./pdte_main -i ../data/heart_11bits -l 1 -m 16 -d 10
+// ./pdte_main -i ../data/breast_11bits -l 1 -m 16 -d 10
+// ./pdte_main -i ../data/spam_11bits -l 1 -m 16 -d 10
+// ./pdte_main -i ../data/electricity_10bits -l 1 -m 16 -d 10
 
 int main(int argc, char* argv[]){
 
@@ -34,52 +37,29 @@ int main(int argc, char* argv[]){
     }
 
     auto root = pdte->load_tree(input_address + "/model.json");
-    root->print_tree();
-
+    //root->print_tree();
     pdte->setup_cmp(cmp_type, l, m, extra);
-    
     auto tree_flatten = pdte->encode_tree(root); 
 
     auto raw_data = pdte->load_data(input_address + "/x_test.csv", data_rows);
 
-    for (int i = 0 ; i <raw_data.size(); i++){
+    float finish = 0;
+    bool is_correct = true;
+    long comm = 0;
+    for (size_t i = 0 ; i <raw_data.size(); i++){
         auto data = vector<vector<uint64_t>>{raw_data[i]};
-            
         auto data_cipher = pdte->encode_data(data);
 
-            // evaluate
+        // evaluate
         vector<vector<Ciphertext>> result;
-        auto finish = profile("pdte", [&]() { 
+        finish += profile("pdte_row_" + std::to_string(i), [&]() { 
             result = pdte->evaluate(root, data_cipher, tree_flatten);
         });
         auto expect_result = pdte->recover(result);
         auto actural_result = root->eval(data);
-        cout<<" i: "<< i <<endl;
-        cout<<"expect_result: "<< expect_result[0] <<endl;    
-        cout<<"actural_result: "<< actural_result[0] <<endl;
-        if (expect_result[0] != actural_result[0]){
-            cout<<" i: "<< i <<endl;
-            break;
-        }
+        is_correct = is_correct && pdte->verify(expect_result, actural_result);
+        comm += pdte->comm_cost(data_cipher, result);
     }
-
-/*
-    auto data_cipher = pdte->encode_data(data);
-
-        // evaluate
-    vector<vector<Ciphertext>> result;
-    auto finish = profile("pdte", [&]() { 
-        result = pdte->evaluate(root, data_cipher, tree_flatten);
-    });
-    cout<<" * "<<endl;
-    auto expect_result = pdte->recover(result);
-
-    auto actural_result = root->eval(data);
-    cout<<"expect_result: "<< expect_result[0] <<endl;    
-    cout<<"actural_result: "<< actural_result[0] <<endl;
-
-    auto is_correct = pdte->verify(expect_result, actural_result);
-    long comm = pdte->comm_cost(data_cipher, result);
 
     pdte->print();
     cout<< " bpdte result is correct                  : "<< is_correct 
@@ -87,8 +67,11 @@ int main(int argc, char* argv[]){
         << " \n data_rows                                : "<< data_rows
         << " \n keys size                                : "<< pdte->keys_size()/1024
         << " kB\n evaluate time cost                       : "<< finish/1000     
-        << " ms\n evaluate comm. cost                      : "<< comm/1024
-        << " kB"<< endl; 
-*/
+        << " ms\n evaluate comm. cost                      : "<< comm/1024 
+        << " kB\n amortized time cost                      : "<< finish/1024/data_rows 
+        << " ms\n amortized comm. cost                     : "<< comm/1024 /data_rows 
+        << " kB"<< endl;
+
+
     return 0;
 }

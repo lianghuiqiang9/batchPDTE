@@ -19,7 +19,7 @@ struct TreeFlatten {
     vector<vector<Plaintext>> threshold_pt;
     vector<Plaintext> direction_pt;
     Plaintext leaf_values_pt;
-    int remiander;
+    int remainder;
     int new_cols; // original index_matrix cols.
     int aligned_cols; // the thresholds in one level.
 };
@@ -27,23 +27,15 @@ struct TreeFlatten {
 class PDTE{
     public:
     string scheme = "pdte";
-    int tree_depth = -1;        // set it first
+    int tree_depth = 16;        // set it first
     int data_cols;
-    //int data_rows = 1;
 
     unique_ptr<CMP> cmp;
     shared_ptr<LHE> lhe;
-    //Plaintext one_one_one;
-    //Ciphertext zero_zero_zero;
 
     vector<Ciphertext> cmp_zero_b;
 
-    //Plaintext tree_depth_factorial_inv_pt;
-    //vector<Plaintext> tree_depth_vec_pt;
-
-    //
     int repeat = 1;
-    bool rot_flag = false;
 
     shared_ptr<Node> load_tree(string filename);
 
@@ -51,15 +43,12 @@ class PDTE{
 
     void setup_cmp(int cmp_type, int l, int m, int extra = 0);
 
-    //vector<Plaintext> init_tree_depth_vec();
-
-    //Plaintext init_d_factorial_inv_pt();
-    uint64_t get_optimized_aligned_cols(uint64_t cols, uint64_t rows, uint64_t num_cmps);
-
     vector<vector<IndexPos>> get_index_flatten(vector<vector<uint64_t>> index_matrix, uint64_t cols,  uint64_t aligned_cols); 
+    
+    vector<Ciphertext> expend_compare_result(vector<Ciphertext>& cmp_raw_out, uint64_t aligned_cols, uint64_t new_cols, uint64_t remainder);
+
     TreeFlatten encode_tree(shared_ptr<Node> root);
 
-    // client
     vector<vector<Ciphertext>> encode_data(const vector<vector<uint64_t>>& data);
 
     vector<vector<Ciphertext>> evaluate(shared_ptr<Node> root, vector<vector<Ciphertext>>& data_cipher, TreeFlatten& tree_flatten);

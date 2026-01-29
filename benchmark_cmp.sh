@@ -4,6 +4,7 @@
 ## cdcmp
 ## rdcmp
 
+# precision 
 ./build/cmp_main -c 0 -l 2 -m 4 
 ./build/cmp_main -c 0 -l 4 -m 4
 ./build/cmp_main -c 0 -l 8 -m 4

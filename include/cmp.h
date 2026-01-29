@@ -32,44 +32,47 @@ public:
 
     virtual vector<vector<uint64_t>> encode_b(const vector<vector<uint64_t>>& b) = 0;
     
-    virtual vector<Ciphertext> encrypt(const vector<vector<uint64_t>>& b) = 0;
+    vector<Ciphertext> encrypt(const vector<vector<uint64_t>>& b);
 
     virtual vector<Plaintext> encode_a(const vector<vector<uint64_t>>& a) = 0;
 
-    virtual Plaintext init_x_zero_zero(const vector<uint64_t>& x) = 0;
+    Plaintext init_one_zero_zero();
+
+    Plaintext init_x_zero_zero(const vector<uint64_t>& x);
 
     virtual Ciphertext great_than(vector<Plaintext>& a, vector<Ciphertext>& b) = 0;
 
-    virtual void clear_up(Ciphertext& result) = 0;
+    void clear_up(Ciphertext& result);
 
-    virtual vector<uint64_t> decrypt(const Ciphertext& ct) = 0;
+    vector<uint64_t> decrypt(const Ciphertext& ct);
 
-    virtual vector<uint64_t> recover(const Ciphertext& ct) = 0;
+    vector<uint64_t> decode(const std::vector<uint64_t>& res);
 
-    virtual vector<vector<uint64_t>> raw_encode_b(const vector<uint64_t>& b) = 0;
+    vector<uint64_t> recover(const Ciphertext& ct);
+
+    vector<vector<uint64_t>> raw_encode_b(const vector<uint64_t>& b);
     
-    virtual vector<vector<uint64_t>> raw_encode_a(const vector<uint64_t>& a) = 0;
+    vector<vector<uint64_t>> raw_encode_a(const vector<uint64_t>& a);
 
-    virtual vector<uint64_t> raw_decode_b(const vector<vector<uint64_t>>& encoded_out, size_t original_b_size) = 0;
+    vector<uint64_t> raw_decode_b(const vector<vector<uint64_t>>& encoded_out, size_t original_b_size);
 
     virtual vector<vector<uint64_t>> decode_b(const vector<Ciphertext>& cts) = 0;
 
-    virtual vector<vector<uint64_t>> random_raw_encode_b() = 0;
+    vector<vector<uint64_t>> random_raw_encode_b();
 
-    virtual vector<vector<uint64_t>> random_raw_encode_a() = 0;
+    vector<vector<uint64_t>> random_raw_encode_a();
 
-    virtual Plaintext get_one_hot(uint64_t start, uint64_t width) = 0;
+    Plaintext get_one_hot(uint64_t start, uint64_t width);
 
-    virtual vector<Ciphertext> rotate_m_rows(const vector<Ciphertext>& b, const vector<Ciphertext>& b_inv_rows, int step) = 0;
+    vector<Ciphertext> exchange(const vector<Ciphertext>& b, uint64_t end_index, uint64_t start_index);
     
-    virtual Ciphertext rotate_m_rows(const Ciphertext& b, const Ciphertext& b_inv_rows, int step) = 0;
-
-    virtual vector<Ciphertext> rotate_m_rows(const vector<Ciphertext>& b, int step) = 0;
-
-    virtual Ciphertext rotate_m_rows(const Ciphertext& b, int step) = 0;
-
-    virtual void print() = 0;
-
+    vector<Ciphertext> exchange(const vector<Ciphertext>& b, const vector<Ciphertext>& b_rot_columns, uint64_t end_index, uint64_t start_index);
+    
+    Ciphertext exchange(const Ciphertext& b, uint64_t end_index, uint64_t start_index);
+    
+    vector<Ciphertext> fill_width_hot(vector<Ciphertext>& data, uint64_t start, uint64_t width, uint64_t repeat);
+    
+    void print();
     // 
     virtual vector<bool> verify(const vector<vector<uint64_t>>& a, const vector<vector<uint64_t>>& b) = 0;
 

@@ -9,16 +9,17 @@
 
 int main(int argc, char* argv[]) {
     cout << "--- Initializing LHE System ---" << endl;
-    const int depth = 12;
-    const vector<int> steps = {-1,1};
+    int depth = 12;
+    vector<int> steps = {-1,1};
 
     int opt;
     int lhe_type = 0;
     unique_ptr<LHE> lhe;
 
-    while ((opt = getopt(argc, argv, "ft:")) != -1) {
+    while ((opt = getopt(argc, argv, "ft:d:")) != -1) {
         switch (opt) {
         case 't': lhe_type = atoi(optarg); break;
+        case 'd': depth = atoi(optarg); break;
         }
     }
     switch (lhe_type) {
@@ -78,7 +79,7 @@ int main(int argc, char* argv[]) {
     cout << endl << "--- Multiply Performance ---" << endl;
     {
         auto ct = lhe->encrypt(a);
-        profile("Depth times multiply", [&]() {
+        profile(std::to_string(depth) +" times multiply", [&]() {
             for (int i = 0; i < depth; ++i) {
                 profile("Multiply            ", [&]() { 
                     ct = lhe->multiply(ct, ct); 
@@ -88,5 +89,74 @@ int main(int argc, char* argv[]) {
         });
     }
 
-       return 0;
+    
+    cout << endl << "--- Actural Depth ---" << endl;
+    
+    {
+        vector<uint64_t> a(slots, 0);
+        for(size_t i = 0; i < slots; i++) {
+            a[i] = i % mod;           // [0, 1, 2, ...]
+        }
+        auto ct = lhe->encrypt(a);
+        for (int i = 0; i < 20; ++i) {
+
+            ct = lhe->multiply(ct, ct);
+            lhe->relinearize_inplace(ct);
+            a = mul(a, a, mod);
+
+            auto pt = lhe->decrypt(ct);
+            auto result = lhe->decode(pt);
+
+            print_vector(result, 10);
+            print_vector(a, 10);
+
+            if (a!=result){
+                cout<<"actural max depth : "<<i<<endl;
+                break;
+            }
+        }    
+    }
+    cout << endl << "--- Actural Depth (fresh ciphertext) ---" << endl;
+
+    {
+        vector<uint64_t> a(slots, 0);
+        for(size_t i = 0; i < slots; i++) {
+            a[i] = i % mod;           // [0, 1, 2, ...]
+        }
+        auto ct = lhe->encrypt(a);
+        auto a_temp = a;
+        auto ct_temp = lhe->encrypt(a);
+
+        for (int i = 0; i < 20; ++i) {
+
+            ct = lhe->multiply(ct, ct_temp);
+            lhe->relinearize_inplace(ct);
+            a = mul(a, a_temp, mod);
+
+            auto pt = lhe->decrypt(ct);
+            auto result = lhe->decode(pt);
+
+            print_vector(result, 10);
+            print_vector(a, 10);
+
+            if (a!=result){
+                cout<<"actural max depth (fresh ciphertext) : "<<i<<endl;
+                break;
+            }
+        }
+    }
+
+    auto &coeff_modulus = lhe->parms.coeff_modulus();
+    vector<uint64_t> q_vec(coeff_modulus.size());
+    for (size_t i = 0; i < coeff_modulus.size(); i++) {
+        q_vec[i] = log2(coeff_modulus[i].value())+1;
+    }
+
+cout<<   "lhe params: "
+    << "\n N: "<< (1<<lhe->log_poly_mod_degree)
+    << ",\n p: "<< lhe->plain_modulus
+    << ",\n"; print_vector(q_vec, q_vec.size()," q:");
+
+
+    return 0;
 }

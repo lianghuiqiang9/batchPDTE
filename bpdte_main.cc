@@ -39,17 +39,19 @@ int main(int argc, char* argv[]){
     }
 
     auto root = bpdte->load_tree(input_address + "/model.json");
-    // root->print_tree();
+    //root->print_tree();
+
     bpdte->setup_cmp(cmp_type, l, m, extra);
     auto leaf_flatten = bpdte->encode_tree(root); 
 
     auto data = bpdte->load_data(input_address + "/x_test.csv", data_rows);
-    //print_vector(data,bpdte.data_cols,"data");
+    //print_matrix(data, 20, 20,  "data: ");
+    
     auto data_cipher = bpdte->encode_data(data);
 
     // evaluate
     vector<vector<Ciphertext>> result;
-    auto finish = profile("bpdte", [&]() { 
+    auto finish = profile("bpdte_" + std::to_string(data_rows), [&]() { 
         result = bpdte->evaluate(root, data_cipher, leaf_flatten);
         bpdte->clear_up(result);
     });
@@ -67,7 +69,7 @@ int main(int argc, char* argv[]){
     bpdte->print();
     cout<< " bpdte result is correct                  : "<< is_correct 
         << " \n input_address                            : "<<input_address
-        << " \n data_rows                                : "<< data_rows
+        << " \n batch nums                               : "<< data_rows
         << " \n keys size                                : "<< bpdte->keys_size()/1024
         << " kB\n evaluate time cost                       : "<< finish/1000     
         << " ms\n evaluate comm. cost                      : "<< comm/1024 

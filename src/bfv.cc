@@ -5,6 +5,7 @@ BFV::BFV( int depth, vector<int> steps, bool is_rotate) {
     this->parms = EncryptionParameters(scheme_type::bfv);
     this->scheme = "bfv";
     this->steps = steps;
+    this->is_rotate = is_rotate;
 /////////////////////////////////
     uint64_t log_poly_mod_degree = 13;
     uint64_t prime_bitlength = 17;
@@ -57,10 +58,8 @@ BFV::BFV( int depth, vector<int> steps, bool is_rotate) {
         // rotate_columns key, maybe unnecessary.
         uint32_t conj_elt = 2 * poly_degree - 1;
         elts.push_back(conj_elt);
-
         keygen.create_galois_keys(elts, gal_keys);
     }
-            
     
     encryptor = make_unique<Encryptor>(*context, pk);
     decryptor = make_unique<Decryptor>(*context, keygen.secret_key());
@@ -71,7 +70,6 @@ BFV::BFV( int depth, vector<int> steps, bool is_rotate) {
     slot_count = batch_encoder->slot_count();
 
 }
-
 
 void BFV::mod_switch(Ciphertext& ct1, Ciphertext& ct2) {
 
@@ -91,13 +89,3 @@ int BFV::get_noise_budget(const Ciphertext& ct) {
     return decryptor->invariant_noise_budget(ct);
 }
 
-void BFV::print(){
-    cout << "LHE Parameters:" << endl;
-    cout << "  - Scheme:        " << scheme << endl;
-    cout << "  - Max Depth:     " << depth << endl;
-    cout << "  - Slots:         " << slot_count << endl;
-    cout << "  - Plain Modulus: " << plain_modulus << endl;
-    cout << "  - Rotate Steps: [ "; 
-                            for (auto e:this->steps){ cout << e << " "; } 
-                                cout <<" ]"<< endl;
-}

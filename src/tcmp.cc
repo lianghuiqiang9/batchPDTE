@@ -9,9 +9,7 @@ TCMP::TCMP(int l, int m, int extra, bool is_rotate, uint8_t id) {
     this->n = l * m;
 
     int cmp_depth_need = (this->id == 0x1) ? static_cast<int>(std::ceil(std::log2(l))) : l;
-
     depth = cmp_depth_need + extra;
-    //cout<<"*depth: "<<depth<< "cmp_depth_need: "<< cmp_depth_need <<" extra: "<< extra <<endl;
 
     if (m <= 4){
         std::vector<int> steps;
@@ -22,8 +20,6 @@ TCMP::TCMP(int l, int m, int extra, bool is_rotate, uint8_t id) {
     }else{
         this->lhe = make_unique<BFV>(depth, vector<int>(0), true);
     }
-
-
 
     if (m >= int(this->lhe->log_poly_mod_degree - 1)) {
         cout<< m <<" " << this->lhe->log_poly_mod_degree<<endl;
@@ -49,7 +45,6 @@ TCMP::TCMP(int l, int m, int extra, bool is_rotate, uint8_t id) {
     one_zero_zero = init_one_zero_zero();
     one_zero_zero_cipher = lhe->encrypt(one_zero_zero);
 }
-
 
 // input
 // num_cmps 
@@ -80,12 +75,28 @@ vector<vector<uint64_t>> TCMP::encode_b(const vector<vector<uint64_t>>& b) {
     return out;
 }
 
-vector<Ciphertext> TCMP::encrypt(const vector<vector<uint64_t>>& b) {
-    vector<Ciphertext> out(b.size());
-    for(size_t i = 0 ; i < b.size(); i++){
-        out[i] = lhe->encrypt(b[i]);
+vector<vector<uint64_t>> TCMP::decode_b(const vector<Ciphertext>& cts) {
+    vector<vector<uint64_t>> decrypted_data(l);
+    for (int i = 0; i < l; i++) {
+        decrypted_data[i] = decrypt(cts[i]); 
     }
-    return out;
+    vector<vector<uint64_t>> raw_b(l, vector<uint64_t>(num_cmps, 0));
+    uint64_t max_search = (1ULL << m);
+
+    for (int i = 0; i < l; i++) {
+        const uint64_t* row_ptr = decrypted_data[i].data();
+        for (uint64_t j = 0; j < num_cmps; j++) {
+            uint64_t start_idx = index_map[j];
+            uint64_t theta = 0;
+
+            while (theta < max_search && start_idx + theta < slot_count && row_ptr[start_idx + theta] == 0ULL) {
+                theta++;
+            }
+            raw_b[i][j] = theta - 1; 
+        }
+    }
+
+    return raw_b;
 }
 
 // input
@@ -93,29 +104,14 @@ vector<Ciphertext> TCMP::encrypt(const vector<vector<uint64_t>>& b) {
 // output
 // a = [ a00, a01, a02 ]
 vector<Plaintext> TCMP::encode_a(const vector<vector<uint64_t>>& raw_a) {
-    auto out = lhe->encode(raw_a[0]);
+    vector<uint64_t> a(l);
+    for(int i = 0; i < l; ++i){
+        a[i] = raw_a[i][0];
+    }
+    auto out = lhe->encode(a);
     return vector<Plaintext>{out};
 }
 
-// [ 1,0,0,...,1,0,0,...
-//   1,0,0,...,1,0,0,... ]
-Plaintext TCMP::init_one_zero_zero(){
-    vector<uint64_t> one_zero_zero(slot_count, 0ULL);
-    for(uint64_t i = 0; i < num_cmps ; i++){
-        one_zero_zero[index_map[i]] = 1ULL;
-    }
-    return lhe->encode(one_zero_zero);
-}
-
-Plaintext TCMP::init_x_zero_zero(const vector<uint64_t>& x)  {
-    vector<uint64_t> x_zero_zero(slot_count, 0ULL);
-    auto x_size = x.size();
-    auto limit = num_cmps > x_size ? x_size : num_cmps;
-    for(size_t i = 0; i < limit ; i++){
-        x_zero_zero[index_map[i]] = x[i];
-    }
-    return lhe->encode(x_zero_zero);
-}
 
 Ciphertext TCMP::great_than(vector<Plaintext>& pt_a, vector<Ciphertext>& b)  {
     auto a = lhe->decode(pt_a[0]);
@@ -163,37 +159,16 @@ Ciphertext TCMP::great_than(vector<Plaintext>& pt_a, vector<Ciphertext>& b)  {
         }
 
     }
-    
 
-    return std::move(gt[0]);
-
-}
-
-void TCMP::clear_up(Ciphertext& result)  {
-    lhe->multiply_plain_inplace(result, one_zero_zero);
-}
-
-vector<uint64_t> TCMP::decrypt(const Ciphertext& ct)  {
-    auto pt = lhe->decrypt(ct);
-    return lhe->decode(pt);
-}
-
-vector<uint64_t> TCMP::decode(const std::vector<uint64_t>& res) {
-    vector<uint64_t> ans(num_cmps);
-    for(uint64_t i = 0; i < num_cmps ; i++){
-        ans[i] = res[index_map[i]];
-    }
-    return ans;
-}
-
-vector<uint64_t> TCMP::recover(const Ciphertext& ct)  {
-    auto res = this->decrypt(ct);
-    return this->decode(res);
+    return gt[0];
 }
 
 // out = [ a[0]>b[0], a[0]>b[1], ... ]
 vector<bool> TCMP::verify(const vector<vector<uint64_t>>& raw_a, const vector<vector<uint64_t>>& b)  {
-    auto a = raw_a[0];
+    vector<uint64_t> a(l);
+    for(int i = 0; i < l; ++i){
+        a[i] = raw_a[i][0];
+    }
     vector<bool> out(num_cmps, false);
     for(uint64_t i = 0; i < num_cmps ; ++i){
         for(int k = l-1; k >= 0; --k){
@@ -208,106 +183,4 @@ vector<bool> TCMP::verify(const vector<vector<uint64_t>>& raw_a, const vector<ve
         }
     }
     return out;
-}
-
-// input= [ b0,  b1,  b2 ]
-// out  = [ b00, b10, b20
-//          b01, b11, b21
-//          b02, b12, b22 ]
-// b0 = b00 + 2^m * b01 + (2^m)^2 * b02 ;
-// b1 = b10 + 2^m * b11 + (2^m)^2 * b12 ;
-// b2 = b20 + 2^m * b21 + (2^m)^2 * b22 ;
-vector<vector<uint64_t>> TCMP::raw_encode_b(const vector<uint64_t>& b)  {
-    vector<vector<uint64_t>> out(l, vector<uint64_t>(num_cmps, 0));
-    const uint64_t range = num_slots_per_element - 1;
-    const size_t b_size = b.size();
-
-    for(int i = 0; i < l; i++) {
-        const auto offset = i * m;
-        uint64_t* out_ptr = out[i].data();
-        const uint64_t* in_ptr = b.data();
-        for(size_t j = 0; j < b_size; j++) {
-            out_ptr[j] = (in_ptr[j] >> offset) & range;
-        }
-    }
-    return out;
-}
-
-vector<uint64_t> TCMP::raw_decode_b(const vector<vector<uint64_t>>& encoded_out, size_t original_b_size){
-    return vector<uint64_t>(0);
-}
-
-vector<vector<uint64_t>> TCMP::decode_b(const vector<Ciphertext>& cts){
-    return vector<vector<uint64_t>>(0);
-}
-
-Plaintext TCMP::get_one_hot(uint64_t start, uint64_t width){
-
-}
-
-vector<Ciphertext> TCMP::rotate_m_rows(const vector<Ciphertext>& b, const vector<Ciphertext>& b_inv_rows, int step){
-
-}
-
-Ciphertext TCMP::rotate_m_rows(const Ciphertext& b, const Ciphertext& b_inv_rows, int step){
-
-}
-
-vector<Ciphertext> TCMP::rotate_m_rows(const vector<Ciphertext>& b,  int step){
-
-}
-
-Ciphertext TCMP::rotate_m_rows(const Ciphertext& b, int step){
-
-}
-// input = a
-// out = [a01, a02, a03, ...]
-// a = a00 + 2^m * a01 + (2^m)^2 * a02 ;
-vector<vector<uint64_t>> TCMP::raw_encode_a(const vector<uint64_t>& raw_a)  {
-    auto a = raw_a[0];
-    vector<uint64_t> out(l, 0ULL);
-    auto range = num_slots_per_element - 1;
-
-    for(int i = 0 ; i < l; i++){
-        out[i] = (a >> (i * m) ) & range;
-    }
-    return  vector<vector<uint64_t>>{out};
-}
-
-// low to high
-vector<vector<uint64_t>> TCMP::random_raw_encode_b()  {
-    vector<vector<uint64_t>> out(l, vector<uint64_t>(num_cmps));
-
-    std::uniform_int_distribution<uint64_t> dist(0, num_slots_per_element - 1);
-
-    for (int i = 0; i < l; i++) {
-        uint64_t* row_ptr = out[i].data(); 
-        for (uint64_t j = 0; j < num_cmps; j++) {
-            row_ptr[j] = dist(gen);
-        }
-    }
-    return out; 
-}
-
-// low to high
-vector<vector<uint64_t>> TCMP::random_raw_encode_a()  {
-    vector<uint64_t> out(l);
-    std::uniform_int_distribution<uint64_t> dist(0, num_slots_per_element - 1);
-
-    std::generate(out.begin(), out.end(), [&]() {
-        return dist(gen);
-    });
-    
-    return vector<vector<uint64_t>>{out};
-}
-
-void TCMP::print()  {
-    lhe->print();
-    cout << " name                                     : " << scheme 
-        << " \n depth                                    : "<< depth    
-        << " \n l                                        : "<< l 
-        << " \n m                                        : "<< m
-        << " \n bit precision (n)                        : "<< n 
-        << " \n max batch size                           : "<< num_cmps
-        <<endl ;
 }
