@@ -28,6 +28,7 @@ class PDTE{
     public:
     string scheme = "pdte";
     int tree_depth = 16;        // set it first
+    int leaf_nums = 0;
     int data_cols;
 
     unique_ptr<CMP> cmp;
@@ -37,23 +38,27 @@ class PDTE{
 
     int repeat = 1;
 
+    virtual ~PDTE() = default;
+
     shared_ptr<Node> load_tree(string filename);
 
     vector<vector<uint64_t>> load_data(string filename, int data_rows = 1);
 
-    void setup_cmp(int cmp_type, int l, int m, int extra = 0);
-
-    vector<vector<IndexPos>> get_index_flatten(vector<vector<uint64_t>> index_matrix, uint64_t cols,  uint64_t aligned_cols); 
-    
-    vector<Ciphertext> expend_compare_result(vector<Ciphertext>& cmp_raw_out, uint64_t aligned_cols, uint64_t new_cols, uint64_t remainder);
+    virtual void setup_cmp(int cmp_type, int l, int m, int extra = 0) = 0;
 
     TreeFlatten encode_tree(shared_ptr<Node> root);
 
     vector<vector<Ciphertext>> encode_data(const vector<vector<uint64_t>>& data);
 
-    vector<vector<Ciphertext>> evaluate(shared_ptr<Node> root, vector<vector<Ciphertext>>& data_cipher, TreeFlatten& tree_flatten);
+    virtual vector<vector<Ciphertext>> evaluate(shared_ptr<Node> root, vector<vector<Ciphertext>>& data_cipher, TreeFlatten& tree_flatten) = 0;
 
-    vector<uint64_t> recover(vector<vector<Ciphertext>>& a);
+    virtual vector<uint64_t> recover(vector<vector<Ciphertext>>& a) = 0;
+
+    vector<vector<IndexPos>> get_index_flatten(vector<vector<uint64_t>> index_matrix, uint64_t cols,  uint64_t aligned_cols); 
+    
+    vector<vector<Ciphertext>> feature_extract(vector<vector<Ciphertext>>& data_cipher, TreeFlatten& tree_flatten);
+
+    vector<Ciphertext> expend_compare_result(vector<Ciphertext>& cmp_raw_out, TreeFlatten& tree_flatten);
 
     long keys_size();
 

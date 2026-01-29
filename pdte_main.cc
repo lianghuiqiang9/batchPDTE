@@ -3,14 +3,21 @@
 #include<vector>
 #include<random>
 #include"pdte.h"
+#include"multipath.h"
+#include"sumpath.h"
 using namespace std;
 
 // g++ -o pdte_main -O3 pdte_main.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1 -L ./build -lbpdte -Wl,-dpath,./lib
 
-// ./pdte_main -i ../data/heart_11bits -l 1 -m 16 -d 10
-// ./pdte_main -i ../data/breast_11bits -l 1 -m 16 -d 10
-// ./pdte_main -i ../data/spam_11bits -l 1 -m 16 -d 10
-// ./pdte_main -i ../data/electricity_10bits -l 1 -m 16 -d 10
+// ./pdte_main -i ../data/heart_11bits -l 1 -m 16 -d 10 -p 0
+// ./pdte_main -i ../data/breast_11bits -l 1 -m 16 -d 10 -p 0
+// ./pdte_main -i ../data/spam_11bits -l 1 -m 16 -d 10 -p 0
+// ./pdte_main -i ../data/electricity_10bits -l 1 -m 16 -d 10 -p 0
+
+// ./pdte_main -i ../data/heart_11bits -l 1 -m 16 -d 10 -p 1
+// ./pdte_main -i ../data/breast_11bits -l 1 -m 16 -d 10 -p 1
+// ./pdte_main -i ../data/spam_11bits -l 1 -m 16 -d 10 -p 1
+// ./pdte_main -i ../data/electricity_10bits -l 1 -m 16 -d 10 -p 1
 
 int main(int argc, char* argv[]){
 
@@ -33,7 +40,8 @@ int main(int argc, char* argv[]){
 
     unique_ptr<PDTE> pdte;
     switch (pdte_type) {
-        case 0: pdte = make_unique<PDTE>(); break;
+        case 0: pdte = make_unique<SumPath>(); break;
+        case 1: pdte = make_unique<MultiPath>(); break;
     }
 
     auto root = pdte->load_tree(input_address + "/model.json");
@@ -68,8 +76,8 @@ int main(int argc, char* argv[]){
         << " \n keys size                                : "<< pdte->keys_size()/1024
         << " kB\n evaluate time cost                       : "<< finish/1000     
         << " ms\n evaluate comm. cost                      : "<< comm/1024 
-        << " kB\n amortized time cost                      : "<< finish/1024/data_rows 
-        << " ms\n amortized comm. cost                     : "<< comm/1024 /data_rows 
+        << " kB\n average time cost                        : "<< finish/1024/data_rows 
+        << " ms\n average comm. cost                       : "<< comm/1024 /data_rows 
         << " kB"<< endl;
 
 

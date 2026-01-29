@@ -21,28 +21,6 @@ vector<vector<uint64_t>> PDTE::load_data(string filename, int data_rows){
 }
 
 // client
-void PDTE::setup_cmp(int cmp_type, int l, int m, int extra){
-    if (l!=1){
-        cout<<"please choose the l to 1, get the best performance."<<endl;
-    }
-    
-    //
-    int log_tree_depth = static_cast<int>(std::ceil(std::log2(tree_depth) + 1));
-    extra = log_tree_depth + extra;
-
-    switch (cmp_type) {
-        case 1: cmp = make_unique<DCMP>(l, m, extra, true); break;
-    }
-
-    lhe = cmp->lhe;
-
-    vector<uint64_t> zero(cmp->num_cmps,0); //change
-    auto cmp_raw_encode_zero_b = cmp->raw_encode_b(zero);
-    auto cmp_encode_zero_b = cmp->encode_b(cmp_raw_encode_zero_b);
-    cmp_zero_b = cmp->encrypt(cmp_encode_zero_b);
-}
-
-// client
 vector<vector<Ciphertext>> PDTE::encode_data(const vector<vector<uint64_t>>& raw_data){
     auto num_cmps = cmp->num_cmps;
 
@@ -80,6 +58,8 @@ TreeFlatten PDTE::encode_tree(shared_ptr<Node> root){
     auto rows = index_matrix.size(); 
     auto cols = index_matrix[0].size();
     auto num_cmps = cmp->num_cmps;
+
+    this->leaf_nums = cols;
 
     if (cols >= num_cmps){
         cout<<"cols: "<< cols << " num_cmps: "<< num_cmps <<" the leaves is too much, reduce the m."<<endl;
@@ -165,12 +145,48 @@ TreeFlatten PDTE::encode_tree(shared_ptr<Node> root){
     return TreeFlatten{index_flatten, threshold_pt, direction_pt, leaf_values_pt, remainder, new_cols, aligned_cols};
 }
 
-vector<vector<Ciphertext>> PDTE::evaluate(shared_ptr<Node> root, vector<vector<Ciphertext>>& data_cipher, TreeFlatten& tree_flatten){
+
+vector<vector<IndexPos>> PDTE::get_index_flatten(vector<vector<uint64_t>> index_matrix, uint64_t cols, uint64_t aligned_cols) {
+    auto new_rows = index_matrix.size();
+    auto new_cols = index_matrix[0].size();
+    vector<vector<IndexPos>> index_flatten(new_rows);
+
+    for (size_t i = 0; i < new_rows; ++i) {
+        vector<IndexPos> row_temp; 
+        row_temp.reserve(cols); 
+
+        uint64_t current_index = 0;
+        uint64_t start = 0;
+
+        for (size_t j = 0; j < new_cols; ++j) {
+            auto flag = j % aligned_cols;
+
+            if (flag == 0) {
+                current_index = index_matrix[i][j];
+                start = j;
+            } 
+            else if (flag < cols) {
+                if (current_index != index_matrix[i][j]) {
+                    row_temp.push_back(IndexPos{current_index, start, j - start});
+                    current_index = index_matrix[i][j];
+                    start = j;
+                }
+            }
+
+            if (flag == cols - 1) {
+                row_temp.push_back(IndexPos{current_index, start, j - start + 1});
+            }
+        }
+        index_flatten[i] = std::move(row_temp); 
+    }
+    return index_flatten;
+}
+
+vector<vector<Ciphertext>> PDTE::feature_extract(vector<vector<Ciphertext>>& data_cipher, TreeFlatten& tree_flatten){
     auto& data = data_cipher[0]; // vector 
     auto data_rot_columns = lhe->rotate_columns(data);
 
     const auto& index_flatten = tree_flatten.index_flatten;  // new_rows * new_cols 
-    const uint64_t new_cols = tree_flatten.new_cols;  // in index_matrix.
     const uint64_t new_rows = index_flatten.size();
 
     vector<vector<Ciphertext>> extract_data(new_rows);
@@ -204,24 +220,15 @@ vector<vector<Ciphertext>> PDTE::evaluate(shared_ptr<Node> root, vector<vector<C
         }
     }
 
-    vector<Ciphertext> cmp_raw_out(new_rows);
-    for (size_t i = 0; i < new_rows; ++i){
-        cmp_raw_out[i] = cmp->great_than(tree_flatten.threshold_pt[i], extract_data[i]);
-        // select the left node when t > x[a].
-        lhe->sub_plain_inplace(cmp_raw_out[i], tree_flatten.direction_pt[i]);
-    }
-
-    auto cmp_out = expend_compare_result(cmp_raw_out, tree_flatten.aligned_cols, new_cols, tree_flatten.remainder);
-    //cout<< "cmp_out.size(): " << cmp_out.size() <<endl;
-    
-    auto out = lhe->multiply_many(cmp_out);
-    // pir
-    lhe->multiply_plain_inplace(out, tree_flatten.leaf_values_pt);
-
-    return {{ std::move(out) }};
+    return extract_data;
 }
 
-vector<Ciphertext> PDTE::expend_compare_result(vector<Ciphertext>& cmp_raw_out, uint64_t aligned_cols, uint64_t new_cols, uint64_t remainder) {
+
+vector<Ciphertext> PDTE::expend_compare_result(vector<Ciphertext>& cmp_raw_out, TreeFlatten& tree_flatten) {
+    uint64_t aligned_cols = tree_flatten.aligned_cols;
+    uint64_t new_cols = tree_flatten.new_cols;
+    uint64_t remainder = tree_flatten.remainder;
+    
     const size_t new_rows = cmp_raw_out.size();
     if (new_rows == 0) return {};
 
@@ -249,20 +256,6 @@ vector<Ciphertext> PDTE::expend_compare_result(vector<Ciphertext>& cmp_raw_out, 
     return cmp_out; 
 }
     
-vector<uint64_t> PDTE::recover(vector<vector<Ciphertext>>& a){
-    uint64_t out = 0;
-    auto temp = cmp->recover(a[0][0]);
-    for (size_t i = 0; i < temp.size();i++){
-        if (temp[i]!=0 ){
-            out = temp[i];
-            if (out > (lhe->plain_modulus / 2)){
-                return vector<uint64_t>{lhe->plain_modulus - out};
-            }
-        }
-    }
-    return vector<uint64_t>{out};
-}
-
 long PDTE::keys_size(){
     return cmp->keys_size();
 }
@@ -299,40 +292,4 @@ long PDTE::comm_cost(const vector<vector<Ciphertext>>& ct1, const vector<vector<
         }
     } 
     return comm;
-}
-
-vector<vector<IndexPos>> PDTE::get_index_flatten(vector<vector<uint64_t>> index_matrix, uint64_t cols, uint64_t aligned_cols) {
-    auto new_rows = index_matrix.size();
-    auto new_cols = index_matrix[0].size();
-    vector<vector<IndexPos>> index_flatten(new_rows);
-
-    for (size_t i = 0; i < new_rows; ++i) {
-        vector<IndexPos> row_temp; 
-        row_temp.reserve(cols); 
-
-        uint64_t current_index = 0;
-        uint64_t start = 0;
-
-        for (size_t j = 0; j < new_cols; ++j) {
-            auto flag = j % aligned_cols;
-
-            if (flag == 0) {
-                current_index = index_matrix[i][j];
-                start = j;
-            } 
-            else if (flag < cols) {
-                if (current_index != index_matrix[i][j]) {
-                    row_temp.push_back(IndexPos{current_index, start, j - start});
-                    current_index = index_matrix[i][j];
-                    start = j;
-                }
-            }
-
-            if (flag == cols - 1) {
-                row_temp.push_back(IndexPos{current_index, start, j - start + 1});
-            }
-        }
-        index_flatten[i] = std::move(row_temp); 
-    }
-    return index_flatten;
 }

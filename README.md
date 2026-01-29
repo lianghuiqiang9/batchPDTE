@@ -20,40 +20,50 @@ make install
 
 ./pdte_main -i ../data/heart_11bits -l 1 -m 16 -d 10
 
+./pdte_main -i ../data/heart_11bits -l 1 -m 16 -d 10 -p 1
+
 # Parameter Settings 
 
 1.  -i  [Path]
         The directory path containing the decision tree model and the dataset.
 
-2.  -d  [Batch Size]
+2.  -o  [Path]
+        The directory path to save the decision tree model and the dataset.
+        
+3.  -d  [Batch Size]
         The number of input data rows for batch evaluation.
 
-3.  -l  [TE Expansion Factor]
-        Controls the number of ciphertexts in TEcmp; 
+4.  -l  [Expansion Factor]
+        Controls the number of ciphertexts in CMP; 
         The total bit length is (l * m).
 
-4.  -m  [TE Encoding Length]
-        Controls the encoding granularity in TEcmp; 
-        The total bit length is (l * m).
+5.  -m  [Encoding Length]
+        Controls the encoding granularity in CMP; 
+        In tCMP, 2^m slot per elements in a LHE ciphertext.
+        In bCMP, m slot per elements in a LHE ciphertext.
 
-5.  -c  [Comparison Mode]
+6.  -c  [CMP Mode]
         Select the comparison algorithm:
         0: tCMP (Thermometer Comparison)
         1: dCMP (Dichotomy Comparison)
 
-6.  -e  [Reserved Depth]
+7.  -e  [Reserved Depth]
         The extra multiplicative depth reserved after the comparison step.
 
-7.  -p  [Evaluation Strategy]
-        Select the Private Decision Tree Evaluation (bpdte) method:
+8.  -b  [bPDTE Evaluation Strategy]
+        Select the batch Private Decision Tree Evaluation method:
         0: bPDTE with ASM (Adapted Sum Path)
         1: bPDTE with ESM (Extended Sum Path)
 
-8.  -t  [Scheme Type]
+9.  -p  [PDTE Evaluation Strategy]
+        Select the Private Decision Tree Evaluation method:
+        0: PDTE with Sum Path
+        1: PDTE with Multi Path
+
+10.  -t  [LHE Scheme Type]
         Select the underlying Homomorphic Encryption scheme:
         0: BFV
         1: BGV
-
 
 # Benchmark 
 
