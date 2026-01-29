@@ -1,12 +1,12 @@
 
-# ======================= Quick Start =======================
+# Quick Start 
 
 mkdir build
 cd build
 make
 make install
 
-# =========================== Run ===========================
+# Run 
 
 ./lhe_test -t 0 -d 5
 
@@ -20,7 +20,7 @@ make install
 
 ./pdte_main -i ../data/heart_11bits -l 1 -m 16 -d 10
 
-# ==================== Parameter Settings ====================
+# Parameter Settings 
 
 1.  -i  [Path]
         The directory path containing the decision tree model and the dataset.
@@ -58,7 +58,7 @@ make install
         1: BGV
 
 
-# ======================== Benchmark =========================
+# Benchmark 
 
 For detailed instructions on running the performance benchmarks, 
 please refer to the execution sequences documented in:
@@ -68,7 +68,7 @@ This script contains the automated terminal commands required to
 evaluate the throughput and latency of the privCMP and bpdte system.
 
 
-# ==================== Comparison Protocols ==================
+# Comparison Protocols 
 
 Detailed terminal commands and environment setup for the 
 baseline comparison protocols can be found in the following 
