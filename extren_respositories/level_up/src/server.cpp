@@ -96,7 +96,7 @@ void TreeEvaluationServer::initialize_model(
 
     cout<<"fetch_model_for_benchmark"<<endl;
     this->tree_root = Node2(model_filename);
-    //print_tree(this->tree_root);
+    print_tree(this->tree_root);
 
     query_parameters->set_tree_params(this->tree_root);
 }
@@ -579,6 +579,11 @@ vector<vector<uint64_t>> TreeEvaluationServer::generate_server_comp_values(Query
 
     uint64_t number_of_attributes = query_parameters->num_attr;
     int num_cts = ceil((float)query_parameters->max_repetitions/query_parameters->reps_in_ct_per_attr);
+
+    cout<< " number_of_attributes: " << number_of_attributes <<endl;
+    cout<< " num_cts: " << num_cts <<endl;
+    cout<< " query_parameters->reps_in_ct_per_attr: " << query_parameters->reps_in_ct_per_attr <<endl;
+    
     vector<vector<uint64_t>> server_comp_values(num_cts, vector<uint64_t>(number_of_attributes*query_parameters->reps_in_ct_per_attr,0));
 
     map<int, int> first_unused_indices;
@@ -625,16 +630,19 @@ void TreeEvaluationServer::respond_to_classification(
 
     // Generate the server values to compare with the clients values
     vector<vector<uint64_t>> server_comp_values = generate_server_comp_values(query_parameters);
-    /*
-    cout<<"server_comp_values :"<<endl;
-    cout<<"server_comp_values.size() : "<< server_comp_values.size()<<endl;
-    cout<<"server_comp_values[0].size() : "<< server_comp_values[0].size()<<endl;
-    for(int i =0;i<server_comp_values.size();i++){
-        for(int j = 0; j< server_comp_values[i].size();j++)
-        cout<<server_comp_values[i][j]<<" ";
-        cout<<endl;
-    }cout<<endl;
-*/
+    
+    {
+        cout<<"server_comp_values :"<<endl;
+        cout<<"server_comp_values.size() : "<< server_comp_values.size()<<endl;
+        cout<<"server_comp_values[0].size() : "<< server_comp_values[0].size()<<endl;
+        for(int i =0;i<server_comp_values.size();i++){
+            for(int j = 0; j< server_comp_values[i].size();j++)
+            cout<<server_comp_values[i][j]<<" ";
+            cout<<endl;
+        }cout<<endl;
+    }
+
+
 
     Timer time_batched_comparison;
     time_batched_comparison.start();

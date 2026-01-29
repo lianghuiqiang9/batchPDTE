@@ -123,6 +123,15 @@ void QueryParameters::set_tree_params(DecisionTreeNode* root){
         max_used = max(max_used, it->second);
     }
     this->max_repetitions=max_used;
+
+    {
+        std::cout << "--- Attribute Usage Statistics ---" << std::endl;
+        for (const auto& pair : attribute_counts) {
+            std::cout << "Attribute ID: " << pair.first 
+                    << " | Count: " << pair.second << std::endl;
+        }
+        std::cout << "----------------------------------" << std::endl;
+    }
 }
 
 void permute_ret_vec(std::vector<std::pair<Ciphertext, Ciphertext>>& ret_vec)

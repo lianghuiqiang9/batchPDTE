@@ -60,5 +60,9 @@ bash build_pdte.sh
 
 
 
+# debug
+
+./main  -t ../../../../data/heart_11bits/model.json -v ../../../../data/heart
+_11bits/x_test.csv -n 11 -w 4 -e 0
 
 

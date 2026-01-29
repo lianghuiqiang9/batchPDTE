@@ -326,13 +326,17 @@ void Client::submit_classification_with_params(
             classification_vec.push_back(attribute_vector[i]);
         }
     }
-    /*
-    cout<<"classification_vec "<<endl;
-    cout<<"classification_vec.size() : "<<classification_vec.size()<<endl;
-    for(int i = 0;i<classification_vec.size();i++){
-        cout<<classification_vec[i]<<" ";
-    }cout<<endl;
-*/
+    {
+        cout<<" query_parameters->num_attr: " << query_parameters->num_attr <<endl;
+        cout<<" query_parameters->reps_in_ct_per_attr: " << query_parameters->reps_in_ct_per_attr <<endl;
+        cout<<"classification_vec "<<endl;
+        cout<<"classification_vec.size() : "<<classification_vec.size()<<endl;
+        for(int i = 0;i<classification_vec.size();i++){
+            cout<<classification_vec[i]<<" ";
+        }cout<<endl;
+    }
+
+
 
     vector<Ciphertext> __query_ciphertexts = attribute_vector_to_ciphertext(classification_vec, query_parameters);
     send(__query_ciphertexts);
