@@ -36,9 +36,6 @@ make install
         Controls the encoding granularity in TEcmp; 
         The total bit length is (l * m).
 
-5.  -n  [Bit Precision]
-        Specifies the bit length used in RDcmp and CDcmp.
-
 6.  -c  [Comparison Mode]
         Select the comparison algorithm:
         0: tCMP (Thermometer Comparison)
