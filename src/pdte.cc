@@ -47,33 +47,6 @@ vector<vector<Ciphertext>> PDTE::encode_data(const vector<vector<uint64_t>>& raw
     return vector<vector<Ciphertext>>{client_input};
 }
 
-/*
-// client
-vector<vector<Ciphertext>> PDTE::old_encode_data(const vector<vector<uint64_t>>& raw_data){
-    auto num_cmps = cmp->num_cmps;
-
-    repeat = num_cmps / data_cols ; 
-    repeat = 1 << static_cast<int>(std::log2(repeat)); 
-
-    //cout<<"data_cols       : "<< data_cols <<endl;
-    //cout<<"num_cmps        : "<< num_cmps <<endl;
-    //cout<<"repeat          : "<< repeat <<endl;
-    
-    vector<uint64_t> data(num_cmps, 0);
-    for (int i = 0; i < repeat * data_cols; i++){
-        data[i] = raw_data[0][ i / repeat];   
-    }
-
-    //print_vector(data, data.size(), "data: ");
-
-    auto raw_encode_data = cmp->raw_encode_b(data);
-    auto cmp_encode_data = cmp->encode_b(raw_encode_data);
-    auto client_input = cmp->encrypt(cmp_encode_data);
-
-    return vector<vector<Ciphertext>>{client_input};
-}
-*/
-
 TreeFlatten PDTE::encode_tree(shared_ptr<Node> root){
     auto paths = get_raw_paths(root);
     //print_paths(paths);
@@ -268,49 +241,6 @@ vector<vector<Ciphertext>> PDTE::feature_extract(vector<vector<Ciphertext>>& dat
 
     return extract_data;
 }
-
-/*
-vector<vector<Ciphertext>> PDTE::old_feature_extract(vector<vector<Ciphertext>>& data_cipher, TreeFlatten& tree_flatten){
-    auto& data = data_cipher[0]; // vector 
-    auto data_rot_columns = lhe->rotate_columns(data);
-
-    const auto& index_flatten = tree_flatten.index_flatten;  // new_rows * new_cols 
-    const uint64_t new_rows = index_flatten.size();
-
-    vector<vector<Ciphertext>> extract_data(new_rows);
-    vector<Ciphertext> temp;
-    Plaintext onehot;
-    for(size_t i = 0; i < new_rows; ++i){
-        //cout<<" new_rows: " << new_rows << " i: " << i << endl;
-        // retrieval
-        for(size_t j = 0; j < index_flatten[i].size(); ++j){
-            auto& index = index_flatten[i][j].index;
-            auto& start = index_flatten[i][j].start;
-            auto& width = index_flatten[i][j].width;
-            //cout<<" index_flatten["<<i<<"].size(): " << index_flatten[i].size() << " j: " << j ;
-            //cout<<" index: " << int(index) << " start: "<< start << " width: " << width << endl;;
-
-            onehot = cmp->get_one_hot(start, width);
-            if (index == uint64_t(-1)){
-                temp = lhe->multiply_plain(cmp_zero_b, onehot);
-            }else{
-                temp = cmp->exchange(data, data_rot_columns, start, index * repeat);
-                cmp->fill_width_hot(temp, start, width, repeat);
-                lhe->multiply_plain_inplace(temp, onehot);
-            }
-
-            // sum
-            if (j==0){
-                extract_data[i]  = std::move(temp);
-            }else{
-                lhe->add_inplace(extract_data[i], temp);
-            }
-        }
-    }
-
-    return extract_data;
-}
-*/
 
 vector<Ciphertext> PDTE::expend_compare_result(vector<Ciphertext>& cmp_raw_out, TreeFlatten& tree_flatten) {
     uint64_t aligned_cols = tree_flatten.aligned_cols;
