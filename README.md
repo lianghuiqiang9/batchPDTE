@@ -36,20 +36,20 @@ make install
         Controls the encoding granularity in TEcmp; 
         The total bit length is (l * m).
 
-6.  -c  [Comparison Mode]
+5.  -c  [Comparison Mode]
         Select the comparison algorithm:
         0: tCMP (Thermometer Comparison)
         1: dCMP (Dichotomy Comparison)
 
-7.  -e  [Reserved Depth]
+6.  -e  [Reserved Depth]
         The extra multiplicative depth reserved after the comparison step.
 
-8.  -p  [Evaluation Strategy]
+7.  -p  [Evaluation Strategy]
         Select the Private Decision Tree Evaluation (bpdte) method:
         0: bPDTE with ASM (Adapted Sum Path)
         1: bPDTE with ESM (Extended Sum Path)
 
-9.  -t  [Scheme Type]
+8.  -t  [Scheme Type]
         Select the underlying Homomorphic Encryption scheme:
         0: BFV
         1: BGV
