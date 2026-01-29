@@ -29,14 +29,14 @@ class PDTE{
     string scheme = "pdte";
     int tree_depth = 16;        // set it first
     int leaf_nums = 0;
-    int data_cols;
+    uint64_t data_cols;
 
     unique_ptr<CMP> cmp;
     shared_ptr<LHE> lhe;
 
     vector<Ciphertext> cmp_zero_b;
 
-    int repeat = 1;
+    uint64_t repeat = 1;
 
     virtual ~PDTE() = default;
 

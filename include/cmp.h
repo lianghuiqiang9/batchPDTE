@@ -64,6 +64,10 @@ public:
 
     Plaintext get_one_hot(uint64_t start, uint64_t width);
 
+    Plaintext get_double_one_hot(uint64_t start, uint64_t width);
+
+    vector<Ciphertext> fill_double_width_hot(vector<Ciphertext>& data, uint64_t start, uint64_t width, uint64_t repeat);
+
     vector<Ciphertext> exchange(const vector<Ciphertext>& b, uint64_t end_index, uint64_t start_index);
     
     vector<Ciphertext> exchange(const vector<Ciphertext>& b, const vector<Ciphertext>& b_rot_columns, uint64_t end_index, uint64_t start_index);

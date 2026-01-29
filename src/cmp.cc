@@ -130,6 +130,15 @@ Plaintext CMP::get_one_hot(uint64_t start, uint64_t width) {
     return lhe->encode(onehot);
 }
 
+Plaintext CMP::get_double_one_hot(uint64_t start, uint64_t width) {
+    vector<uint64_t> onehot(lhe->slot_count, 0); 
+    uint64_t end_idx = std::min((start + width) * num_slots_per_element, (uint64_t)onehot.size());
+    std::fill(onehot.begin() + start * num_slots_per_element, onehot.begin() + end_idx, 1);
+    std::fill(onehot.begin() + start * num_slots_per_element + row_count, onehot.begin() + end_idx + row_count, 1);
+
+    return lhe->encode(onehot);
+}
+
 vector<Ciphertext> CMP::exchange(const vector<Ciphertext>& b, uint64_t end_index, uint64_t start_index) {
     int64_t start_pos = static_cast<int64_t>(start_index * num_slots_per_element);
     int64_t end_pos = static_cast<int64_t>(end_index * num_slots_per_element);
@@ -197,7 +206,7 @@ vector<Ciphertext> CMP::exchange(const vector<Ciphertext>& b, const vector<Ciphe
 vector<Ciphertext> CMP::fill_width_hot(vector<Ciphertext>& data, uint64_t start, uint64_t width, uint64_t repeat){
     if (width <= repeat) return data;
     auto onehot = get_one_hot(start, repeat);
-    lhe->multiply_plain_inplace(data, onehot);
+    auto out = lhe->multiply_plain(data, onehot);
 
     if (start < num_cmps_per_row && (start + width) > num_cmps_per_row && start !=0){
         //cout<< " start: " << start << " width: " << width << endl;
@@ -206,12 +215,12 @@ vector<Ciphertext> CMP::fill_width_hot(vector<Ciphertext>& data, uint64_t start,
         uint64_t rot_times2 = (width + start - num_cmps_per_row + repeat - 1) / repeat;
         //cout<< " start: " << start << " repeat: " << repeat << " rot_times1: " << rot_times1<< " rot_times2: " << rot_times2;
         
-        auto temp2 = exchange(data, num_cmps_per_row, start);
+        auto temp2 = exchange(out, num_cmps_per_row, start);
 
         for(uint64_t k = 1; k < rot_times1; k<<=1 ){
             //cout<< " rot_times1: "<< rot_times1 <<" k: "<<k;
-            auto temp = exchange(data, k * repeat + start, start);
-            lhe->add_inplace(data, temp);
+            auto temp = exchange(out, k * repeat + start, start);
+            lhe->add_inplace(out, temp);
 
         }
 
@@ -221,17 +230,32 @@ vector<Ciphertext> CMP::fill_width_hot(vector<Ciphertext>& data, uint64_t start,
             lhe->add_inplace(temp2, temp);
 
         }
-        lhe->add_inplace(data, temp2);
+        lhe->add_inplace(out, temp2);
     }else{
         uint64_t rot_times = (width + repeat - 1) / repeat;
         //cout<< " start: " << start << " repeat: " << repeat << " rot_times: " << rot_times;
         for(uint64_t k = 1; k < rot_times; k <<= 1 ){
-            auto temp = exchange(data, k * repeat + start, start);
-            lhe->add_inplace(data, temp);
+            auto temp = exchange(out, k * repeat + start, start);
+            lhe->add_inplace(out, temp);
         }
     }
 
-    return data;
+    return out;
+}
+
+
+vector<Ciphertext> CMP::fill_double_width_hot(vector<Ciphertext>& data, uint64_t start, uint64_t width, uint64_t repeat){
+    if (width <= repeat) return data;
+    auto onehot = get_double_one_hot(start, repeat);
+    auto out = lhe->multiply_plain(data, onehot);
+
+    uint64_t rot_times = (width + repeat - 1) / repeat;
+    //cout<< " start: " << start << " repeat: " << repeat << " rot_times: " << rot_times;
+    for(uint64_t k = 1; k < rot_times; k <<= 1 ){
+        auto temp = exchange(out, k * repeat + start, start);
+        lhe->add_inplace(out, temp);
+    }
+    return out;
 }
 
 long CMP::keys_size(){
