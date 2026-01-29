@@ -72,6 +72,7 @@ vector<vector<Ciphertext>> SumPath::evaluate(shared_ptr<Node> root, vector<vecto
     //cout<< "cmp_out.size(): " << cmp_out.size() <<endl;
 
     auto out1 = lhe->add_many(cmp_out); // zero position
+
     auto out2 = lhe->multiply_plain(out1, salt2_pt); // leaf position
     lhe->add_plain_inplace(out2, tree_flatten.leaf_values_pt);
 
@@ -84,7 +85,9 @@ vector<vector<Ciphertext>> SumPath::evaluate(shared_ptr<Node> root, vector<vecto
 vector<uint64_t> SumPath::recover(vector<vector<Ciphertext>>& a){
     auto temp1 = cmp->recover(a[0][0]);
     auto temp2 = cmp->recover(a[0][1]);
-    for (int i = 0; i < leaf_nums; i++){
+    //print_vector(temp1, temp1.size(), " temp1: ");
+    //print_vector(temp2, temp2.size(), " temp2: ");
+    for (size_t i = 0; i < temp1.size(); i++){
         if (temp1[i]== 0){
             return vector<uint64_t>{temp2[i]};
         }

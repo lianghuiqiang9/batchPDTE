@@ -45,7 +45,7 @@ int main(int argc, char* argv[]){
     }
 
     auto root = pdte->load_tree(input_address + "/model.json");
-    //root->print_tree();
+    root->print_tree();
     pdte->setup_cmp(cmp_type, l, m, extra);
     auto tree_flatten = pdte->encode_tree(root); 
 
@@ -57,7 +57,6 @@ int main(int argc, char* argv[]){
     for (size_t i = 0 ; i <raw_data.size(); i++){
         auto data = vector<vector<uint64_t>>{raw_data[i]};
         auto data_cipher = pdte->encode_data(data);
-
         // evaluate
         vector<vector<Ciphertext>> result;
         finish += profile("pdte_row_" + std::to_string(i), [&]() { 

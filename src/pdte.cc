@@ -61,8 +61,6 @@ TreeFlatten PDTE::encode_tree(shared_ptr<Node> root){
     auto cols = index_matrix[0].size();
     auto num_cmps = cmp->num_cmps;
 
-    this->leaf_nums = cols;
-
     if (cols >= num_cmps){
         cout<<"cols: "<< cols << " num_cmps: "<< num_cmps <<" the leaves is too much, reduce the m."<<endl;
         exit(0);
@@ -187,7 +185,6 @@ vector<vector<IndexPos>> PDTE::get_index_flatten(vector<vector<uint64_t>> index_
 
 vector<vector<Ciphertext>> PDTE::feature_extract(vector<vector<Ciphertext>>& data_cipher, TreeFlatten& tree_flatten){
     auto& data = data_cipher[0]; // vector 
-    
     const auto& index_flatten = tree_flatten.index_flatten;  // new_rows * new_cols 
     const uint64_t new_rows = index_flatten.size();
     uint64_t new_cols = tree_flatten.new_cols;
@@ -197,15 +194,15 @@ vector<vector<Ciphertext>> PDTE::feature_extract(vector<vector<Ciphertext>>& dat
     vector<vector<Ciphertext>> encode_data(data_cols);
     vector<Ciphertext> data_rot;
     for(uint64_t i = 0; i < data_cols; i++){
-
-        if(feature_width > repeat){
+        if (feature_width <= repeat){
+            data_rot = cmp->exchange(data, 0, i * repeat);
+        }else {
             data_rot = cmp->fill_double_width_hot(data, i * repeat, feature_width, repeat);
-        }
 
-        if (feature_width < num_cmps_per_row){
-            data_rot = cmp->exchange(data_rot, 0, i * repeat);
+            if (feature_width < num_cmps_per_row){
+                data_rot = cmp->exchange(data_rot, 0, i * repeat);
+            }
         }
-
         encode_data[i] = std::move(data_rot);
     }
 
@@ -227,7 +224,7 @@ vector<vector<Ciphertext>> PDTE::feature_extract(vector<vector<Ciphertext>>& dat
             if (index == uint64_t(-1)){
                 temp = lhe->multiply_plain(cmp_zero_b, onehot);
             }else{
-                temp =lhe->multiply_plain(encode_data[index], onehot);
+                temp = lhe->multiply_plain(encode_data[index], onehot);
             }
 
             // sum

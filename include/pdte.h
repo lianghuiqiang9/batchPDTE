@@ -28,7 +28,6 @@ class PDTE{
     public:
     string scheme = "pdte";
     int tree_depth = 16;        // set it first
-    int leaf_nums = 0;
     uint64_t data_cols;
 
     unique_ptr<CMP> cmp;
