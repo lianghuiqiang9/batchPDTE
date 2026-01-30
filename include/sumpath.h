@@ -16,6 +16,10 @@ class SumPath : public PDTE {
     SumPath();
     ~SumPath() = default;
 
+    TreeFlatten encode_tree(shared_ptr<Node> root) override;
+
+    vector<vector<Ciphertext>> encode_data(const vector<vector<uint64_t>>& data) override;
+
     void setup_cmp(int cmp_type, int l, int m, int extra = 0) override;
     
     // server

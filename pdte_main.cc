@@ -5,6 +5,7 @@
 #include"pdte.h"
 #include"multipath.h"
 #include"sumpath.h"
+#include"sumpath2.h"
 using namespace std;
 
 // g++ -o pdte_main -O3 pdte_main.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1 -L ./build -lbpdte -Wl,-dpath,./lib
@@ -14,10 +15,15 @@ using namespace std;
 // ./pdte_main -i ../data/spam_11bits -l 1 -m 16 -d 10 -p 0
 // ./pdte_main -i ../data/electricity_10bits -l 1 -m 16 -d 10 -p 0
 
-// ./pdte_main -i ../data/heart_11bits -l 1 -m 16 -d 10 -p 1
-// ./pdte_main -i ../data/breast_11bits -l 1 -m 16 -d 10 -p 1
-// ./pdte_main -i ../data/spam_11bits -l 1 -m 16 -d 10 -p 1
-// ./pdte_main -i ../data/electricity_10bits -l 1 -m 16 -d 10 -p 1
+// ./pdte_main -i ../data/heart_11bits -l 1 -m 11 -d 10 -p 1
+// ./pdte_main -i ../data/breast_11bits -l 1 -m 11 -d 10 -p 1
+// ./pdte_main -i ../data/spam_11bits -l 1 -m 11 -d 10 -p 1
+// ./pdte_main -i ../data/electricity_10bits -l 1 -m 10 -d 10 -p 1
+
+// ./pdte_main -i ../data/heart_11bits -l 1 -m 16 -d 10 -p 2
+// ./pdte_main -i ../data/breast_11bits -l 1 -m 16 -d 10 -p 2
+// ./pdte_main -i ../data/spam_11bits -l 1 -m 16 -d 10 -p 2
+// ./pdte_main -i ../data/electricity_10bits -l 1 -m 16 -d 10 -p 2
 
 int main(int argc, char* argv[]){
 
@@ -41,11 +47,12 @@ int main(int argc, char* argv[]){
     unique_ptr<PDTE> pdte;
     switch (pdte_type) {
         case 0: pdte = make_unique<SumPath>(); break;
-        case 1: pdte = make_unique<MultiPath>(); break;
+        case 1: pdte = make_unique<SumPath2>(); break;
+        case 2: pdte = make_unique<MultiPath>(); break;
     }
 
     auto root = pdte->load_tree(input_address + "/model.json");
-    root->print_tree();
+    // root->print_tree();
     pdte->setup_cmp(cmp_type, l, m, extra);
     auto tree_flatten = pdte->encode_tree(root); 
 
@@ -69,12 +76,12 @@ int main(int argc, char* argv[]){
         
         if (is_correct == false){
             cout << " i: "<< i << endl;
-            //break;
+            break;
         }
     }
 
     pdte->print();
-    cout<< " bpdte result is correct                  : "<< is_correct 
+    cout<< " pdte result is correct                   : "<< is_correct 
         << " \n input_address                            : "<<input_address
         << " \n data_rows                                : "<< data_rows
         << " \n keys size                                : "<< pdte->keys_size()/1024

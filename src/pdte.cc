@@ -21,7 +21,7 @@ vector<vector<uint64_t>> PDTE::load_data(string filename, int data_rows){
 }
 
 // client
-vector<vector<Ciphertext>> PDTE::encode_data(const vector<vector<uint64_t>>& raw_data){
+vector<vector<Ciphertext>> PDTE::raw_encode_data(const vector<vector<uint64_t>>& raw_data){
     auto num_cmps = cmp->num_cmps;
 
     repeat = num_cmps / 2 / data_cols ; 
@@ -47,7 +47,7 @@ vector<vector<Ciphertext>> PDTE::encode_data(const vector<vector<uint64_t>>& raw
     return vector<vector<Ciphertext>>{client_input};
 }
 
-TreeFlatten PDTE::encode_tree(shared_ptr<Node> root){
+TreeFlatten PDTE::raw_encode_tree(shared_ptr<Node> root){
     auto paths = get_raw_paths(root);
     //print_paths(paths);
 

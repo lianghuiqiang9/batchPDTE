@@ -19,7 +19,7 @@ public:
     int index;
     
     uint64_t threshold;
-    vector<vector<uint64_t>> raw_encode_threshold;
+    //vector<vector<uint64_t>> raw_encode_threshold;
     vector<Plaintext> cmp_encode_threshold;
 
     uint64_t leaf_value; 

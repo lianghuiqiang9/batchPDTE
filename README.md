@@ -22,6 +22,8 @@ make install
 
 ./pdte_main -i ../data/heart_11bits -l 1 -m 16 -d 10 -p 1
 
+./pdte_main -i ../data/heart_11bits -l 1 -m 11 -d 10 -p 2
+
 # Parameter Settings 
 
 1.  -i  [Path]

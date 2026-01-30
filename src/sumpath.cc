@@ -4,33 +4,15 @@ SumPath::SumPath(){
     scheme = "pdte_sum_path";
 }
 
-// client
-void SumPath::setup_cmp(int cmp_type, int l, int m, int extra){
-    if (l!=1){
-        cout<<"please choose the l to 1, get the best performance."<<endl;
-    }
-    
-    //
-    //int log_tree_depth = static_cast<int>(std::ceil(std::log2(tree_depth) + 1));
-    //extra = log_tree_depth + extra;
-
-    switch (cmp_type) {
-        case 1: cmp = make_unique<DCMP>(l, m, extra, true); break;
-    }
-
-    lhe = cmp->lhe;
-
-    // 
+TreeFlatten SumPath::encode_tree(shared_ptr<Node> root){
+    //sumpath info 
     vector<uint64_t> zero(cmp->num_cmps,0); 
     auto cmp_raw_encode_zero_b = cmp->raw_encode_b(zero);
     auto cmp_encode_zero_b = cmp->encode_b(cmp_raw_encode_zero_b);
     cmp_zero_b = cmp->encrypt(cmp_encode_zero_b);
-
     one_zero_zero = cmp->init_one_zero_zero();
-
     vector<uint64_t> neg_one(cmp->num_cmps, cmp->lhe->plain_modulus - 1);
     neg_one_zero_zero = cmp->init_x_zero_zero(neg_one);
-
     vector<uint64_t> neg_two(cmp->num_cmps, cmp->lhe->plain_modulus - 2);
     neg_two_zero_zero = cmp->init_x_zero_zero(neg_two);
 
@@ -47,6 +29,21 @@ void SumPath::setup_cmp(int cmp_type, int l, int m, int extra){
     salt1_pt = cmp->init_x_zero_zero(salt1);
     salt2_pt = cmp->init_x_zero_zero(salt2);
 
+    return raw_encode_tree(root);
+}
+
+vector<vector<Ciphertext>> SumPath::encode_data(const vector<vector<uint64_t>>& data){
+    return raw_encode_data(data);
+}
+
+// client
+void SumPath::setup_cmp(int cmp_type, int l, int m, int extra){
+    if (l!=1){
+        cout<<"please choose the l to 1, get the best performance."<<endl;
+    }
+
+    cmp = make_unique<DCMP>(l, m, extra, true);
+    lhe = cmp->lhe;
 }
 
 vector<vector<Ciphertext>> SumPath::evaluate(shared_ptr<Node> root, vector<vector<Ciphertext>>& data_cipher, TreeFlatten& tree_flatten){
@@ -56,6 +53,7 @@ vector<vector<Ciphertext>> SumPath::evaluate(shared_ptr<Node> root, vector<vecto
     
     vector<Ciphertext> cmp_raw_out(new_rows);
 
+    // direction
     for (size_t i = 0; i < new_rows; ++i){
         // select the left node when t > x[a].
         cmp_raw_out[i] = cmp->great_than(tree_flatten.threshold_pt[i], extract_data[i]);
@@ -67,12 +65,11 @@ vector<vector<Ciphertext>> SumPath::evaluate(shared_ptr<Node> root, vector<vecto
         lhe->add_plain_inplace(cmp_raw_out[i], neg_one_zero_zero);
         lhe->add_inplace(cmp_raw_out[i], right_temp);
     }
-
+    // unfold the cmp_raw_out
     auto cmp_out = expend_compare_result(cmp_raw_out, tree_flatten);  
     //cout<< "cmp_out.size(): " << cmp_out.size() <<endl;
 
     auto out1 = lhe->add_many(cmp_out); // zero position
-
     auto out2 = lhe->multiply_plain(out1, salt2_pt); // leaf position
     lhe->add_plain_inplace(out2, tree_flatten.leaf_values_pt);
 

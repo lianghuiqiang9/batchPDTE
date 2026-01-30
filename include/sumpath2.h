@@ -1,16 +1,21 @@
-#ifndef __MULTIPATH__
-#define __MULTIPATH__
+#ifndef __SUMPATH2__
+#define __SUMPATH2__
 
 #include"pdte.h"
 using namespace std;
 
-class MultiPath : public PDTE {
+class SumPath2 : public PDTE {
     public:
 
-    vector<vector<Plaintext>> salts;
+    Plaintext salt1_pt;
+    Plaintext salt2_pt;
 
-    MultiPath();
-    ~MultiPath() = default;
+    Plaintext one_one_one;
+    Ciphertext zero_zero_zero;
+    Plaintext onehot_pt;
+
+    SumPath2();
+    ~SumPath2() = default;
 
     TreeFlatten encode_tree(shared_ptr<Node> root) override;
 
@@ -18,6 +23,7 @@ class MultiPath : public PDTE {
 
     void setup_cmp(int cmp_type, int l, int m, int extra = 0) override;
     
+    vector<Ciphertext> sum_path(shared_ptr<Node> root, vector<vector<Ciphertext>>& data_cipher);
     // server
     vector<vector<Ciphertext>> evaluate(shared_ptr<Node> root, vector<vector<Ciphertext>>& data_cipher, TreeFlatten& tree_flatten) override;
 

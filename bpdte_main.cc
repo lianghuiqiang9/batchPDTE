@@ -10,7 +10,7 @@ using namespace std;
 
 // g++ -o bpdte_main -O3 bpdte_main.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1 -L ./build -lbpdte -Wl,-dpath,./lib
 
-// ./bpdte_main -i ../data/heart_11bits -d 128 -l 1 -m 16
+// ./bpdte_main -i ../data/heart_11bits -d 128 -l 1 -m 16 -p 1
 
 int main(int argc, char* argv[]){
 

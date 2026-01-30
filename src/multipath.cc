@@ -4,6 +4,19 @@ MultiPath::MultiPath(){
     scheme = "pdte_multi_path";
 }
 
+TreeFlatten MultiPath::encode_tree(shared_ptr<Node> root){
+    vector<uint64_t> zero(cmp->num_cmps,0); //change
+    auto cmp_raw_encode_zero_b = cmp->raw_encode_b(zero);
+    auto cmp_encode_zero_b = cmp->encode_b(cmp_raw_encode_zero_b);
+    cmp_zero_b = cmp->encrypt(cmp_encode_zero_b);
+
+    return raw_encode_tree(root);
+}
+
+vector<vector<Ciphertext>> MultiPath::encode_data(const vector<vector<uint64_t>>& data){
+    return raw_encode_data(data);
+}
+
 // client
 void MultiPath::setup_cmp(int cmp_type, int l, int m, int extra){
     if (l!=1){
@@ -14,16 +27,13 @@ void MultiPath::setup_cmp(int cmp_type, int l, int m, int extra){
     int log_tree_depth = static_cast<int>(std::ceil(std::log2(tree_depth) + 1));
     extra = log_tree_depth + extra;
 
-    switch (cmp_type) {
-        case 1: cmp = make_unique<DCMP>(l, m, extra, true); break;
-    }
+    //switch (cmp_type) {
+    //    case 1: cmp = make_unique<DCMP>(l, m, extra, true); break;
+    //}
+    cmp = make_unique<DCMP>(l, m, extra, true);
 
     lhe = cmp->lhe;
 
-    vector<uint64_t> zero(cmp->num_cmps,0); //change
-    auto cmp_raw_encode_zero_b = cmp->raw_encode_b(zero);
-    auto cmp_encode_zero_b = cmp->encode_b(cmp_raw_encode_zero_b);
-    cmp_zero_b = cmp->encrypt(cmp_encode_zero_b);
 }
 
 vector<vector<Ciphertext>> MultiPath::evaluate(shared_ptr<Node> root, vector<vector<Ciphertext>>& data_cipher, TreeFlatten& tree_flatten){

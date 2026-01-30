@@ -45,9 +45,13 @@ class PDTE{
 
     virtual void setup_cmp(int cmp_type, int l, int m, int extra = 0) = 0;
 
-    TreeFlatten encode_tree(shared_ptr<Node> root);
+    virtual TreeFlatten encode_tree(shared_ptr<Node> root) = 0;
 
-    vector<vector<Ciphertext>> encode_data(const vector<vector<uint64_t>>& data);
+    virtual vector<vector<Ciphertext>> encode_data(const vector<vector<uint64_t>>& data) = 0;
+
+    TreeFlatten raw_encode_tree(shared_ptr<Node> root);
+
+    vector<vector<Ciphertext>> raw_encode_data(const vector<vector<uint64_t>>& data);
 
     virtual vector<vector<Ciphertext>> evaluate(shared_ptr<Node> root, vector<vector<Ciphertext>>& data_cipher, TreeFlatten& tree_flatten) = 0;
 

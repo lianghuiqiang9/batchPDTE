@@ -54,8 +54,8 @@ LeafFlatten BPDTE::raw_encode_tree(shared_ptr<Node> root){
         if (!node->is_leaf()) {
             //node->threshold_bitv = tecmp_encode_a(node->threshold, l, m, m_degree);
             vector<uint64_t> threshold(batch_size, node->threshold);
-            node->raw_encode_threshold = cmp->raw_encode_a(threshold);
-            node->cmp_encode_threshold = cmp->encode_a(node->raw_encode_threshold);
+            auto raw_encode_threshold = cmp->raw_encode_a(threshold);
+            node->cmp_encode_threshold = cmp->encode_a(raw_encode_threshold);
             if (node->right) stk.push({ node->right.get() }); 
             if (node->left)  stk.push({ node->left.get() });
         }
@@ -73,7 +73,7 @@ LeafFlatten BPDTE::raw_encode_tree(shared_ptr<Node> root){
     return LeafFlatten{leaf_vec, leaf_vec_pt};
 }
 
-vector<Ciphertext> BPDTE::sum_path(shared_ptr<Node> root, vector<vector<Ciphertext>>& data_cipher, LeafFlatten& leaf_flatten){
+vector<Ciphertext> BPDTE::sum_path(shared_ptr<Node> root, vector<vector<Ciphertext>>& data_cipher){
     vector<Ciphertext> out;
     root->value = zero_zero_zero;
     stack<StackFrame> stk;

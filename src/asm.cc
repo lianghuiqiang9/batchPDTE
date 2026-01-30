@@ -9,6 +9,12 @@ LeafFlatten ASM::encode_tree(shared_ptr<Node> root){
     tree_depth_factorial_inv_pt = init_d_factorial_inv_pt();
     tree_depth_vec_pt = init_tree_depth_vec();  
 
+    vector<uint64_t> one(cmp->slot_count, 1ULL);
+    one_one_one = lhe->encode(one);
+
+    vector<uint64_t> zero(cmp->slot_count, 0ULL);
+    zero_zero_zero = lhe->encrypt(zero);
+
     return leaf;
 }
 
@@ -25,17 +31,12 @@ void ASM::setup_cmp(int cmp_type, int l, int m, int extra){
     batch_size = cmp->num_cmps;
     lhe = cmp->lhe;
 
-    vector<uint64_t> one(cmp->slot_count, 1ULL);
-    one_one_one = lhe->encode(one);
-
-    vector<uint64_t> zero(cmp->slot_count, 0ULL);
-    zero_zero_zero = lhe->encrypt(zero);
 }
 
 // server
 
 vector<vector<Ciphertext>> ASM::evaluate(shared_ptr<Node> root, vector<vector<Ciphertext>>& data_cipher, LeafFlatten& leaf_flatten){
-    auto sum_path_result = sum_path(root, data_cipher, leaf_flatten);
+    auto sum_path_result = sum_path(root, data_cipher);
     return adapted_sum_path(sum_path_result, leaf_flatten);
     
 }
