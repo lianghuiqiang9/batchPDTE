@@ -1,12 +1,13 @@
 #include"dcmp.h"
 
-DCMP::DCMP(int l, int m, int extra, bool is_rotate) {
+DCMP::DCMP(int l, int m, int extra, bool is_rotate, bool is_padding) {
     this->scheme = "dcmp";
     l = 1 << static_cast<int>(std::ceil(std::log2(l)));
     m = 1 << static_cast<int>(std::ceil(std::log2(m)));
     this->l = l;
     this->m = m;
     this->n = l * m;
+    this->is_padding = is_padding;
 
     int cmp_depth_need =  static_cast<int>(std::ceil(std::log2(this->n)) + 1); 
     depth = cmp_depth_need + extra;
@@ -23,7 +24,7 @@ DCMP::DCMP(int l, int m, int extra, bool is_rotate) {
     num_slots_per_element = m;
     num_cmps_per_row = row_count / num_slots_per_element;
 
-    if (l!=1){
+    if (l!=1 && is_padding){
         num_cmps = num_cmps_per_row * 2 - 1;
     }else{
         num_cmps = num_cmps_per_row * 2;
@@ -60,7 +61,7 @@ vector<vector<uint64_t>> DCMP::encode_b(const vector<vector<uint64_t>>& raw_b) {
             }
          }
 
-        if(l!=1){
+        if(l!=1 && is_padding){
             temp[slot_count - 1] = 13; // padding.
         }
         out[i] = temp;

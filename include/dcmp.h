@@ -10,8 +10,9 @@
 
 class DCMP : public CMP {
 public:
+    bool is_padding = true;
 
-    DCMP(int l, int m, int extra = 0, bool is_rotate = false);
+    DCMP(int l, int m, int extra = 0, bool is_rotate = false, bool padding = true);
 
     ~DCMP() = default;
 

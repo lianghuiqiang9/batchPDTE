@@ -66,6 +66,7 @@ int main(int argc, char* argv[]){
         auto actural_result = root->eval(data);
         is_correct = is_correct && pdte->verify(expect_result, actural_result);
         comm += pdte->comm_cost(data_cipher, result);
+        
         if (is_correct == false){
             cout << " i: "<< i << endl;
             //break;
