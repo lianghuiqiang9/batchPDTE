@@ -21,26 +21,28 @@ TCMP::TCMP(int l, int m, int extra, bool is_rotate, uint8_t id) {
         this->lhe = make_unique<BFV>(depth, vector<int>(0), true);
     }
 
-    if (m >= int(this->lhe->log_poly_mod_degree - 1)) {
-        cout<< m <<" " << this->lhe->log_poly_mod_degree<<endl;
+    slot_count = lhe->slot_count;
+    row_count = lhe->row_count;
+
+    if (m > int(this->lhe->log_poly_mod_degree)) {
+        cout<< "m: " << m <<" log_poly_mod_degree: " << this->lhe->log_poly_mod_degree<<endl;
         cout << "Error: params m is too large." << endl;
         exit(0);
-    }
+    }else 
 
-    slot_count = lhe->slot_count;
-    row_count = slot_count / 2;
     num_slots_per_element = 1 << m;
-    num_cmps_per_row = row_count / num_slots_per_element;
-    num_cmps = num_cmps_per_row * 2;
+    num_cmps = slot_count / num_slots_per_element;
+    num_cmps_per_row = num_cmps / 2;
 
     // index_map
     //idx = 0            num_cmps_per_row                2 * num_cmps_per_row              ...
     //    = row_count    row_count + num_cmps_per_row    row_count + 2 * num_cmps_per_row  ...
-    index_map.resize(num_cmps);
-    for(uint64_t i = 0; i < num_cmps; i++) {
-        bool flag = i < num_cmps_per_row;
-        index_map[i] = flag ? (i * num_slots_per_element) : (row_count + (i - num_cmps_per_row) * num_slots_per_element);
-    }
+    //index_map.resize(num_cmps);
+    //for(uint64_t i = 0; i < num_cmps; i++) {
+        //bool flag = i < num_cmps_per_row;
+        //index_map[i] = flag ? (i * num_slots_per_element) : (row_count + (i - num_cmps_per_row) * num_slots_per_element);
+    //    index_map[i] = i * num_slots_per_element;
+    //}
 
     one_zero_zero = init_one_zero_zero();
     one_zero_zero_cipher = lhe->encrypt(one_zero_zero);
@@ -66,10 +68,16 @@ vector<vector<uint64_t>> TCMP::encode_b(const vector<vector<uint64_t>>& b) {
         uint64_t* row_ptr = out[i].data();
         const auto& b_row = b[i];
         for(size_t j = 0; j < b_row.size(); j++) {
-            uint64_t start_idx = index_map[j];
+            uint64_t start_idx = j * num_slots_per_element;
             // te encoding
             uint64_t theta = b_row[j];
-            std::fill_n(row_ptr + start_idx, theta + 1, 0ULL);
+            std::fill_n(row_ptr + start_idx, theta + 1, 0ULL); 
+
+            //if (theta + 1 == slot_count){
+            //    std::cerr << "[Warning] Reached slot_count limit. theta: " << theta 
+            //            << ", slot_count: " << slot_count << std::endl;
+            //    throw std::logic_error("Comparison range exceeds slot_count boundary.");
+            //}
         }
     }
     return out;
@@ -86,7 +94,7 @@ vector<vector<uint64_t>> TCMP::decode_b(const vector<Ciphertext>& cts) {
     for (int i = 0; i < l; i++) {
         const uint64_t* row_ptr = decrypted_data[i].data();
         for (uint64_t j = 0; j < num_cmps; j++) {
-            uint64_t start_idx = index_map[j];
+            uint64_t start_idx = j * num_slots_per_element;
             uint64_t theta = 0;
 
             while (theta < max_search && start_idx + theta < slot_count && row_ptr[start_idx + theta] == 0ULL) {
@@ -120,13 +128,13 @@ Ciphertext TCMP::great_than(vector<Plaintext>& pt_a, vector<Ciphertext>& b)  {
     vector<Ciphertext> gt(l);
 
     if(l == 1){
-        gt[0] = lhe->rotate_rows(b[0], a[0]);
+        gt[0] = lhe->rotate_rows_global(b[0], a[0]);
         return gt[0];
     }else{
         for(int i = 0; i < l; ++i){
-            gt[i] = lhe->rotate_rows(b[i], a[i]);
+            gt[i] = lhe->rotate_rows_global(b[i], a[i]);
             if(a[i] < num_slots_per_element - 1){
-                eq[i] = lhe->rotate_rows(b[i], a[i] + 1);
+                eq[i] = lhe->rotate_rows_global(b[i], a[i] + 1);
             }else{
                 eq[i] = one_zero_zero_cipher;
             }

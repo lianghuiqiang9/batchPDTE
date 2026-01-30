@@ -20,24 +20,28 @@ DCMP::DCMP(int l, int m, int extra, bool is_rotate, bool is_padding) {
     this->lhe = make_unique<BFV>(depth, steps, is_rotate);
 
     slot_count = lhe->slot_count;
-    row_count = slot_count / 2;
+    row_count = lhe->row_count;
+
     num_slots_per_element = m;
-    num_cmps_per_row = row_count / num_slots_per_element;
 
     if (l!=1 && is_padding){
-        num_cmps = num_cmps_per_row * 2 - 1;
+        num_cmps = slot_count / num_slots_per_element - 1;
     }else{
-        num_cmps = num_cmps_per_row * 2;
+        num_cmps = slot_count / num_slots_per_element;
     }
+
+    num_cmps_per_row = (num_cmps + 1) / 2;
+
 
     // index_map
     //idx = 0            num_cmps_per_row                2 * num_cmps_per_row              ...
     //    = row_count    row_count + num_cmps_per_row    row_count + 2 * num_cmps_per_row  ...
-    index_map.resize(num_cmps);
-    for(uint64_t i = 0; i < num_cmps; i++) {
-        bool flag = i < num_cmps_per_row;
-        index_map[i] = flag ? (i * num_slots_per_element) : (row_count + (i - num_cmps_per_row) * num_slots_per_element);
-    }
+    //index_map.resize(num_cmps);
+    //for(uint64_t i = 0; i < num_cmps; i++) {
+        //bool flag = i < num_cmps_per_row;
+        //index_map[i] = flag ? (i * num_slots_per_element) : (row_count + (i - num_cmps_per_row) * num_slots_per_element);
+    //    index_map[i] = i * num_slots_per_element;
+    //}
 
     one_zero_zero = init_one_zero_zero();
 }

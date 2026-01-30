@@ -29,6 +29,7 @@ public:
     uint64_t log_poly_mod_degree;
     uint64_t plain_modulus;
     uint64_t slot_count;
+    uint64_t row_count;
 
     ~LHE() = default;
 
@@ -75,6 +76,8 @@ public:
     void rotate_rows_inplace(vector<Ciphertext>& cts, int step);
 
     Ciphertext rotate_rows(Ciphertext ct, int step);
+
+    Ciphertext rotate_rows_global(Ciphertext ct, int step);
 
     vector<Ciphertext> rotate_rows(vector<Ciphertext> cts, int step);
 

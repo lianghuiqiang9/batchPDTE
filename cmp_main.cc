@@ -5,26 +5,27 @@
 
 // g++ -o cmp_main -O3 cmp_main.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1 -L ./lib -lbpdte -Wl,-rpath,./lib
 
-// ./cmp_main -l 2 -m 8 -c 0
+// ./cmp_main -l 2 -m 8 -c 0 -e 0
 
 int main(int argc, char* argv[]) {
     int l = 8, m = 2;
     int opt;
-    int cmp_type = 0;
+    int cmp_type = 0, extra = 0;
     unique_ptr<CMP> cmp;
 
-    while ((opt = getopt(argc, argv, "fl:m:c:")) != -1) {
+    while ((opt = getopt(argc, argv, "fl:m:c:e:")) != -1) {
         switch (opt) {
         case 'l': l = atoi(optarg); break;
         case 'm': m = atoi(optarg); break;
         case 'c': cmp_type = atoi(optarg);break;
+        case 'e': extra = atoi(optarg);break;     
         }
     }
     int n = l * m;
 
     switch (cmp_type) {
-        case 0: cmp = make_unique<TCMP>(l, m); break;
-        case 1: cmp = make_unique<DCMP>(l, m); break;
+        case 0: cmp = make_unique<TCMP>(l, m, extra); break;
+        case 1: cmp = make_unique<DCMP>(l, m, extra); break;
     }
     
     auto num_cmps = cmp->num_cmps;

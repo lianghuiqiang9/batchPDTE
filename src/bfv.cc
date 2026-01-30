@@ -68,6 +68,7 @@ BFV::BFV( int depth, vector<int> steps, bool is_rotate) {
 
     plain_modulus = parms.plain_modulus().value();
     slot_count = batch_encoder->slot_count();
+    row_count = slot_count / 2 ;
 
 }
 

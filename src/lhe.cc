@@ -109,6 +109,21 @@ Ciphertext LHE::rotate_rows(Ciphertext ct, int step) {
     return ct;
 }
 
+Ciphertext LHE::rotate_rows_global(Ciphertext ct, int step) { 
+    if (step < 0){
+        step = step + slot_count;
+    }
+
+    if (uint64_t(step) < row_count){
+        evaluator->rotate_rows_inplace(ct, step, gal_keys);
+    }else{
+        evaluator->rotate_columns_inplace(ct, gal_keys);
+        evaluator->rotate_rows_inplace(ct, step - row_count, gal_keys);
+    }
+
+    return ct;
+}
+
 vector<Ciphertext> LHE::rotate_rows(vector<Ciphertext> cts, int step) {
     for(auto& e:cts){
         evaluator->rotate_rows_inplace(e, step, gal_keys);

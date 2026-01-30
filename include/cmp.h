@@ -24,7 +24,7 @@ public:
     uint64_t num_cmps_per_row;
     Plaintext one_zero_zero;
     //Ciphertext one_zero_zero_cipher;
-    vector<uint64_t> index_map;
+    //vector<uint64_t> index_map;
 
     inline static std::mt19937 gen{ std::random_device{}() };
 

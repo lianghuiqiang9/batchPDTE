@@ -21,7 +21,7 @@ vector<uint64_t> CMP::decrypt(const Ciphertext& ct) {
 vector<uint64_t> CMP::decode(const std::vector<uint64_t>& res){
     vector<uint64_t> ans(num_cmps);
     for(uint64_t i = 0; i < num_cmps ; i++){
-        ans[i] = res[index_map[i]];
+        ans[i] = res[ i * num_slots_per_element];
     }
     return ans;
 }
@@ -36,7 +36,7 @@ vector<uint64_t> CMP::recover(const Ciphertext& ct) {
 Plaintext CMP::init_one_zero_zero(){
     vector<uint64_t> one_zero_zero(slot_count, 0ULL);
     for(uint64_t i = 0; i < num_cmps ; i++){
-        one_zero_zero[index_map[i]] = 1ULL;
+        one_zero_zero[i * num_slots_per_element] = 1ULL;
     }
     return lhe->encode(one_zero_zero);
 }
@@ -46,7 +46,7 @@ Plaintext CMP::init_x_zero_zero(const vector<uint64_t>& x) {
     auto x_size = x.size();
     auto limit = num_cmps > x_size ? x_size : num_cmps;
     for(size_t i = 0; i < limit ; i++){
-        x_zero_zero[index_map[i]] = x[i];
+        x_zero_zero[i * num_slots_per_element] = x[i];
     }
     return lhe->encode(x_zero_zero);
 }
