@@ -1,7 +1,7 @@
 #include"multipath.h"
 
 MultiPath::MultiPath(){
-    scheme = "pdte_multi_path";
+    scheme = "pdte_multipath";
 }
 
 TreeFlatten MultiPath::encode_tree(shared_ptr<Node> root){

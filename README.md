@@ -20,7 +20,9 @@ make install
 
 ./pdte_main -i ../data/heart_11bits -l 1 -m 16 -d 10
 
-./pdte_main -i ../data/heart_11bits -l 1 -m 16 -d 10 -p 1
+./pdte_main -i ../data/heart_11bits -l 1 -m 16 -d 10 -p 1 -c 0
+
+./pdte_main -i ../data/heart_11bits -l 1 -m 11 -d 10 -p 1 -c 1
 
 ./pdte_main -i ../data/heart_11bits -l 1 -m 11 -d 10 -p 2
 

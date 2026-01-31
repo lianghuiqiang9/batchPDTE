@@ -1,7 +1,7 @@
 #include"sumpath.h"
 
 SumPath::SumPath(){
-    scheme = "pdte_sum_path";
+    scheme = "pdte_sumpath";
 }
 
 TreeFlatten SumPath::encode_tree(shared_ptr<Node> root){
@@ -43,6 +43,7 @@ void SumPath::setup_cmp(int cmp_type, int l, int m, int extra){
     }
 
     cmp = make_unique<DCMP>(l, m, extra, true);
+
     lhe = cmp->lhe;
 }
 

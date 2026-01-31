@@ -1,7 +1,7 @@
 #include "sumpath2.h"
 
 SumPath2::SumPath2(){
-    scheme = "pdte_sum_path2";
+    scheme = "pdte_sumpath2";
 }
 
 TreeFlatten SumPath2::encode_tree(shared_ptr<Node> root){
@@ -87,7 +87,11 @@ void SumPath2::setup_cmp(int cmp_type, int l, int m, int extra){
         cout<<"please choose the l to 1, get the best performance."<<endl;
     }
 
-    cmp = make_unique<TCMP>(l, m, extra, true);
+    switch (cmp_type) {
+        case 0: cmp = make_unique<TCMP>(l, m, extra, true); break;
+        case 1: cmp = make_unique<DCMP>(l, m, extra, true); break;
+    }
+
     lhe = cmp->lhe;
 }
 
