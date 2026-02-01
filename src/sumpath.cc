@@ -57,7 +57,7 @@ vector<vector<Ciphertext>> SumPath::evaluate(shared_ptr<Node> root, vector<vecto
     // direction
     for (size_t i = 0; i < new_rows; ++i){
         // select the left node when t > x[a].
-        cmp_raw_out[i] = cmp->great_than(tree_flatten.threshold_pt[i], extract_data[i]);
+        cmp_raw_out[i] = cmp->great_than(tree_flatten.threshold_vec[i], extract_data[i]);
 
         auto right_temp =lhe->multiply_plain(cmp_raw_out[i], neg_two_zero_zero);
         lhe->add_plain_inplace(right_temp, one_zero_zero);

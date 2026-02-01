@@ -34,10 +34,10 @@ public:
     // a = [ a00, a01, a02 ]
     // output
     // a = [ a00, a01, a02 ]
-    vector<Plaintext> encode_a(const vector<vector<uint64_t>>& raw_a) override;
+    vector<vector<uint64_t>> encode_a(const vector<vector<uint64_t>>& raw_a) override;
 
     // a > E(b)
-    Ciphertext great_than(vector<Plaintext>& pt_a, vector<Ciphertext>& b) override;
+    Ciphertext great_than(vector<vector<uint64_t>>& pt_a, vector<Ciphertext>& b) override;
 
     // out = [ a[0]>b[0], a[0]>b[1], ... ]
     vector<bool> verify(const vector<vector<uint64_t>>& raw_a, const vector<vector<uint64_t>>& b) override;

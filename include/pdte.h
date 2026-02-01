@@ -16,7 +16,7 @@ struct IndexPos{
 
 struct TreeFlatten {
     vector<vector<IndexPos>> index_flatten;
-    vector<vector<Plaintext>> threshold_pt;
+    vector<vector<vector<uint64_t>>> threshold_vec;
     vector<Plaintext> direction_pt;
     Plaintext leaf_values_pt;
     int remainder;

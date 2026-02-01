@@ -46,6 +46,7 @@ TCMP::TCMP(int l, int m, int extra, bool is_rotate, uint8_t id) {
 
     one_zero_zero = init_one_zero_zero();
     one_zero_zero_cipher = lhe->encrypt(one_zero_zero);
+    zero_zero_zero_cipher = init_zero_zero_zero();
 }
 
 // input
@@ -111,19 +112,20 @@ vector<vector<uint64_t>> TCMP::decode_b(const vector<Ciphertext>& cts) {
 // a = [ a00, a01, a02 ]
 // output
 // a = [ a00, a01, a02 ]
-vector<Plaintext> TCMP::encode_a(const vector<vector<uint64_t>>& raw_a) {
-    vector<uint64_t> a(l);
+vector<vector<uint64_t>> TCMP::encode_a(const vector<vector<uint64_t>>& raw_a) {
+    vector<uint64_t> out(l);
     for(int i = 0; i < l; ++i){
-        a[i] = raw_a[i][0];
+        out[i] = raw_a[i][0];
     }
-    auto out = lhe->encode(a);
-    return vector<Plaintext>{out};
+    //auto out = lhe->encode(a);
+    return vector<vector<uint64_t>>{out};
 }
 
 
-Ciphertext TCMP::great_than(vector<Plaintext>& pt_a, vector<Ciphertext>& b)  {
-    auto a = lhe->decode(pt_a[0]);
-
+Ciphertext TCMP::great_than(vector<vector<uint64_t>>& raw_a, vector<Ciphertext>& b)  {
+    //auto a = lhe->decode(pt_a[0]);
+    auto a = raw_a[0];
+    
     vector<Ciphertext> eq(l);
     vector<Ciphertext> gt(l);
 

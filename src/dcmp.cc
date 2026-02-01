@@ -1,13 +1,12 @@
 #include"dcmp.h"
 
-DCMP::DCMP(int l, int m, int extra, bool is_rotate, bool is_padding) {
+DCMP::DCMP(int l, int m, int extra, bool is_rotate) {
     this->scheme = "dcmp";
     l = 1 << static_cast<int>(std::ceil(std::log2(l)));
     m = 1 << static_cast<int>(std::ceil(std::log2(m)));
     this->l = l;
     this->m = m;
     this->n = l * m;
-    this->is_padding = is_padding;
 
     int cmp_depth_need =  static_cast<int>(std::ceil(std::log2(this->n)) + 1); 
     depth = cmp_depth_need + extra;
@@ -24,26 +23,13 @@ DCMP::DCMP(int l, int m, int extra, bool is_rotate, bool is_padding) {
 
     num_slots_per_element = m;
 
-    if (l!=1 && is_padding){
-        num_cmps = slot_count / num_slots_per_element - 1;
-    }else{
-        num_cmps = slot_count / num_slots_per_element;
-    }
+    num_cmps = slot_count / num_slots_per_element;
 
     num_cmps_per_row = (num_cmps + 1) / 2;
 
-
-    // index_map
-    //idx = 0            num_cmps_per_row                2 * num_cmps_per_row              ...
-    //    = row_count    row_count + num_cmps_per_row    row_count + 2 * num_cmps_per_row  ...
-    //index_map.resize(num_cmps);
-    //for(uint64_t i = 0; i < num_cmps; i++) {
-        //bool flag = i < num_cmps_per_row;
-        //index_map[i] = flag ? (i * num_slots_per_element) : (row_count + (i - num_cmps_per_row) * num_slots_per_element);
-    //    index_map[i] = i * num_slots_per_element;
-    //}
-
     one_zero_zero = init_one_zero_zero();
+    zero_zero_zero_cipher = init_zero_zero_zero();
+
 }
 
 // input
@@ -64,10 +50,6 @@ vector<vector<uint64_t>> DCMP::encode_b(const vector<vector<uint64_t>>& raw_b) {
                 temp[offset + k] = 1 - ((raw_b[i][j]>>k)&1);
             }
          }
-
-        if(l!=1 && is_padding){
-            temp[slot_count - 1] = 13; // padding.
-        }
         out[i] = temp;
     }
     return out;
@@ -102,8 +84,8 @@ vector<vector<uint64_t>> DCMP::decode_b(const vector<Ciphertext>& cts) {
 // a = [ a00, a01, a02 ]
 // output
 // a = [ a00, a01, a02 ]
-vector<Plaintext> DCMP::encode_a(const vector<vector<uint64_t>>& raw_a){
-    vector<Plaintext> out(l);
+vector<vector<uint64_t>> DCMP::encode_a(const vector<vector<uint64_t>>& raw_a){
+    vector<vector<uint64_t>> out(l);
     vector<uint64_t> temp(slot_count, 0);
     for(int i = 0; i < l;i++){
         std::fill(temp.begin(), temp.end(), 0ULL);
@@ -115,31 +97,30 @@ vector<Plaintext> DCMP::encode_a(const vector<vector<uint64_t>>& raw_a){
             }
          }
 
-        if(l!=1){
-            temp[slot_count - 1] =13; // padding.
-        }
-
-        out[i] = lhe->encode(temp);
+        out[i] = temp;
     }
     return out;
 }
 
 // a>E(b);
-Ciphertext DCMP::great_than(vector<Plaintext>& a, vector<Ciphertext>& b) {
+Ciphertext DCMP::great_than(vector<vector<uint64_t>>& a, vector<Ciphertext>& b) {
     vector<Ciphertext> eq(l);
     vector<Ciphertext> gt(l);
 
     // in cols
     for(int i = 0; i < l; ++i){
-        if (){
-            
+        if (lhe->is_all_zero(a[i])){
+            gt[i] = zero_zero_zero_cipher;
+            eq[i] = b[i];
+        }else{
+            auto pt_a = lhe->encode(a[i]);
+            gt[i] = lhe->multiply_plain(b[i], pt_a);
+            eq[i] = lhe->add(gt[i], gt[i]);
+            lhe->negate_inplace(eq[i]);
+            lhe->add_inplace(eq[i], b[i]);
+            lhe->add_plain_inplace(eq[i], pt_a);
         }
-        gt[i] = lhe->multiply_plain(b[i], a[i]);
-        eq[i] = lhe->add(gt[i], gt[i]);
-        lhe->negate_inplace(eq[i]);
-        lhe->add_inplace(eq[i], b[i]);
-        lhe->add_plain_inplace(eq[i], a[i]);
-        
+
         int depth = static_cast<int>(std::log2(m));
         for(int j = 0; j < depth ; j++){
             int step = 1<<j;

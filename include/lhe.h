@@ -34,6 +34,8 @@ public:
     ~LHE() = default;
 
     Plaintext encode(const std::vector<uint64_t>& a);
+    
+    bool is_all_zero(const std::vector<uint64_t>& a);
 
     Ciphertext encrypt(const Plaintext& pt);
 

@@ -10,9 +10,9 @@
 
 class DCMP : public CMP {
 public:
-    bool is_padding = true;
+    //bool is_padding = true;
 
-    DCMP(int l, int m, int extra = 0, bool is_rotate = false, bool padding = true);
+    DCMP(int l, int m, int extra = 0, bool is_rotate = false);
 
     ~DCMP() = default;
 
@@ -26,10 +26,10 @@ public:
     // a = [ a00, a01, a02 ]
     // output
     // a = [ a00, a01, a02 ]
-    vector<Plaintext> encode_a(const vector<vector<uint64_t>>& raw_a);
+    vector<vector<uint64_t>> encode_a(const vector<vector<uint64_t>>& raw_a);
 
     // a > E(b)
-    Ciphertext great_than(vector<Plaintext>& raw_a, vector<Ciphertext>& raw_b);
+    Ciphertext great_than(vector<vector<uint64_t>>& raw_a, vector<Ciphertext>& raw_b);
 
     // out = [ a[0]>b[0], a[0]>b[1], ... ]
     vector<bool> verify(const vector<vector<uint64_t>>& raw_a, const vector<vector<uint64_t>>& raw_b) override;

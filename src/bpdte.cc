@@ -1,7 +1,5 @@
 #include"bpdte.h"
 
-
-
 //server
 shared_ptr<Node> BPDTE::load_tree(string filename){
     auto root = std::make_shared<Node>(filename);
@@ -52,10 +50,11 @@ LeafFlatten BPDTE::raw_encode_tree(shared_ptr<Node> root){
         Node* node = frame.node;
 
         if (!node->is_leaf()) {
-            //node->threshold_bitv = tecmp_encode_a(node->threshold, l, m, m_degree);
             vector<uint64_t> threshold(batch_size, node->threshold);
+            //cout<<"node->threshold: " << node->threshold << endl;
             auto raw_encode_threshold = cmp->raw_encode_a(threshold);
             node->cmp_encode_threshold = cmp->encode_a(raw_encode_threshold);
+            //print_matrix(node->cmp_encode_threshold, 16, 1, "node->cmp_encode_threshold:");
             if (node->right) stk.push({ node->right.get() }); 
             if (node->left)  stk.push({ node->left.get() });
         }
@@ -167,8 +166,8 @@ bool BPDTE::verify(const vector<uint64_t>& result, shared_ptr<Node> root, const 
 }
 
 bool BPDTE::verify(const vector<uint64_t>& expect_result, const vector<uint64_t>& actural_result){
-    //print_vector(expect_result, expect_result.size(), "bpdte_result   : ");
-    //print_vector(actural_result, actural_result.size(), "actural_result: ");
+    print_vector(expect_result, 10, "bpdte_result   : ");
+    print_vector(actural_result, 10, "actural_result: ");
     
     for(size_t i = 0; i < actural_result.size(); ++i){
         if (actural_result[i]!=expect_result[i]){

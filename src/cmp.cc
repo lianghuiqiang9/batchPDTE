@@ -41,6 +41,13 @@ Plaintext CMP::init_one_zero_zero(){
     return lhe->encode(one_zero_zero);
 }
 
+Ciphertext CMP::init_zero_zero_zero(){
+    vector<uint64_t> zero_zero_zero(slot_count, 0ULL);
+    auto zero_zero_zero_pt = lhe->encode(zero_zero_zero);
+
+    return lhe->encrypt(zero_zero_zero_pt);
+}
+
 Plaintext CMP::init_x_zero_zero(const vector<uint64_t>& x) {
     vector<uint64_t> x_zero_zero(slot_count, 0ULL);
     auto x_size = x.size();
@@ -112,10 +119,11 @@ vector<uint64_t> CMP::raw_decode_b(const vector<vector<uint64_t>>& encoded_out, 
     return b;
 }
 
-bool CMP::verify(const vector<bool>& actural_result, const vector<uint64_t>& result){
+bool CMP::verify(const vector<bool>& actural_result, const vector<uint64_t>& expect_result){
+    //print_vector(actural_result, actural_result.size(), "actural_result: ");
+    //print_vector(expect_result, expect_result.size(), "expect_result: ");
     for(uint64_t i = 0;i < num_cmps; ++i){
-        //cout<<"actural_result: "<<actural_result[i]<< " result: "<<result[i]<<endl;
-        if (actural_result[i]!=(result[i]==1)){
+        if (actural_result[i]!=(expect_result[i]==1)){
             return false;
         }
     }

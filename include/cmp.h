@@ -8,6 +8,7 @@
 #include "lhe.h"
 #include "bfv.h"
 #include "bgv.h"
+#include "utils.h"
 
 class CMP {
 public:
@@ -23,8 +24,7 @@ public:
     uint64_t num_slots_per_element; // m_degree = (1<<m)
     uint64_t num_cmps_per_row;
     Plaintext one_zero_zero;
-    //Ciphertext one_zero_zero_cipher;
-    //vector<uint64_t> index_map;
+    Ciphertext zero_zero_zero_cipher;
 
     inline static std::mt19937 gen{ std::random_device{}() };
 
@@ -34,13 +34,15 @@ public:
     
     vector<Ciphertext> encrypt(const vector<vector<uint64_t>>& b);
 
-    virtual vector<Plaintext> encode_a(const vector<vector<uint64_t>>& a) = 0;
+    virtual vector<vector<uint64_t>> encode_a(const vector<vector<uint64_t>>& a) = 0;
 
     Plaintext init_one_zero_zero();
 
+    Ciphertext init_zero_zero_zero();
+
     Plaintext init_x_zero_zero(const vector<uint64_t>& x);
 
-    virtual Ciphertext great_than(vector<Plaintext>& a, vector<Ciphertext>& b) = 0;
+    virtual Ciphertext great_than(vector<vector<uint64_t>>& a, vector<Ciphertext>& b) = 0;
 
     void clear_up(Ciphertext& result);
 

@@ -45,7 +45,7 @@ int main(int argc, char* argv[]){
     auto leaf_flatten = bpdte->encode_tree(root); 
 
     auto data = bpdte->load_data(input_address + "/x_test.csv", data_rows);
-    //print_matrix(data, 20, 20,  "data: ");
+    //print_matrix(data, 10, 20,  "data: ");
     
     auto data_cipher = bpdte->encode_data(data);
 

@@ -6,6 +6,14 @@ Plaintext LHE::encode(const std::vector<uint64_t>& a){
     return pt;
 }
 
+bool LHE::is_all_zero(const std::vector<uint64_t>& a){
+    for(auto e:a){
+        if (e!=0)
+        return false;
+    }
+    return true;
+}
+
 Ciphertext LHE::encrypt(const Plaintext& pt){
     Ciphertext ct;
     encryptor->encrypt(pt, ct);

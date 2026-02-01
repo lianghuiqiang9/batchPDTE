@@ -42,7 +42,7 @@ vector<vector<Ciphertext>> MultiPath::evaluate(shared_ptr<Node> root, vector<vec
 
     vector<Ciphertext> cmp_raw_out(new_rows);
     for (size_t i = 0; i < new_rows; ++i){
-        cmp_raw_out[i] = cmp->great_than(tree_flatten.threshold_pt[i], extract_data[i]);
+        cmp_raw_out[i] = cmp->great_than(tree_flatten.threshold_vec[i], extract_data[i]);
         // select the left node when t > x[a].
         lhe->sub_plain_inplace(cmp_raw_out[i], tree_flatten.direction_pt[i]);
     }

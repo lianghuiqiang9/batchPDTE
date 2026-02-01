@@ -133,16 +133,16 @@ TreeFlatten PDTE::raw_encode_tree(shared_ptr<Node> root){
     }
     */
 
-    vector<vector<Plaintext>> threshold_pt(new_rows);
+    vector<vector<vector<uint64_t>>> threshold_vec(new_rows);
     vector<Plaintext> direction_pt(new_rows);
     for (int i = 0; i < new_rows; i++) {
         auto raw_encode_a = cmp->raw_encode_a(threshold_matrix[i]);
-        threshold_pt[i] = cmp->encode_a(raw_encode_a);
+        threshold_vec[i] = cmp->encode_a(raw_encode_a);
         direction_pt[i] = cmp->init_x_zero_zero(direction_matrix[i]);
     }
     auto leaf_values_pt = cmp->init_x_zero_zero(leaf_values);
 
-    return TreeFlatten{index_flatten, threshold_pt, direction_pt, leaf_values_pt, remainder, new_cols, aligned_cols};
+    return TreeFlatten{index_flatten, threshold_vec, direction_pt, leaf_values_pt, remainder, new_cols, aligned_cols};
 }
 
 
