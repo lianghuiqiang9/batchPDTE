@@ -10,30 +10,33 @@ using namespace std;
 
 // g++ -o pdte_main -O3 pdte_main.cc -I ./include -I /usr/local/include/SEAL-4.1 -lseal-4.1 -L ./build -lbpdte -Wl,-dpath,./lib
 
+// dcmp-sumpath
 // ./pdte_main -i ../data/heart_11bits -l 1 -m 16 -d 10 -p 0
 // ./pdte_main -i ../data/breast_11bits -l 1 -m 16 -d 10 -p 0
 // ./pdte_main -i ../data/spam_11bits -l 1 -m 16 -d 10 -p 0
 // ./pdte_main -i ../data/electricity_10bits -l 1 -m 16 -d 10 -p 0
 
+// tcmp-sumpath2
 // ./pdte_main -i ../data/heart_11bits -l 1 -m 11 -d 10 -p 1 -c 0
 // ./pdte_main -i ../data/breast_11bits -l 1 -m 11 -d 10 -p 1 -c 0
 // ./pdte_main -i ../data/spam_11bits -l 1 -m 11 -d 10 -p 1 -c 0
 // ./pdte_main -i ../data/electricity_10bits -l 1 -m 10 -d 10 -p 1 -c 0
 
+
+// sumpath2
+// dcmp
 // ./pdte_main -i ../data/heart_11bits -l 1 -m 11 -d 10 -p 1
 // ./pdte_main -i ../data/breast_11bits -l 1 -m 11 -d 10 -p 1
 // ./pdte_main -i ../data/spam_11bits -l 1 -m 11 -d 10 -p 1
 // ./pdte_main -i ../data/electricity_10bits -l 1 -m 10 -d 10 -p 1
 
+// multiPath
+// dcmp
 // ./pdte_main -i ../data/heart_11bits -l 1 -m 16 -d 10 -p 2
 // ./pdte_main -i ../data/breast_11bits -l 1 -m 16 -d 10 -p 2
 // ./pdte_main -i ../data/spam_11bits -l 1 -m 16 -d 10 -p 2
 // ./pdte_main -i ../data/electricity_10bits -l 1 -m 16 -d 10 -p 2
 
-// ./pdte_main -i ../data/heart_11bits -l 1 -m 16 -d 10 -p 2
-// ./pdte_main -i ../data/breast_11bits -l 1 -m 16 -d 10 -p 2
-// ./pdte_main -i ../data/spam_11bits -l 1 -m 16 -d 10 -p 2
-// ./pdte_main -i ../data/electricity_10bits -l 1 -m 16 -d 10 -p 2
 
 int main(int argc, char* argv[]){
 
