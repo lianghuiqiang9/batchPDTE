@@ -131,6 +131,9 @@ Ciphertext DCMP::great_than(vector<Plaintext>& a, vector<Ciphertext>& b) {
 
     // in cols
     for(int i = 0; i < l; ++i){
+        if (){
+            
+        }
         gt[i] = lhe->multiply_plain(b[i], a[i]);
         eq[i] = lhe->add(gt[i], gt[i]);
         lhe->negate_inplace(eq[i]);

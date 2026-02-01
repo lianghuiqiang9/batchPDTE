@@ -17,25 +17,25 @@ using namespace std;
 // ./pdte_main -i ../data/electricity_10bits -l 1 -m 16 -d 10 -p 0
 
 // tcmp-sumpath2
-// ./pdte_main -i ../data/heart_11bits -l 1 -m 11 -d 10 -p 1 -c 0
-// ./pdte_main -i ../data/breast_11bits -l 1 -m 11 -d 10 -p 1 -c 0
-// ./pdte_main -i ../data/spam_11bits -l 1 -m 11 -d 10 -p 1 -c 0
-// ./pdte_main -i ../data/electricity_10bits -l 1 -m 10 -d 10 -p 1 -c 0
-
-
-// sumpath2
-// dcmp
 // ./pdte_main -i ../data/heart_11bits -l 1 -m 11 -d 10 -p 1
 // ./pdte_main -i ../data/breast_11bits -l 1 -m 11 -d 10 -p 1
 // ./pdte_main -i ../data/spam_11bits -l 1 -m 11 -d 10 -p 1
 // ./pdte_main -i ../data/electricity_10bits -l 1 -m 10 -d 10 -p 1
 
+
+// sumpath2
+// dcmp
+// ./pdte_main -i ../data/heart_11bits -l 1 -m 11 -d 10 -p 1 -c 1
+// ./pdte_main -i ../data/breast_11bits -l 1 -m 11 -d 10 -p 1 c 1
+// ./pdte_main -i ../data/spam_11bits -l 1 -m 11 -d 10 -p 1 -c 1
+// ./pdte_main -i ../data/electricity_10bits -l 1 -m 10 -d 10 -p 1 -c 1
+
 // multiPath
 // dcmp
-// ./pdte_main -i ../data/heart_11bits -l 1 -m 16 -d 10 -p 2
-// ./pdte_main -i ../data/breast_11bits -l 1 -m 16 -d 10 -p 2
-// ./pdte_main -i ../data/spam_11bits -l 1 -m 16 -d 10 -p 2
-// ./pdte_main -i ../data/electricity_10bits -l 1 -m 16 -d 10 -p 2
+// ./pdte_main -i ../data/heart_11bits -l 1 -m 16 -d 10 -p 2 -c 1
+// ./pdte_main -i ../data/breast_11bits -l 1 -m 16 -d 10 -p 2 -c 1
+// ./pdte_main -i ../data/spam_11bits -l 1 -m 16 -d 10 -p 2 -c 1
+// ./pdte_main -i ../data/electricity_10bits -l 1 -m 16 -d 10 -p 2 -c 1
 
 
 int main(int argc, char* argv[]){
@@ -43,7 +43,7 @@ int main(int argc, char* argv[]){
     string input_address;
     int data_rows = 1;
     int l = 1, m = 8;    // make sure l * m or n >= data_bit_length
-    int cmp_type = 1, pdte_type = 0, extra = 0;
+    int cmp_type = 0, pdte_type = 0, extra = 0;
     int opt;
     while ((opt = getopt(argc, argv, "fi:d:l:m:c:e:p:")) != -1) {
         switch (opt) {
