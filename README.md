@@ -12,19 +12,16 @@ make install
 
 ./cmp_main -m 8 -l 2 -n 16 -t 0
 
-./tree_test -i ../data/heart_11bits -o ../data/heart_11bits_temp -d 16
+./bpdte_main -i ../data/heart_11bits -d 128 -l 2 -m 6
 
-./bpdte_main -i ../data/heart_11bits -d 2048 -l 8 -m 2 -n 16 -c 0 -e 0 -p 0
+./bpdte_main -i ../data/heart_11bits -d 1024 -l 1 -m 16 -c 1
 
-./bpdte_main -i ../data/heart_11bits -d 1024 -l 8 -m 2 -n 16 -c 0 -e 5 -p 1
+./bpdte_main -i ../data/heart_11bits -d 16384 -l 16 -m 1 -c 1
 
-./pdte_main -i ../data/heart_11bits -l 1 -m 16 -d 10
+./pdte_main -i ../data/heart_11bits -l 1 -m 16 -d 10 -p 0
 
-./pdte_main -i ../data/heart_11bits -l 1 -m 16 -d 10 -p 1 -c 0
+./pdte_main -i ../data/heart_11bits -l 1 -m 11 -d 10 -p 1
 
-./pdte_main -i ../data/heart_11bits -l 1 -m 11 -d 10 -p 1 -c 1
-
-./pdte_main -i ../data/heart_11bits -l 1 -m 11 -d 10 -p 2
 
 # Parameter Settings 
 
@@ -73,11 +70,12 @@ make install
 
 For detailed instructions on running the performance benchmarks, 
 please refer to the execution sequences documented in:
-./benchmark.sh
+./benchmark_cmp.sh
+./benchmark_pdte.sh
+./benchmark_bpdte.sh
 
 This script contains the automated terminal commands required to 
 evaluate the throughput and latency of the privCMP and bpdte system.
-
 
 # Comparison Protocols 
 
