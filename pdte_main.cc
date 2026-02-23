@@ -97,11 +97,11 @@ int main(int argc, char* argv[]){
     cout<< " pdte result is correct                   : "<< is_correct 
         << " \n input_address                            : "<<input_address
         << " \n data_rows                                : "<< data_rows
-        << " \n keys size                                : "<< pdte->keys_size()/1024
-        << " kB\n evaluate time cost                       : "<< finish/1000     
-        << " ms\n evaluate comm. cost                      : "<< comm/1024 
-        << " kB\n average time cost                        : "<< finish/1024/data_rows 
-        << " ms\n average comm. cost                       : "<< comm/1024 /data_rows 
+        << " \n keys size                                : "<< (float)pdte->keys_size()/1024
+        << " kB\n evaluate time cost                       : "<< (float)finish/1000     
+        << " ms\n evaluate comm. cost                      : "<< (float)comm/1024 
+        << " kB\n average time cost                        : "<< (float)finish/1024/data_rows 
+        << " ms\n average comm. cost                       : "<< (float)comm/1024 /data_rows 
         << " kB"<< endl;
 
 

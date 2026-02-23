@@ -31,3 +31,12 @@
 ./cmp_main -c 1 -l 256 -m 1
 ./cmp_main -c 1 -l 512 -m 1
 ./cmp_main -c 1 -l 1024 -m 1
+
+# large precision
+./cmp_main -c 0 -l 1 -m 12
+./cmp_main -c 0 -l 2 -m 12
+./cmp_main -c 0 -l 4 -m 13
+./cmp_main -c 0 -l 8 -m 13
+./cmp_main -c 0 -l 16 -m 13
+./cmp_main -c 0 -l 32 -m 14
+./cmp_main -c 0 -l 64 -m 14

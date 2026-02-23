@@ -143,8 +143,8 @@ vector<Ciphertext> SumPath2::sum_path(shared_ptr<Node> root, vector<vector<Ciphe
 
         if (!frame.visited) {
             //      c
-            //  r      1-r
-            //  r+c    1-r+c
+            //  1-r    r
+            //  1-r+c  r+c
             if (node->threshold == 0){
                 node->right->value = zero_zero_zero;
             }else{

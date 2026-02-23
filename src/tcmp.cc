@@ -136,7 +136,7 @@ Ciphertext TCMP::great_than(vector<vector<uint64_t>>& raw_a, vector<Ciphertext>&
         for(int i = 0; i < l; ++i){
             gt[i] = lhe->rotate_rows_global(b[i], a[i]);
             if(a[i] < num_slots_per_element - 1){
-                eq[i] = lhe->rotate_rows_global(b[i], a[i] + 1);
+                eq[i] = lhe->rotate_rows_global(gt[i], 1);
             }else{
                 eq[i] = one_zero_zero_cipher;
             }

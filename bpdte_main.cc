@@ -70,11 +70,11 @@ int main(int argc, char* argv[]){
     cout<< " bpdte result is correct                  : "<< is_correct 
         << " \n input_address                            : "<<input_address
         << " \n batch nums                               : "<< data_rows
-        << " \n keys size                                : "<< bpdte->keys_size()/1024
-        << " kB\n evaluate time cost                       : "<< finish/1000     
-        << " ms\n evaluate comm. cost                      : "<< comm/1024 
-        << " kB\n amortized time cost                      : "<< finish/1024/data_rows 
-        << " ms\n amortized comm. cost                     : "<< comm/1024 /data_rows 
+        << " \n keys size                                : "<< (float)bpdte->keys_size()/1024
+        << " kB\n evaluate time cost                       : "<< (float)finish/1000     
+        << " ms\n evaluate comm. cost                      : "<< (float)comm/1024 
+        << " kB\n amortized time cost                      : "<< (float)finish/1024/data_rows 
+        << " ms\n amortized comm. cost                     : "<< (float)comm/1024 /data_rows 
         << " kB"<< endl;
 
 }
