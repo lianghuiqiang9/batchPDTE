@@ -1,8 +1,7 @@
 
 # cmp
-## tecmp
-## cdcmp
-## rdcmp
+## tcmp
+## dcmp
 
 # precision 
 ./cmp_main -c 0 -l 2 -m 4 

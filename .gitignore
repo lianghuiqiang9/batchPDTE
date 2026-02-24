@@ -6,9 +6,3 @@ tree_test
 
 lib/*
 build/*
-
-output.txt
-output_cmp.txt
-output_pdte.txt
-output_bpdte.txt
-output_run.txt

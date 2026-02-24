@@ -12,16 +12,15 @@ make install
 
 ./cmp_main -m 8 -l 2 -n 16 -t 0
 
+./pdte_main -i ../data/heart_11bits -l 1 -m 16 -d 10 -p 0
+
+./pdte_main -i ../data/heart_11bits -l 1 -m 11 -d 10 -p 1
+
 ./bpdte_main -i ../data/heart_11bits -d 128 -l 2 -m 6
 
 ./bpdte_main -i ../data/heart_11bits -d 1024 -l 1 -m 16 -c 1
 
 ./bpdte_main -i ../data/heart_11bits -d 16384 -l 16 -m 1 -c 1
-
-./pdte_main -i ../data/heart_11bits -l 1 -m 16 -d 10 -p 0
-
-./pdte_main -i ../data/heart_11bits -l 1 -m 11 -d 10 -p 1
-
 
 # Parameter Settings 
 
