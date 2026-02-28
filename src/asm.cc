@@ -26,6 +26,7 @@ void ASM::setup_cmp(int cmp_type, int l, int m, int extra){
     switch (cmp_type) {
         case 0: cmp = make_unique<TCMP>(l, m, log_tree_depth + extra); break;
         case 1: cmp = make_unique<DCMP>(l, m, log_tree_depth + extra); break;
+        case 2: cmp = make_unique<CWCMP>(l, m, log_tree_depth + extra); break;
     }
 
     batch_size = cmp->num_cmps;

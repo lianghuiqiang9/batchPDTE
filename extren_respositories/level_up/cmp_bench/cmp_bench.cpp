@@ -744,7 +744,7 @@ int main(int argc, char* argv[]) {
                 delete bench;
             }
 
-            if (n <= 128){
+            if (n < 64){
                 for (uint64_t hw: {2,4,8,16,32,64}){
                     if ((float)n/hw>=9) continue;
                     if (2*hw>=n+1) continue;

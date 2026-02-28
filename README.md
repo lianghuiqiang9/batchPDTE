@@ -22,6 +22,8 @@ make install
 
 ./bpdte_main -i ../data/heart_11bits -d 16384 -l 16 -m 1 -c 1
 
+./bpdte_main -i ../data/heart_11bits -d 16384 -l 16 -m 1 -c 2
+
 # Parameter Settings 
 
 1.  -i  [Path]
@@ -46,6 +48,7 @@ make install
         Select the comparison algorithm:
         0: tCMP (Thermometer Comparison)
         1: dCMP (Dichotomy Comparison)
+        2: CWCMP (https://eprint.iacr.org/2024/662)
 
 7.  -e  [Reserved Depth]
         The extra multiplicative depth reserved after the comparison step.

@@ -52,9 +52,9 @@ public:
 
     vector<uint64_t> recover(const Ciphertext& ct);
 
-    vector<vector<uint64_t>> raw_encode_b(const vector<uint64_t>& b);
+    virtual vector<vector<uint64_t>> raw_encode_b(const vector<uint64_t>& b);
     
-    vector<vector<uint64_t>> raw_encode_a(const vector<uint64_t>& a);
+    virtual vector<vector<uint64_t>> raw_encode_a(const vector<uint64_t>& a);
 
     vector<uint64_t> raw_decode_b(const vector<vector<uint64_t>>& encoded_out, size_t original_b_size);
 
@@ -78,7 +78,7 @@ public:
     
     vector<Ciphertext> fill_width_hot(vector<Ciphertext>& data, uint64_t start, uint64_t width, uint64_t repeat);
     
-    void print();
+    virtual void print();
     // 
     virtual vector<bool> verify(const vector<vector<uint64_t>>& a, const vector<vector<uint64_t>>& b) = 0;
 

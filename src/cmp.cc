@@ -59,11 +59,6 @@ Plaintext CMP::init_x_zero_zero(const vector<uint64_t>& x) {
 }
 
 
-// input= [ b0,  b1,  b2 ]
-// out  = [ b00, b01, b02, ..., b10, b11, b12, ..., b20, b21, b22, ... ]
-// b0 = b00 + 2 * b01 + 2^m * b02 + ...;
-// b1 = b10 + 2 * b11 + 2^m * b12 + ...;
-// b2 = b20 + 2 * b21 + 2^m * b22 + ...;
 vector<vector<uint64_t>> CMP::raw_encode_b(const vector<uint64_t>& b) {
     vector<vector<uint64_t>> out(l, vector<uint64_t>(num_cmps, 0));
     const uint64_t range = (1 << m) - 1;

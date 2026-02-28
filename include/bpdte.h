@@ -5,6 +5,7 @@
 #include"cmp.h"
 #include"dcmp.h"
 #include"tcmp.h"
+#include"cwcmp.h"
 #include"utils.h"
 using namespace std;
 

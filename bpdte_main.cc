@@ -61,6 +61,10 @@ int main(int argc, char* argv[]){
 
     // verify
     auto actural_result = root->eval(data);
+    if (cmp_type ==2){
+        actural_result = root->eval2(data);
+    }
+    
     auto is_correct = bpdte->verify(expect_result, actural_result);
 
     long comm = bpdte->comm_cost(data_cipher, result);

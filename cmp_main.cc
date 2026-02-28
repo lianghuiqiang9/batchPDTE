@@ -1,5 +1,6 @@
 #include"dcmp.h"
 #include"tcmp.h"
+#include"cwcmp.h"
 #include"utils.h"
 #include<unistd.h>
 
@@ -26,6 +27,7 @@ int main(int argc, char* argv[]) {
     switch (cmp_type) {
         case 0: cmp = make_unique<TCMP>(l, m, extra); break;
         case 1: cmp = make_unique<DCMP>(l, m, extra); break;
+        case 2: cmp = make_unique<CWCMP>(l, m, extra); break;
     }
     
     auto num_cmps = cmp->num_cmps;

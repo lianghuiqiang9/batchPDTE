@@ -2,6 +2,7 @@
 # cmp
 ## tcmp
 ## dcmp
+## cwcmp
 
 # precision 
 ./cmp_main -c 0 -l 2 -m 4 
@@ -31,7 +32,11 @@
 ./cmp_main -c 1 -l 512 -m 1
 ./cmp_main -c 1 -l 1024 -m 1
 
-# large precision
+./cmp_main -c 2 -l 8 -m 1
+./cmp_main -c 2 -l 16 -m 1
+./cmp_main -c 2 -l 32 -m 1
+
+# large precision in tcmp
 ./cmp_main -c 0 -l 1 -m 12
 ./cmp_main -c 0 -l 2 -m 12
 ./cmp_main -c 0 -l 4 -m 13

@@ -88,14 +88,14 @@ vector<uint64_t> Node::eval(const vector<vector<uint64_t>> &features) {
     return out;
 }
 
-// t > f[a] --> right
+// t < f[a] --> right
 uint64_t eval_rec2(const Node& node, const vector<uint64_t>& features) {
     if (node.is_leaf()) {
         return node.leaf_value;
     }
-    const Node* next_node = (node.threshold > features[node.index]) 
-                            ? node.right.get() 
-                            : node.left.get();
+    const Node* next_node = (node.threshold < features[node.index]) 
+                            ? node.left.get() 
+                            : node.right.get();
 
     return eval_rec2(*next_node, features);
 }
