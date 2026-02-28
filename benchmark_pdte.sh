@@ -13,10 +13,10 @@
 ## electricity_10bits
 
 # dcmp-sumpath
-./pdte_main -i ../data/heart_11bits -l 1 -m 16 -d 10 -p 0
-./pdte_main -i ../data/breast_11bits -l 1 -m 16 -d 10 -p 0
-./pdte_main -i ../data/spam_11bits -l 1 -m 16 -d 10 -p 0
-./pdte_main -i ../data/electricity_10bits -l 1 -m 16 -d 10 -p 0
+# ./pdte_main -i ../data/heart_11bits -l 1 -m 16 -d 10 -p 0
+# ./pdte_main -i ../data/breast_11bits -l 1 -m 16 -d 10 -p 0
+# ./pdte_main -i ../data/spam_11bits -l 1 -m 16 -d 10 -p 0
+# ./pdte_main -i ../data/electricity_10bits -l 1 -m 16 -d 10 -p 0
 
 # tcmp-sumpath2
 ./pdte_main -i ../data/heart_11bits -l 1 -m 11 -d 10 -p 1
