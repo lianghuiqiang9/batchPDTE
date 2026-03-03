@@ -1,5 +1,0 @@
-data/*
-cmp_bench/cmp
-src/build
-src2/build
-experiments/*.csv

@@ -1,7 +1,0 @@
-*.bin
-*.exe
-
-cmp_test
-pdte_test
-lhe_test
-lhe_depth_test

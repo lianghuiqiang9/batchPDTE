@@ -1,7 +1,9 @@
+
+cmp_main
+bpdte_main
+lhe_test
+tree_test
+
+lib/*
 build/*
-CMP/build/*
-CMP/lib/*
-cmp_bench/build/*
-cmp_bench/depth_test
-data/heart_16bits
-data/heart_32bits
+table-8.txt
