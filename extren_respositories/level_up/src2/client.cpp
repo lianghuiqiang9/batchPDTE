@@ -123,6 +123,12 @@ uint64_t Client::extract_response(const vector<Plaintext> &response, bool mult_p
 
     for(size_t i = 0;;i++) {
         if(indicators.data()[i] == 0) {
+            /*{
+                for(size_t j = 0; j< 100;j++){
+                    cout<< labels.data()[j] << " ";
+                }cout<< endl;
+            }*/
+            
             return labels.data()[i] - 1;
         }
     }

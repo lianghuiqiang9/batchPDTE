@@ -106,6 +106,7 @@ vector<vector<Ciphertext>> SumPath2::evaluate(shared_ptr<Node> root, vector<vect
 
     auto sum_path_result = sum_path(root, extract_data);
 
+    //auto start = chrono::high_resolution_clock::now();
     Ciphertext out1;
     for(size_t i = 0; i < sum_path_result.size(); ++i){
         lhe->multiply_plain_inplace(sum_path_result[i], onehot_pt);
@@ -116,6 +117,10 @@ vector<vector<Ciphertext>> SumPath2::evaluate(shared_ptr<Node> root, vector<vect
             lhe->add_inplace(out1, sum_path_result[i]);
         }
     }
+    //auto end = chrono::high_resolution_clock::now();
+    //auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
+    //cout << "packing: " << duration.count() << " us" << endl;
+
     auto out2 = lhe->multiply_plain(out1, salt2_pt);
     lhe->add_plain_inplace(out2, tree_flatten.leaf_values_pt);
     lhe->multiply_plain_inplace(out1, salt1_pt);

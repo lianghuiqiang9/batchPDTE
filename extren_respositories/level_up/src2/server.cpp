@@ -229,6 +229,8 @@ void Server::do_server_computation(stringstream& data_stream, size_t input_size,
         evaluator->add_inplace(node->right->ctxt, node->ctxt);
     }
 
+    //auto start = chrono::high_resolution_clock::now();
+    
     // extract results at leaves
     for(auto &node: leaves) {
         evaluator->sub_plain_inplace(node->ctxt, uint64_to_hex_string(node->attr_idx));
@@ -246,6 +248,9 @@ void Server::do_server_computation(stringstream& data_stream, size_t input_size,
         evaluator->add_inplace(indicators, node->ctxt);
     }
 
+    //auto end = chrono::high_resolution_clock::now();
+    //auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
+    //cout << "packing: " << duration.count() << " us" << endl;
     
     metrics->metrics_["time_server"] = server_time.end_and_get();
 
