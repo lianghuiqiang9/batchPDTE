@@ -59,7 +59,7 @@ Plaintext CMP::init_x_zero_zero(const vector<uint64_t>& x) {
 // b2 = b20 + 2 * b21 + 2^m * b22 + ...;
 vector<vector<uint64_t>> CMP::raw_encode_b(const vector<uint64_t>& b) {
     vector<vector<uint64_t>> out(l, vector<uint64_t>(num_cmps, 0));
-    const uint64_t range = (1 << m) - 1;
+    const uint64_t range = (m == 64) ? UINT64_MAX : (uint64_t{1} << m) - 1;
     const size_t b_size = b.size();
 
     for(int i = 0; i < l; i++) {
@@ -75,12 +75,14 @@ vector<vector<uint64_t>> CMP::raw_encode_b(const vector<uint64_t>& b) {
 
 // low to high  
 vector<vector<uint64_t>> CMP::random_raw_encode_b() {
-    vector<vector<uint64_t>> out(l, vector<uint64_t>(num_cmps));
-    std::uniform_int_distribution<uint64_t> dist(0, (1<<m) - 1);
+    uint64_t w = (m + 63) / 64;
+    vector<vector<uint64_t>> out(l, vector<uint64_t>(num_cmps*w));
+    const uint64_t range = (m > 64) ? UINT64_MAX : (uint64_t{1} << m) - 1;
+    std::uniform_int_distribution<uint64_t> dist(0, range);
 
     for (int i = 0; i < l; i++) {
         uint64_t* row_ptr = out[i].data(); 
-        for (uint64_t j = 0; j < num_cmps; j++) {
+        for (uint64_t j = 0; j < num_cmps*w; j++) {
             row_ptr[j] = dist(gen);
         }
     }
