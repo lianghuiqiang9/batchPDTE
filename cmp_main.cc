@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
         raw_encode_b = cmp->random_raw_encode_b();
 
         print_matrix(raw_encode_a, 10, 10, "raw_encode_a: ");
-        print_matrix(raw_encode_a, 10, 10, "raw_encode_a: ");
+        print_matrix(raw_encode_b, 10, 10, "raw_encode_b: ");
     }
 
     auto cmp_encode_a = cmp->encode_a(raw_encode_a);
